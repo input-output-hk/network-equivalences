@@ -1,7 +1,7 @@
 section \<open>Equivalence of a Diamond-Shaped Forwarding Network and a Cross-Shaped Broadcasting Network\<close>
 
-theory "Network_Equivalences-Forwarding_Broadcasting"
-  imports Network_Equivalences
+theory "Network_Equivalences-Diamond-Forwarding_Broadcasting"
+  imports "Network_Equivalences-Diamond-Foundations"
 begin
 
 abbreviation diamond_send_transfer where

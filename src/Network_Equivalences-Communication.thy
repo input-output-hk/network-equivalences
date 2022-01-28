@@ -1,6 +1,6 @@
 section \<open>Constructs for Describing Communication\<close>
 
-theory "Thorn_Calculus-Communication"
+theory "Network_Equivalences-Communication"
   imports "Thorn_Calculus-Core_Bisimilarities"
 begin
 

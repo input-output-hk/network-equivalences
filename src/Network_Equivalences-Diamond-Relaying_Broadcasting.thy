@@ -1,7 +1,7 @@
 section \<open>Equivalence of a Diamond-Shaped Relaying Network and a Cross-Shaped Broadcasting Network\<close>
 
-theory "Network_Equivalences-Relaying_Broadcasting"
-  imports Network_Equivalences
+theory "Network_Equivalences-Diamond-Relaying_Broadcasting"
+  imports "Network_Equivalences-Diamond-Foundations"
 begin
 
 abbreviation diamond_receiving_and_relaying where

@@ -1,5 +1,5 @@
-theory Network_Equivalences
-  imports "Thorn_Calculus-Communication"
+theory "Network_Equivalences-Diamond-Foundations"
+  imports "Network_Equivalences-Communication"
 begin
 
 abbreviation diamond_sending where
