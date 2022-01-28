@@ -35,24 +35,6 @@ lemma multi_receive_is_quasi_compatible_with_synchronous_weak_bisimilarity:
   shows "A \<triangleright>\<^sup>\<infinity> x. \<P> x \<approx>\<^sub>s A \<triangleright>\<^sup>\<infinity> x. \<Q> x"
   sorry
 
-lift_definition
-  synchronous_behavior_multi_receive :: "
-    chan family \<Rightarrow>
-    (val \<Rightarrow> process family) \<Rightarrow>
-    synchronous_behavior"
-  is multi_receive .
-
-declare synchronous_behavior_multi_receive.abs_eq [equivalence_transfer]
-
-lift_definition
-  synchronous_weak_behavior_multi_receive :: "
-    chan family \<Rightarrow>
-    (val \<Rightarrow> process family) \<Rightarrow>
-    synchronous_weak_behavior"
-  is multi_receive .
-
-declare synchronous_weak_behavior_multi_receive.abs_eq [equivalence_transfer]
-
 text \<open>
   We extend \<^theory_text>\<open>natural_simps\<close> with rules for eliminating duplicates of \<open>\<triangleright>\<^sup>\<infinity>\<close>-processes, which are
   based on the observation that \<^const>\<open>multi_receive\<close> is idempotent.
@@ -196,18 +178,6 @@ lemma adapted_after_distributor:
   shows "(A \<Rightarrow> Bs) \<guillemotleft> \<E> = A \<guillemotleft> \<E> \<Rightarrow> map (\<lambda>B. B \<guillemotleft> \<E>) Bs"
   sorry
 
-lift_definition
-  synchronous_behavior_distributor :: "chan family \<Rightarrow> chan family list \<Rightarrow> synchronous_behavior"
-  is distributor .
-
-declare synchronous_behavior_distributor.abs_eq [equivalence_transfer]
-
-lift_definition
-  synchronous_weak_behavior_distributor :: "chan family \<Rightarrow> chan family list \<Rightarrow> synchronous_weak_behavior"
-  is distributor .
-
-declare synchronous_weak_behavior_distributor.abs_eq [equivalence_transfer]
-
 lemma distributor_idempotency [thorn_simps]:
   shows "A \<Rightarrow> Bs \<parallel> A \<Rightarrow> Bs \<sim>\<^sub>s A \<Rightarrow> Bs"
   unfolding distributor_def
@@ -233,16 +203,6 @@ lemma adapted_after_loss:
   shows "\<currency>\<^sup>? A \<guillemotleft> \<E> = \<currency>\<^sup>? (A \<guillemotleft> \<E>)"
   by (simp del: distributor_def add: adapted_after_distributor)
 
-lift_definition synchronous_behavior_loss :: "chan family \<Rightarrow> synchronous_behavior"
-  is loss .
-
-declare synchronous_behavior_loss.abs_eq [equivalence_transfer]
-
-lift_definition synchronous_weak_behavior_loss :: "chan family \<Rightarrow> synchronous_weak_behavior"
-  is loss .
-
-declare synchronous_weak_behavior_loss.abs_eq [equivalence_transfer]
-
 lemma loss_idempotency [thorn_simps]:
   shows "\<currency>\<^sup>? A \<parallel> \<currency>\<^sup>? A \<sim>\<^sub>s \<currency>\<^sup>? A"
   unfolding loss_def
@@ -266,16 +226,6 @@ definition duplication :: "chan family \<Rightarrow> process family" (\<open>\<c
 lemma adapted_after_duplication:
   shows "\<currency>\<^sup>+ A \<guillemotleft> \<E> = \<currency>\<^sup>+ (A \<guillemotleft> \<E>)"
   by (simp del: distributor_def add: adapted_after_distributor)
-
-lift_definition synchronous_behavior_duplication :: "chan family \<Rightarrow> synchronous_behavior"
-  is duplication .
-
-declare synchronous_behavior_duplication.abs_eq [equivalence_transfer]
-
-lift_definition synchronous_weak_behavior_duplication :: "chan family \<Rightarrow> synchronous_weak_behavior"
-  is duplication .
-
-declare synchronous_weak_behavior_duplication.abs_eq [equivalence_transfer]
 
 lemma duplication_idempotency [thorn_simps]:
   shows "\<currency>\<^sup>+ A \<parallel> \<currency>\<^sup>+ A \<sim>\<^sub>s \<currency>\<^sup>+ A"
@@ -305,16 +255,6 @@ definition duploss :: "chan family \<Rightarrow> process family" (\<open>\<curre
 lemma adapted_after_duploss:
   shows "\<currency>\<^sup>* A \<guillemotleft> \<E> = \<currency>\<^sup>* (A \<guillemotleft> \<E>)"
   by (simp only: duploss_def adapted_after_parallel adapted_after_loss adapted_after_duplication)
-
-lift_definition synchronous_behavior_duploss :: "chan family \<Rightarrow> synchronous_behavior"
-  is duploss .
-
-declare synchronous_behavior_duploss.abs_eq [equivalence_transfer]
-
-lift_definition synchronous_weak_behavior_duploss :: "chan family \<Rightarrow> synchronous_weak_behavior"
-  is duploss .
-
-declare synchronous_weak_behavior_duploss.abs_eq [equivalence_transfer]
 
 lemma duploss_idempotency [thorn_simps]:
   shows "\<currency>\<^sup>* A \<parallel> \<currency>\<^sup>* A \<sim>\<^sub>s \<currency>\<^sup>* A"
@@ -410,18 +350,6 @@ lemma adapted_after_unidirectional_bridge:
   shows "(A \<rightarrow> B) \<guillemotleft> \<E> = A \<guillemotleft> \<E> \<rightarrow> B \<guillemotleft> \<E>"
   by (simp del: distributor_def add: adapted_after_distributor)
 
-lift_definition
-  synchronous_behavior_unidirectional_bridge :: "chan family \<Rightarrow> chan family \<Rightarrow> synchronous_behavior"
-  is unidirectional_bridge .
-
-declare synchronous_behavior_unidirectional_bridge.abs_eq [equivalence_transfer]
-
-lift_definition
-  synchronous_weak_behavior_unidirectional_bridge :: "chan family \<Rightarrow> chan family \<Rightarrow> synchronous_weak_behavior"
-  is unidirectional_bridge .
-
-declare synchronous_weak_behavior_unidirectional_bridge.abs_eq [equivalence_transfer]
-
 lemma unidirectional_bridge_idempotency [thorn_simps]:
   shows "A \<rightarrow> B \<parallel> A \<rightarrow> B \<sim>\<^sub>s A \<rightarrow> B"
   unfolding unidirectional_bridge_def
@@ -474,18 +402,6 @@ where
 lemma adapted_after_bidirectional_bridge:
   shows "(A \<leftrightarrow> B) \<guillemotleft> \<E> = A \<guillemotleft> \<E> \<leftrightarrow> B \<guillemotleft> \<E>"
   by (simp only: bidirectional_bridge_def adapted_after_parallel adapted_after_unidirectional_bridge)
-
-lift_definition
-  synchronous_behavior_bidirectional_bridge :: "chan family \<Rightarrow> chan family \<Rightarrow> synchronous_behavior"
-  is bidirectional_bridge .
-
-declare synchronous_behavior_bidirectional_bridge.abs_eq [equivalence_transfer]
-
-lift_definition
-  synchronous_weak_behavior_bidirectional_bridge :: "chan family \<Rightarrow> chan family \<Rightarrow> synchronous_weak_behavior"
-  is bidirectional_bridge .
-
-declare synchronous_weak_behavior_bidirectional_bridge.abs_eq [equivalence_transfer]
 
 lemma bidirectional_bridge_idempotency [thorn_simps]:
   shows "A \<leftrightarrow> B \<parallel> A \<leftrightarrow> B \<sim>\<^sub>s A \<leftrightarrow> B"
