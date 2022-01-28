@@ -1,7 +1,7 @@
 section \<open>Constructs for Describing Communication\<close>
 
 theory "Network_Equivalences-Communication"
-  imports "Thorn_Calculus-Core_Bisimilarities"
+  imports "Thorn_Calculus.Thorn_Calculus-Core_Bisimilarities"
 begin
 
 subsection \<open>Repeated Receiving\<close>
