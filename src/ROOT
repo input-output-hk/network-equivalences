@@ -3,5 +3,7 @@ chapter IOG
 session Network_Equivalences = HOL +
   description
     \<open>Formal proofs of equivalences of different kinds of networks.\<close>
+  sessions
+    Thorn_Calculus
   document_files
     "root.tex"
