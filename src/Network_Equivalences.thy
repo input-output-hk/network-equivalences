@@ -1,5 +1,5 @@
 theory Network_Equivalences
-  imports Chi_Calculus.Communication
+  imports "Thorn_Calculus-Communication"
 begin
 
 abbreviation diamond_sending where
