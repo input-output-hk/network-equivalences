@@ -5,5 +5,10 @@ session Network_Equivalences = HOL +
     \<open>Formal proofs of equivalences of different kinds of networks.\<close>
   sessions
     Thorn_Calculus
+  theories
+    "Network_Equivalences-Communication"
+    "Network_Equivalences-Diamond-Foundations"
+    "Network_Equivalences-Diamond-Relaying_Broadcasting"
+    "Network_Equivalences-Diamond-Forwarding_Broadcasting"
   document_files
     "root.tex"
