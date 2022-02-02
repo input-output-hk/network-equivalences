@@ -14,82 +14,28 @@ theory "Network_Equivalences-Diamond-Forwarding_Broadcasting_With_Filtering"
     "Network_Equivalences-Communication"
 begin
 
-type_synonym four_node_network = "
-  \<comment> \<open>Filtering predicate:\<close> (val \<Rightarrow> bool) \<Rightarrow>
-  \<comment> \<open>Send interface:\<close> [chan, chan, chan, chan] \<Rightarrow>
-  \<comment> \<open>Receive interface:\<close> [chan, chan, chan, chan] \<Rightarrow>
-  process"
-
-type_synonym diamond_send_interfacing = "
-  \<comment> \<open>Send interface:\<close> [chan, chan, chan, chan] \<Rightarrow>
-  \<comment> \<open>Send buffer:\<close> [chan, chan, chan, chan] \<Rightarrow>
-  process"
-
-type_synonym diamond_send_buffering = "
-  \<comment> \<open>Send buffer:\<close> [chan, chan, chan, chan] \<Rightarrow>
-  \<comment> \<open>Links:\<close> [chan, chan, chan, chan, chan] \<Rightarrow>
-  process"
-
-type_synonym diamond_receive_interfacing = "
-  \<comment> \<open>Filtering predicate:\<close> (val \<Rightarrow> bool) \<Rightarrow>
-  \<comment> \<open>Receive interface:\<close> [chan, chan, chan, chan] \<Rightarrow>
-  \<comment> \<open>Receive buffering:\<close> [chan, chan, chan, chan] \<Rightarrow>
-  \<comment> \<open>Send buffering:\<close> [chan, chan, chan, chan] \<Rightarrow>
-  process"
-
-type_synonym diamond_receive_buffering = "
-  \<comment> \<open>Receive buffering:\<close> [chan, chan, chan, chan] \<Rightarrow>
-  \<comment> \<open>Links:\<close> [chan, chan, chan, chan, chan] \<Rightarrow>
-  process"
-
-type_synonym diamond_core = "
-  \<comment> \<open>Filtering predicate:\<close> (val \<Rightarrow> bool) \<Rightarrow>
-  \<comment> \<open>Links:\<close> [chan, chan, chan, chan, chan] \<Rightarrow>
-  process"
-
-type_synonym cross_send_buffering = "
-  \<comment> \<open>Send buffering:\<close> [chan, chan, chan, chan] \<Rightarrow>
-  \<comment> \<open>Broadcast medium:\<close> chan \<Rightarrow>
-  process"
-
-type_synonym cross_receive_buffering = "
-  \<comment> \<open>Receive buffering:\<close> [chan, chan, chan, chan] \<Rightarrow>
-  \<comment> \<open>Broadcast medium:\<close> chan \<Rightarrow>
-  process"
-
-type_synonym cross_send_interfacing = "
-  \<comment> \<open>Send interface:\<close> [chan, chan, chan, chan] \<Rightarrow>
-  \<comment> \<open>Broadcast medium:\<close> chan \<Rightarrow>
-  process"
-
-type_synonym cross_receive_interfacing = "
-  \<comment> \<open>Filtering predicate:\<close> (val \<Rightarrow> bool) \<Rightarrow>
-  \<comment> \<open>Receive interface:\<close> [chan, chan, chan, chan] \<Rightarrow>
-  \<comment> \<open>Broadcast medium:\<close> chan \<Rightarrow>
-  process"
-
-abbreviation diamond_send_interfacing :: diamond_send_interfacing where
+abbreviation diamond_send_interfacing where
   "diamond_send_interfacing s\<^sub>0 s\<^sub>1 s\<^sub>2 s\<^sub>3 ob\<^sub>0 ob\<^sub>1 ob\<^sub>2 ob\<^sub>3 \<equiv>
     \<comment> \<open>Node 0:\<close> s\<^sub>0 \<rightarrow> ob\<^sub>0 \<parallel>
     \<comment> \<open>Node 1:\<close> s\<^sub>1 \<rightarrow> ob\<^sub>1 \<parallel>
     \<comment> \<open>Node 2:\<close> s\<^sub>2 \<rightarrow> ob\<^sub>2 \<parallel>
     \<comment> \<open>Node 3:\<close> s\<^sub>3 \<rightarrow> ob\<^sub>3"
 
-abbreviation diamond_send_buffering :: diamond_send_buffering where
+abbreviation diamond_send_buffering where
   "diamond_send_buffering ob\<^sub>0 ob\<^sub>1 ob\<^sub>2 ob\<^sub>3 l\<^sub>0\<^sub>1 l\<^sub>0\<^sub>2 l\<^sub>1\<^sub>3 l\<^sub>2\<^sub>3 l\<^sub>3\<^sub>0 \<equiv>
     \<comment> \<open>Node 0:\<close> ob\<^sub>0 \<Rightarrow> [l\<^sub>0\<^sub>1, l\<^sub>0\<^sub>2] \<parallel>
     \<comment> \<open>Node 1:\<close> ob\<^sub>1 \<Rightarrow> [l\<^sub>1\<^sub>3] \<parallel>
     \<comment> \<open>Node 2:\<close> ob\<^sub>2 \<Rightarrow> [l\<^sub>2\<^sub>3] \<parallel>
     \<comment> \<open>Node 3:\<close> ob\<^sub>3 \<Rightarrow> [l\<^sub>3\<^sub>0]"
 
-abbreviation diamond_receive_interfacing :: diamond_receive_interfacing where
+abbreviation diamond_receive_interfacing where
   "diamond_receive_interfacing \<phi> r\<^sub>0 r\<^sub>1 r\<^sub>2 r\<^sub>3 ib\<^sub>0 ib\<^sub>1 ib\<^sub>2 ib\<^sub>3 ob\<^sub>0 ob\<^sub>1 ob\<^sub>2 ob\<^sub>3 \<equiv>
     \<comment> \<open>Node 0:\<close> ib\<^sub>0 {\<phi>}\<Rightarrow> [r\<^sub>0, ob\<^sub>0] \<parallel>
     \<comment> \<open>Node 1:\<close> ib\<^sub>1 {\<phi>}\<Rightarrow> [r\<^sub>1, ob\<^sub>1] \<parallel>
     \<comment> \<open>Node 2:\<close> ib\<^sub>2 {\<phi>}\<Rightarrow> [r\<^sub>2, ob\<^sub>2] \<parallel>
     \<comment> \<open>Node 3:\<close> ib\<^sub>3 {\<phi>}\<Rightarrow> [r\<^sub>3, ob\<^sub>3]"
 
-abbreviation diamond_receive_buffering :: diamond_receive_buffering where
+abbreviation diamond_receive_buffering where
   "diamond_receive_buffering ib\<^sub>0 ib\<^sub>1 ib\<^sub>2 ib\<^sub>3 l\<^sub>0\<^sub>1 l\<^sub>0\<^sub>2 l\<^sub>1\<^sub>3 l\<^sub>2\<^sub>3 l\<^sub>3\<^sub>0 \<equiv>
     \<comment> \<open>Link 0--1:\<close> l\<^sub>0\<^sub>1 \<rightarrow> ib\<^sub>1 \<parallel>
     \<comment> \<open>Link 0--2:\<close> l\<^sub>0\<^sub>2 \<rightarrow> ib\<^sub>2 \<parallel>
@@ -97,7 +43,7 @@ abbreviation diamond_receive_buffering :: diamond_receive_buffering where
     \<comment> \<open>Link 2--3:\<close> l\<^sub>2\<^sub>3 \<rightarrow> ib\<^sub>3 \<parallel>
     \<comment> \<open>Link 3--0:\<close> l\<^sub>3\<^sub>0 \<rightarrow> ib\<^sub>0"
 
-abbreviation diamond :: four_node_network where
+abbreviation diamond where
   "diamond \<phi> s\<^sub>0 s\<^sub>1 s\<^sub>2 s\<^sub>3 r\<^sub>0 r\<^sub>1 r\<^sub>2 r\<^sub>3 \<equiv>
     \<nu> ib\<^sub>0 ib\<^sub>1 ib\<^sub>2 ib\<^sub>3 ob\<^sub>0 ob\<^sub>1 ob\<^sub>2 ob\<^sub>3 l\<^sub>0\<^sub>1 l\<^sub>0\<^sub>2 l\<^sub>1\<^sub>3 l\<^sub>2\<^sub>3 l\<^sub>3\<^sub>0. (
       \<currency>\<^sup>*l\<^sub>0\<^sub>1 \<parallel> \<currency>\<^sup>*l\<^sub>0\<^sub>2 \<parallel> \<currency>\<^sup>*l\<^sub>1\<^sub>3 \<parallel> \<currency>\<^sup>*l\<^sub>2\<^sub>3 \<parallel> \<currency>\<^sup>*l\<^sub>3\<^sub>0 \<parallel>
@@ -114,7 +60,7 @@ abbreviation receive_send_sidetrack where
     \<comment> \<open>Node 2:\<close> ib\<^sub>2 {\<phi>}\<rightarrow> ob\<^sub>2 \<parallel>
     \<comment> \<open>Node 3:\<close> ib\<^sub>3 {\<phi>}\<rightarrow> ob\<^sub>3"
 
-abbreviation relaying_core :: diamond_core where
+abbreviation relaying_core where
   "relaying_core \<phi> l\<^sub>0\<^sub>1 l\<^sub>0\<^sub>2 l\<^sub>1\<^sub>3 l\<^sub>2\<^sub>3 l\<^sub>3\<^sub>0 \<equiv>
     \<comment> \<open>From link 0--1:\<close> l\<^sub>0\<^sub>1 {\<phi>}\<rightarrow> l\<^sub>1\<^sub>3 \<parallel>
     \<comment> \<open>From link 0--2:\<close> l\<^sub>0\<^sub>2 {\<phi>}\<rightarrow> l\<^sub>2\<^sub>3 \<parallel>
@@ -122,35 +68,35 @@ abbreviation relaying_core :: diamond_core where
     \<comment> \<open>From link 2--3:\<close> l\<^sub>2\<^sub>3 {\<phi>}\<rightarrow> l\<^sub>3\<^sub>0 \<parallel>
     \<comment> \<open>From link 3--0:\<close> l\<^sub>3\<^sub>0 {\<phi>}\<rightarrow> l\<^sub>0\<^sub>1 \<parallel> l\<^sub>3\<^sub>0 {\<phi>}\<rightarrow> l\<^sub>0\<^sub>2"
 
-abbreviation transformed_core :: diamond_core where
+abbreviation transformed_core where
   "transformed_core \<phi> l\<^sub>0\<^sub>1 l\<^sub>0\<^sub>2 l\<^sub>1\<^sub>3 l\<^sub>2\<^sub>3 l\<^sub>3\<^sub>0 \<equiv>
     \<comment> \<open>Link 0--1:\<close> l\<^sub>3\<^sub>0 {\<phi>}\<leftrightarrow>{\<phi>} l\<^sub>0\<^sub>1 \<parallel>
     \<comment> \<open>Link 0--2:\<close> l\<^sub>3\<^sub>0 {\<phi>}\<leftrightarrow>{\<phi>} l\<^sub>0\<^sub>2 \<parallel>
     \<comment> \<open>Link 1--3:\<close> l\<^sub>3\<^sub>0 {\<phi>}\<leftrightarrow>{\<phi>} l\<^sub>1\<^sub>3 \<parallel>
     \<comment> \<open>Link 2--3:\<close> l\<^sub>3\<^sub>0 {\<phi>}\<leftrightarrow>{\<phi>} l\<^sub>2\<^sub>3"
 
-abbreviation cross_receive_buffering :: cross_receive_buffering where
+abbreviation cross_receive_buffering where
   "cross_receive_buffering ib\<^sub>0 ib\<^sub>1 ib\<^sub>2 ib\<^sub>3 m \<equiv>
     \<comment> \<open>Node 0:\<close> m \<rightarrow> ib\<^sub>0 \<parallel>
     \<comment> \<open>Node 1:\<close> m \<rightarrow> ib\<^sub>1 \<parallel>
     \<comment> \<open>Node 2:\<close> m \<rightarrow> ib\<^sub>2 \<parallel>
     \<comment> \<open>Node 3:\<close> m \<rightarrow> ib\<^sub>3"
 
-abbreviation cross_send_buffering :: cross_send_buffering where
+abbreviation cross_send_buffering where
   "cross_send_buffering ob\<^sub>0 ob\<^sub>1 ob\<^sub>2 ob\<^sub>3 m \<equiv>
     \<comment> \<open>Node 0:\<close> ob\<^sub>0 \<rightarrow> m \<parallel>
     \<comment> \<open>Node 1:\<close> ob\<^sub>1 \<rightarrow> m \<parallel>
     \<comment> \<open>Node 2:\<close> ob\<^sub>2 \<rightarrow> m \<parallel>
     \<comment> \<open>Node 3:\<close> ob\<^sub>3 \<rightarrow> m"
 
-abbreviation cross_receive_interfacing :: cross_receive_interfacing where
+abbreviation cross_receive_interfacing where
   "cross_receive_interfacing \<phi> r\<^sub>0 r\<^sub>1 r\<^sub>2 r\<^sub>3 m \<equiv>
     \<comment> \<open>Node 0:\<close> m {\<phi>}\<rightarrow> r\<^sub>0 \<parallel>
     \<comment> \<open>Node 1:\<close> m {\<phi>}\<rightarrow> r\<^sub>1 \<parallel>
     \<comment> \<open>Node 2:\<close> m {\<phi>}\<rightarrow> r\<^sub>2 \<parallel>
     \<comment> \<open>Node 3:\<close> m {\<phi>}\<rightarrow> r\<^sub>3"
 
-abbreviation cross_send_interfacing :: cross_send_interfacing where
+abbreviation cross_send_interfacing where
   "cross_send_interfacing s\<^sub>0 s\<^sub>1 s\<^sub>2 s\<^sub>3 m \<equiv>
     \<comment> \<open>Node 0:\<close> s\<^sub>0 \<rightarrow> m \<parallel>
     \<comment> \<open>Node 1:\<close> s\<^sub>1 \<rightarrow> m \<parallel>
