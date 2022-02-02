@@ -10,5 +10,6 @@ session Network_Equivalences = HOL +
     "Network_Equivalences-Diamond-Foundations"
     "Network_Equivalences-Diamond-Relaying_Broadcasting"
     "Network_Equivalences-Diamond-Forwarding_Broadcasting"
+    "Network_Equivalences-Diamond-Forwarding_Broadcasting_With_Filtering"
   document_files
     "root.tex"
