@@ -1,3 +1,23 @@
+(*FIXME:
+  This theory used to use its own version of the \<^theory_text>\<open>Communication\<close> theory. Since this version
+  duplicated content from the actual \<^theory_text>\<open>Communication\<close> theory to a great extend, we decided to not
+  port it to the Þ-calculus and newer versions of the equivalence reasoner. As a result, we couldn’t
+  port this theory to these new libraries, and thus it is pretty much in the state it was when
+  using the \<open>\<natural>\<close>-calculus.
+
+  Once the network equivalence proofs without considerations for filtering have been polished, we
+  shall rework this theory to fit the updated other developments. In doing so, we shall strive for
+  modularity, avoiding the sort of code duplication that the current version is suffering from. One
+  approach could be to perform the filtering as an extra step using some sort of filtering
+  unidirectional bridge, which should allow us to get rid of the need to have also filtering
+  distributors and possibly bidirectional bridges.
+
+  This approach would also correspond more to the ultimate implementation of consensus protocols
+  with immediate filtering in combination with the network. Here, we should treat the network as
+  essentially a multicast one, where by sending from one node you reach all nodes that are directly
+  connected to that node. All sorts of processing but also forwarding should be done on the
+  consensus protocol layer.
+*)
 (* TODO:
 
   - Factor out the common parts with `Relaying_Broadcasting_Equivalence.thy` and
@@ -13,6 +33,8 @@ theory "Network_Equivalences-Diamond-Forwarding_Broadcasting_With_Filtering"
   imports
     "Network_Equivalences-Communication"
 begin
+
+(*
 
 abbreviation diamond_send_interfacing where
   "diamond_send_interfacing s\<^sub>0 s\<^sub>1 s\<^sub>2 s\<^sub>3 ob\<^sub>0 ob\<^sub>1 ob\<^sub>2 ob\<^sub>3 \<equiv>
@@ -829,5 +851,7 @@ proof -
     using natural_simps unfolding tagged_new_channel_def by equivalence
   finally show ?thesis unfolding tagged_new_channel_def .
 qed
+
+*)
 
 end
