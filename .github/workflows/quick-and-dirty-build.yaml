@@ -3,7 +3,7 @@ name: Automated quick-and-dirty build
 env:
   source-path: src
   isabelle-version: 2021-1
-  other-isabelle-repos:
+  other-isabelle-repos: input-output-hk/equivalence-reasoner input-output-hk/transition-systems input-output-hk/thorn-calculus
   chapter-name: IOG
   session-name: Network_Equivalences
 
