@@ -16,18 +16,18 @@ lemma adapted_after_distributor:
 lemma distributor_idempotency [thorn_simps]:
   shows "A \<Rightarrow> Bs \<parallel> A \<Rightarrow> Bs \<sim>\<^sub>s A \<Rightarrow> Bs"
   unfolding distributor_def
-  using multi_receive_idempotency .
+  using repeated_receive_idempotency .
 
 lemma distributor_nested_idempotency [thorn_simps]:
   shows "A \<Rightarrow> Bs \<parallel> (A \<Rightarrow> Bs \<parallel> P) \<sim>\<^sub>s A \<Rightarrow> Bs \<parallel> P"
   unfolding distributor_def
-  using multi_receive_nested_idempotency .
+  using repeated_receive_nested_idempotency .
 
 (*FIXME: Check whether we should add this lemma to \<^theory_text>\<open>thorn_simps\<close>. *)
 lemma inner_distributor_redundancy:
   shows "A \<Rightarrow> Bs \<parallel> C \<triangleright>\<^sup>\<infinity> x. (A \<Rightarrow> Bs \<parallel> \<P> x) \<sim>\<^sub>s A \<Rightarrow> Bs \<parallel> C \<triangleright>\<^sup>\<infinity> x. \<P> x"
   unfolding distributor_def
-  using inner_multi_receive_redundancy .
+  using inner_repeated_receive_redundancy .
 
 subsection \<open>Loss Servers\<close>
 
@@ -77,7 +77,7 @@ lemma inner_duplication_redundancy:
   unfolding duplication_def
   using inner_distributor_redundancy .
 
-lemma multi_receive_split:
+lemma repeated_receive_split:
   assumes "\<And>x. \<P> x \<rightarrow>\<^sub>s\<lparr>\<tau>\<rparr> \<zero>" and "\<And>x. \<Q> x \<rightarrow>\<^sub>s\<lparr>\<tau>\<rparr> \<zero>"
   shows "\<currency>\<^sup>+ A \<parallel> A \<triangleright>\<^sup>\<infinity> x. (\<P> x \<parallel> \<Q> x) \<approx>\<^sub>s \<currency>\<^sup>+ A \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x"
   sorry
@@ -109,7 +109,7 @@ lemma duploss_nested_idempotency [thorn_simps]:
   In particular, do the following:
 
     \<^item> Turn the detailed proofs that involve
-      \<^theory_text>\<open>multi_receive_is_quasi_compatible_with_synchronous_bisimilarity\<close> into single-step proofs
+      \<^theory_text>\<open>repeated_receive_is_quasi_compatible_with_synchronous_bisimilarity\<close> into single-step proofs
       that use the \<^theory_text>\<open>bisimilarity\<close> proof method.
 
     \<^item> Merge the resulting proofs with adjacent proofs if \<^theory_text>\<open>bisimilarity\<close> can solve the whole step.
@@ -149,7 +149,7 @@ proof -
     by
       (intro
         parallel_is_right_compatible_with_synchronous_bisimilarity
-        multi_receive_is_quasi_compatible_with_synchronous_bisimilarity
+        repeated_receive_is_quasi_compatible_with_synchronous_bisimilarity
       )
   also have "\<dots> \<sim>\<^sub>s \<currency>\<^sup>+ A \<parallel> (\<currency>\<^sup>? A \<parallel> B \<triangleright>\<^sup>\<infinity> x. (\<currency>\<^sup>? A \<parallel> (\<currency>\<^sup>+ A \<parallel> \<P> x)))"
     using thorn_simps
@@ -200,14 +200,14 @@ lemma inner_unidirectional_bridge_redundancy:
   unfolding unidirectional_bridge_def
   using inner_distributor_redundancy .
 
-lemma multi_receive_shortcut_redundancy:
+lemma repeated_receive_shortcut_redundancy:
   shows "A \<rightarrow> B \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x \<approx>\<^sub>s A \<rightarrow> B \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x"
   sorry
 
 lemma distributor_shortcut_redundancy:
   shows "A \<rightarrow> B \<parallel> B \<Rightarrow> Cs \<parallel> A \<Rightarrow> Cs \<approx>\<^sub>s A \<rightarrow> B \<parallel> B \<Rightarrow> Cs"
   unfolding distributor_def
-  using multi_receive_shortcut_redundancy .
+  using repeated_receive_shortcut_redundancy .
 
 lemma unidirectional_bridge_shortcut_redundancy:
   shows "A \<rightarrow> B \<parallel> B \<rightarrow> C \<parallel> A \<rightarrow> C \<approx>\<^sub>s A \<rightarrow> B \<parallel> B \<rightarrow> C"
@@ -281,7 +281,7 @@ proof -
     by
       (intro
         parallel_is_right_compatible_with_synchronous_bisimilarity
-        multi_receive_is_quasi_compatible_with_synchronous_bisimilarity
+        repeated_receive_is_quasi_compatible_with_synchronous_bisimilarity
       )
   also have "\<dots> \<sim>\<^sub>s B \<rightarrow> A \<parallel> (A \<rightarrow> B \<parallel> C \<triangleright>\<^sup>\<infinity> x. (A \<rightarrow> B \<parallel> (B \<rightarrow> A \<parallel> \<P> x)))"
     using thorn_simps
@@ -352,14 +352,14 @@ next
     unfolding general_parallel.simps(2) .
 qed
 
-lemma multi_receive_channel_switch:
+lemma repeated_receive_channel_switch:
   shows "A \<leftrightarrow> B \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x \<approx>\<^sub>s A \<leftrightarrow> B \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x"
   sorry
 
 lemma distributor_source_switch:
   shows "A \<leftrightarrow> B \<parallel> A \<Rightarrow> Cs \<approx>\<^sub>s A \<leftrightarrow> B \<parallel> B \<Rightarrow> Cs"
   unfolding distributor_def
-  using multi_receive_channel_switch .
+  using repeated_receive_channel_switch .
 
 (*FIXME:
   Simplify the proof of the following lemma once #231 is resolved.
@@ -367,7 +367,7 @@ lemma distributor_source_switch:
   In particular, do the following:
 
     \<^item> Turn the detailed proofs that involve
-      \<^theory_text>\<open>multi_receive_is_quasi_compatible_with_synchronous_bisimilarity\<close> into single-step proofs
+      \<^theory_text>\<open>repeated_receive_is_quasi_compatible_with_synchronous_bisimilarity\<close> into single-step proofs
       that use the \<^theory_text>\<open>bisimilarity\<close> proof method.
 
     \<^item> Merge the resulting proofs with adjacent proofs if \<^theory_text>\<open>bisimilarity\<close> can solve the whole step.
@@ -458,7 +458,7 @@ proof -
     by
       (intro
         parallel_is_right_compatible_with_synchronous_weak_bisimilarity
-        multi_receive_is_quasi_compatible_with_synchronous_weak_bisimilarity
+        repeated_receive_is_quasi_compatible_with_synchronous_weak_bisimilarity
       )
       (fact receive_follow_up_targets_switch)
   also have "\<dots> \<approx>\<^sub>s ?\<P> vs \<parallel> A \<triangleright>\<^sup>\<infinity> y. \<Prod>v \<leftarrow> vs. snd v \<triangleleft> \<box> y"

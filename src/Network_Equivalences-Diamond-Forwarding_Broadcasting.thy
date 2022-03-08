@@ -61,7 +61,7 @@ proof -
     unfolding general_parallel.simps and distributor_def using thorn_simps sorry
     (* FIXME:
       This should by solvable by \<^theory_text>\<open>equivalence\<close> again once it is configured to reason under
-      \<^theory_text>\<open>multi_receive\<close>.
+      \<^theory_text>\<open>repeated_receive\<close>.
     *)
   also have "\<dots> \<approx>\<^sub>s
     \<comment> \<open>Node 0:\<close> (\<Prod>a\<leftarrow>[r\<^sub>0]. \<currency>\<^sup>?a \<parallel> rb\<^sub>0 \<Rightarrow> [sb\<^sub>0, r\<^sub>0] \<parallel> rb\<^sub>0 \<rightarrow> sb\<^sub>0) \<parallel>
@@ -73,7 +73,7 @@ proof -
     unfolding general_parallel.simps and distributor_def using thorn_simps sorry
     (* FIXME:
       This should by solvable by \<^theory_text>\<open>equivalence\<close> again once it is configured to reason under
-      \<^theory_text>\<open>multi_receive\<close>.
+      \<^theory_text>\<open>repeated_receive\<close>.
     *)
   finally show ?thesis .
 qed

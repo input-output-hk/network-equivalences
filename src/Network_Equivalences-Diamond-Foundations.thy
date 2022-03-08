@@ -136,7 +136,7 @@ proof -
     unfolding distributor_def and general_parallel.simps using thorn_simps sorry
     (* FIXME:
       This should by solvable by \<^theory_text>\<open>equivalence\<close> again once it is configured to reason under
-      \<^theory_text>\<open>multi_receive\<close>.
+      \<^theory_text>\<open>repeated_receive\<close>.
     *)
   also have "\<dots> \<approx>\<^sub>s
     transformed_core l\<^sub>0\<^sub>1 l\<^sub>0\<^sub>2 l\<^sub>1\<^sub>3 l\<^sub>2\<^sub>3 l\<^sub>3\<^sub>0 \<parallel>
@@ -154,7 +154,7 @@ proof -
     using send_idempotency_under_duploss sorry
     (* FIXME:
       This should by solvable by \<^theory_text>\<open>equivalence\<close> again once it is configured to reason under
-      \<^theory_text>\<open>multi_receive\<close>.
+      \<^theory_text>\<open>repeated_receive\<close>.
     *)
   also have "\<dots> \<approx>\<^sub>s
     transformed_core l\<^sub>0\<^sub>1 l\<^sub>0\<^sub>2 l\<^sub>1\<^sub>3 l\<^sub>2\<^sub>3 l\<^sub>3\<^sub>0 \<parallel>
@@ -173,7 +173,7 @@ proof -
     unfolding distributor_def and general_parallel.simps using thorn_simps sorry
     (* FIXME:
       This should by solvable by \<^theory_text>\<open>equivalence\<close> again once it is configured to reason under
-      \<^theory_text>\<open>multi_receive\<close>.
+      \<^theory_text>\<open>repeated_receive\<close>.
     *)
   also have "\<dots> \<approx>\<^sub>s ?q"
     unfolding unidirectional_bridge_def by equivalence
