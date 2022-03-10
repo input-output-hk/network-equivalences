@@ -4,171 +4,6 @@ theory "Network_Equivalences-Communication"
   imports "Thorn_Calculus.Thorn_Calculus-Core_Bisimilarities"
 begin
 
-subsection \<open>Repeated Receiving\<close>
-
-corec multi_receive :: "chan family \<Rightarrow> (val \<Rightarrow> process family) \<Rightarrow> process family" where
-  "multi_receive A \<P> e = Receive (A e) (\<lambda>x. Parallel (\<P> x e) (multi_receive A \<P> e))"
-syntax
-  "_multi_receive" :: "chan family \<Rightarrow> pttrn \<Rightarrow> process family \<Rightarrow> process family"
-  (\<open>(3_ \<triangleright>\<^sup>\<infinity> _./ _)\<close> [53, 0, 52] 52)
-translations
-  "A \<triangleright>\<^sup>\<infinity> x. P" \<rightleftharpoons> "CONST multi_receive A (\<lambda>x. P)"
-print_translation \<open>
-  [preserve_binder_abs_receive_tr' @{const_syntax multi_receive} @{syntax_const "_multi_receive"}]
-\<close>
-
-lemma multi_receive_proper_def:
-  shows "A \<triangleright>\<^sup>\<infinity> x. \<P> x = A \<triangleright> x. (\<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x)"
-  by (rule ext) (subst multi_receive.code, simp)
-
-lemma adapted_after_multi_receive:
-  shows "(A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> \<E> = A \<guillemotleft> \<E> \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> \<E>"
-  sorry
-
-lemma multi_receive_is_quasi_compatible_with_synchronous_bisimilarity:
-  assumes "\<And>n X. (\<lambda>e. (\<P> (X e) \<guillemotleft> suffix n) e) \<sim>\<^sub>s (\<lambda>e. (\<Q> (X e) \<guillemotleft> suffix n) e)"
-  shows "A \<triangleright>\<^sup>\<infinity> x. \<P> x \<sim>\<^sub>s A \<triangleright>\<^sup>\<infinity> x. \<Q> x"
-  sorry
-
-lemma multi_receive_is_quasi_compatible_with_synchronous_weak_bisimilarity:
-  assumes "\<And>n X. (\<lambda>e. (\<P> (X e) \<guillemotleft> suffix n) e) \<approx>\<^sub>s (\<lambda>e. (\<Q> (X e) \<guillemotleft> suffix n) e)"
-  shows "A \<triangleright>\<^sup>\<infinity> x. \<P> x \<approx>\<^sub>s A \<triangleright>\<^sup>\<infinity> x. \<Q> x"
-  sorry
-
-text \<open>
-  We extend \<^theory_text>\<open>natural_simps\<close> with rules for eliminating duplicates of \<open>\<triangleright>\<^sup>\<infinity>\<close>-processes, which are
-  based on the observation that \<^const>\<open>multi_receive\<close> is idempotent.
-
-  Incidentally, duplicate removal based on idempotence plays rather well with associativity and
-  commutativity rules. The reason is the simplifier's handling of permutative rules, like
-  commutativity: these rules are applied only when they lead to a smaller term, where ``smaller'' by
-  default means ``lexicographically smaller'' (see Subsection~9.3.3 of the Isabelle/Isar Reference
-  Manual). A result of this behavior is that equal processes in a chain of parallel compositions
-  will sooner or later stand next to each other. If then a pair of equal processes stands at the end
-  of the chain, it can be collapsed by applying an idempotency rule; if it does not stand at the
-  end, it can be collapsed by a ``nested'' variant of an idempotency rule, analogous to the
-  ``nested'' variant of commutativity.
-\<close>
-(* FIXME:
-  Add a proper reference to the reference manual.
-*)
-(*FIXME:
-  Don't say ``nested'' but use terminology analogous to the new terminology used for ``nested''
-  commutativity rules.
-*)
-
-lemma multi_receive_idempotency [thorn_simps]:
-  shows "A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x \<sim>\<^sub>s A \<triangleright>\<^sup>\<infinity> x. \<P> x"
-  sorry
-
-lemma multi_receive_nested_idempotency [thorn_simps]:
-  shows "A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> Q) \<sim>\<^sub>s A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> Q"
-proof -
-  have "A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> Q) \<sim>\<^sub>s (A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<parallel> Q"
-    using parallel_associativity
-    by equivalence
-  also have "\<dots> \<sim>\<^sub>s A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> Q"
-    using multi_receive_idempotency
-    by equivalence
-  finally show ?thesis .
-qed
-
-lemma inner_multi_receive_redundancy:
-  shows "A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> B \<triangleright>\<^sup>\<infinity> y. (A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> \<Q> y) \<sim>\<^sub>s A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> B \<triangleright>\<^sup>\<infinity> y. \<Q> y"
-  sorry
-
-(*FIXME:
-  Simplify the proof of the following lemma once #231 is resolved.
-
-  In particular, do the following:
-
-    \<^item> Turn the detailed proofs that involve
-      \<^theory_text>\<open>multi_receive_is_quasi_compatible_with_synchronous_bisimilarity\<close> into single-step proofs
-      that use the \<^theory_text>\<open>bisimilarity\<close> proof method.
-
-    \<^item> Merge the resulting proofs with adjacent proofs if \<^theory_text>\<open>bisimilarity\<close> can solve the whole step.
-
-    \<^item> Merge applications of \<^theory_text>\<open>parallel_commutativity\<close> and \<^theory_text>\<open>parallel_associativity\<close> when possible.
-
-    \<^item> Get rid of applications of compatibility rules whenever \<^theory_text>\<open>bisimilarity\<close> can be used instead.
-*)
-lemma inner_general_parallel_redundancy:
-  assumes "\<And>x \<Q>. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> y. (\<P> x \<parallel> \<Q> y) \<sim>\<^sub>s \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> y. \<Q> y"
-  shows "\<Prod>x \<leftarrow> xs. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> y. (\<Prod>x \<leftarrow> xs. \<P> x \<parallel> \<Q> y) \<sim>\<^sub>s \<Prod>x \<leftarrow> xs. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> y. \<Q> y"
-proof (induction xs arbitrary: \<Q>)
-  case Nil
-  have
-    "(\<lambda>e. ((\<zero> \<parallel> \<Q> (X e)) \<guillemotleft> suffix n) e) \<sim>\<^sub>s (\<lambda>e. (\<Q> (X e) \<guillemotleft> suffix n) e)"
-    (is "?v \<sim>\<^sub>s ?w")
-    for n and X
-  proof -
-    have "?v = (\<lambda>e. (\<zero> \<guillemotleft> suffix n \<parallel> \<Q> (X e) \<guillemotleft> suffix n) e)"
-      by (simp only: adapted_after_parallel)
-    also have "\<dots> = \<zero> \<guillemotleft> suffix n \<parallel> (\<lambda>e. (\<Q> (X e) \<guillemotleft> suffix n) e)"
-      by (subst environment_dependent_parallel) (fact refl)
-    also have "\<dots> \<sim>\<^sub>s ?w"
-      unfolding adapted_after_stop
-      using parallel_left_identity .
-    finally show ?thesis .
-  qed
-  then show ?case
-    unfolding general_parallel.simps(1)
-    by
-      (intro
-        parallel_is_right_compatible_with_synchronous_bisimilarity
-        multi_receive_is_quasi_compatible_with_synchronous_bisimilarity
-      )
-next
-  case (Cons x xs \<Q>)
-  have "
-    (\<lambda>e. (((\<P> x \<parallel> \<Prod>x \<leftarrow> xs. \<P> x) \<parallel> \<Q> (X e)) \<guillemotleft> suffix n) e)
-    \<sim>\<^sub>s
-    (\<lambda>e. ((\<Prod>x \<leftarrow> xs. \<P> x \<parallel> (\<P> x \<parallel> \<Q> (X e))) \<guillemotleft> suffix n) e)"
-    (is "?v \<sim>\<^sub>s ?w")
-    for n and X
-  proof -
-    have "?v = (\<lambda>e. ((\<P> x \<guillemotleft> suffix n \<parallel> (\<Prod>x \<leftarrow> xs. \<P> x) \<guillemotleft> suffix n) \<parallel> \<Q> (X e) \<guillemotleft> suffix n) e)"
-      by (simp only: adapted_after_parallel)
-    also have "\<dots> = (\<P> x \<guillemotleft> suffix n \<parallel> (\<Prod>x \<leftarrow> xs. \<P> x) \<guillemotleft> suffix n) \<parallel> (\<lambda>e. (\<Q> (X e) \<guillemotleft> suffix n) e)"
-      by (subst environment_dependent_parallel) (fact refl)
-    also have "\<dots> \<sim>\<^sub>s ((\<Prod>x \<leftarrow> xs. \<P> x) \<guillemotleft> suffix n \<parallel> \<P> x \<guillemotleft> suffix n) \<parallel> (\<lambda>e. (\<Q> (X e) \<guillemotleft> suffix n) e)"
-      by (intro parallel_is_left_compatible_with_synchronous_bisimilarity parallel_commutativity)
-    also have "\<dots> \<sim>\<^sub>s (\<Prod>x \<leftarrow> xs. \<P> x) \<guillemotleft> suffix n \<parallel> (\<P> x \<guillemotleft> suffix n \<parallel> (\<lambda>e. (\<Q> (X e) \<guillemotleft> suffix n) e))"
-      using parallel_associativity .
-    also have "\<dots> = (\<lambda>e. ((\<Prod>x \<leftarrow> xs. \<P> x) \<guillemotleft> suffix n \<parallel> (\<P> x \<guillemotleft> suffix n \<parallel> \<Q> (X e) \<guillemotleft> suffix n)) e)"
-      by
-        (subst (3) environment_dependent_parallel, subst (4) environment_dependent_parallel)
-        (fact refl)
-    also have "\<dots> = ?w"
-      by (simp only: adapted_after_parallel)
-    finally show ?thesis .
-  qed
-  then have "
-    (\<P> x \<parallel> \<Prod>x \<leftarrow> xs. \<P> x) \<parallel> A \<triangleright>\<^sup>\<infinity> y. ((\<P> x \<parallel> \<Prod>x \<leftarrow> xs. \<P> x) \<parallel> \<Q> y)
-    \<sim>\<^sub>s
-    (\<P> x \<parallel> \<Prod>x \<leftarrow> xs. \<P> x) \<parallel> A \<triangleright>\<^sup>\<infinity> y. (\<Prod>x \<leftarrow> xs. \<P> x \<parallel> (\<P> x \<parallel> \<Q> y))"
-    by
-      (intro
-        parallel_is_right_compatible_with_synchronous_bisimilarity
-        multi_receive_is_quasi_compatible_with_synchronous_bisimilarity
-      )
-  also have "\<dots> \<sim>\<^sub>s \<P> x \<parallel> (\<Prod>x \<leftarrow> xs. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> y. (\<Prod>x \<leftarrow> xs. \<P> x \<parallel> (\<P> x \<parallel> \<Q> y)))"
-    using parallel_associativity .
-  also have "\<dots> \<sim>\<^sub>s \<P> x \<parallel> (\<Prod>x \<leftarrow> xs. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> y. (\<P> x \<parallel> \<Q> y))"
-    using Cons.IH
-    by (rule parallel_is_right_compatible_with_synchronous_bisimilarity)
-  also have "\<dots> \<sim>\<^sub>s \<Prod>x \<leftarrow> xs. \<P> x \<parallel> (\<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> y. (\<P> x \<parallel> \<Q> y))"
-    using parallel_left_commutativity .
-  also have "\<dots> \<sim>\<^sub>s \<Prod>x \<leftarrow> xs. \<P> x \<parallel> (\<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> y. \<Q> y)"
-    using assms
-    by (rule parallel_is_right_compatible_with_synchronous_bisimilarity)
-  also have "\<dots> \<sim>\<^sub>s (\<P> x \<parallel> \<Prod>x \<leftarrow> xs. \<P> x) \<parallel> A \<triangleright>\<^sup>\<infinity> y. \<Q> y"
-    using thorn_simps
-    by equivalence
-  finally show ?case
-    unfolding general_parallel.simps(2) .
-qed
-
 subsection \<open>Distributors\<close>
 
 definition distributor :: "chan family \<Rightarrow> chan family list \<Rightarrow> process family" (infix \<open>\<Rightarrow>\<close> 52) where
@@ -181,18 +16,18 @@ lemma adapted_after_distributor:
 lemma distributor_idempotency [thorn_simps]:
   shows "A \<Rightarrow> Bs \<parallel> A \<Rightarrow> Bs \<sim>\<^sub>s A \<Rightarrow> Bs"
   unfolding distributor_def
-  using multi_receive_idempotency .
+  using repeated_receive_idempotency .
 
 lemma distributor_nested_idempotency [thorn_simps]:
   shows "A \<Rightarrow> Bs \<parallel> (A \<Rightarrow> Bs \<parallel> P) \<sim>\<^sub>s A \<Rightarrow> Bs \<parallel> P"
   unfolding distributor_def
-  using multi_receive_nested_idempotency .
+  using repeated_receive_nested_idempotency .
 
 (*FIXME: Check whether we should add this lemma to \<^theory_text>\<open>thorn_simps\<close>. *)
 lemma inner_distributor_redundancy:
   shows "A \<Rightarrow> Bs \<parallel> C \<triangleright>\<^sup>\<infinity> x. (A \<Rightarrow> Bs \<parallel> \<P> x) \<sim>\<^sub>s A \<Rightarrow> Bs \<parallel> C \<triangleright>\<^sup>\<infinity> x. \<P> x"
   unfolding distributor_def
-  using inner_multi_receive_redundancy .
+  using inner_repeated_receive_redundancy .
 
 subsection \<open>Loss Servers\<close>
 
@@ -242,7 +77,7 @@ lemma inner_duplication_redundancy:
   unfolding duplication_def
   using inner_distributor_redundancy .
 
-lemma multi_receive_split:
+lemma repeated_receive_split:
   assumes "\<And>x. \<P> x \<rightarrow>\<^sub>s\<lparr>\<tau>\<rparr> \<zero>" and "\<And>x. \<Q> x \<rightarrow>\<^sub>s\<lparr>\<tau>\<rparr> \<zero>"
   shows "\<currency>\<^sup>+ A \<parallel> A \<triangleright>\<^sup>\<infinity> x. (\<P> x \<parallel> \<Q> x) \<approx>\<^sub>s \<currency>\<^sup>+ A \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x"
   sorry
@@ -274,7 +109,7 @@ lemma duploss_nested_idempotency [thorn_simps]:
   In particular, do the following:
 
     \<^item> Turn the detailed proofs that involve
-      \<^theory_text>\<open>multi_receive_is_quasi_compatible_with_synchronous_bisimilarity\<close> into single-step proofs
+      \<^theory_text>\<open>repeated_receive_is_quasi_compatible_with_synchronous_bisimilarity\<close> into single-step proofs
       that use the \<^theory_text>\<open>bisimilarity\<close> proof method.
 
     \<^item> Merge the resulting proofs with adjacent proofs if \<^theory_text>\<open>bisimilarity\<close> can solve the whole step.
@@ -314,7 +149,7 @@ proof -
     by
       (intro
         parallel_is_right_compatible_with_synchronous_bisimilarity
-        multi_receive_is_quasi_compatible_with_synchronous_bisimilarity
+        repeated_receive_is_quasi_compatible_with_synchronous_bisimilarity
       )
   also have "\<dots> \<sim>\<^sub>s \<currency>\<^sup>+ A \<parallel> (\<currency>\<^sup>? A \<parallel> B \<triangleright>\<^sup>\<infinity> x. (\<currency>\<^sup>? A \<parallel> (\<currency>\<^sup>+ A \<parallel> \<P> x)))"
     using thorn_simps
@@ -365,14 +200,14 @@ lemma inner_unidirectional_bridge_redundancy:
   unfolding unidirectional_bridge_def
   using inner_distributor_redundancy .
 
-lemma multi_receive_shortcut_redundancy:
+lemma repeated_receive_shortcut_redundancy:
   shows "A \<rightarrow> B \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x \<approx>\<^sub>s A \<rightarrow> B \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x"
   sorry
 
 lemma distributor_shortcut_redundancy:
   shows "A \<rightarrow> B \<parallel> B \<Rightarrow> Cs \<parallel> A \<Rightarrow> Cs \<approx>\<^sub>s A \<rightarrow> B \<parallel> B \<Rightarrow> Cs"
   unfolding distributor_def
-  using multi_receive_shortcut_redundancy .
+  using repeated_receive_shortcut_redundancy .
 
 lemma unidirectional_bridge_shortcut_redundancy:
   shows "A \<rightarrow> B \<parallel> B \<rightarrow> C \<parallel> A \<rightarrow> C \<approx>\<^sub>s A \<rightarrow> B \<parallel> B \<rightarrow> C"
@@ -446,7 +281,7 @@ proof -
     by
       (intro
         parallel_is_right_compatible_with_synchronous_bisimilarity
-        multi_receive_is_quasi_compatible_with_synchronous_bisimilarity
+        repeated_receive_is_quasi_compatible_with_synchronous_bisimilarity
       )
   also have "\<dots> \<sim>\<^sub>s B \<rightarrow> A \<parallel> (A \<rightarrow> B \<parallel> C \<triangleright>\<^sup>\<infinity> x. (A \<rightarrow> B \<parallel> (B \<rightarrow> A \<parallel> \<P> x)))"
     using thorn_simps
@@ -517,14 +352,14 @@ next
     unfolding general_parallel.simps(2) .
 qed
 
-lemma multi_receive_channel_switch:
+lemma repeated_receive_channel_switch:
   shows "A \<leftrightarrow> B \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x \<approx>\<^sub>s A \<leftrightarrow> B \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x"
   sorry
 
 lemma distributor_source_switch:
   shows "A \<leftrightarrow> B \<parallel> A \<Rightarrow> Cs \<approx>\<^sub>s A \<leftrightarrow> B \<parallel> B \<Rightarrow> Cs"
   unfolding distributor_def
-  using multi_receive_channel_switch .
+  using repeated_receive_channel_switch .
 
 (*FIXME:
   Simplify the proof of the following lemma once #231 is resolved.
@@ -532,7 +367,7 @@ lemma distributor_source_switch:
   In particular, do the following:
 
     \<^item> Turn the detailed proofs that involve
-      \<^theory_text>\<open>multi_receive_is_quasi_compatible_with_synchronous_bisimilarity\<close> into single-step proofs
+      \<^theory_text>\<open>repeated_receive_is_quasi_compatible_with_synchronous_bisimilarity\<close> into single-step proofs
       that use the \<^theory_text>\<open>bisimilarity\<close> proof method.
 
     \<^item> Merge the resulting proofs with adjacent proofs if \<^theory_text>\<open>bisimilarity\<close> can solve the whole step.
@@ -623,7 +458,7 @@ proof -
     by
       (intro
         parallel_is_right_compatible_with_synchronous_weak_bisimilarity
-        multi_receive_is_quasi_compatible_with_synchronous_weak_bisimilarity
+        repeated_receive_is_quasi_compatible_with_synchronous_weak_bisimilarity
       )
       (fact receive_follow_up_targets_switch)
   also have "\<dots> \<approx>\<^sub>s ?\<P> vs \<parallel> A \<triangleright>\<^sup>\<infinity> y. \<Prod>v \<leftarrow> vs. snd v \<triangleleft> \<box> y"
