@@ -122,13 +122,15 @@ lemma inner_duploss_redundancy:
   shows "\<currency>\<^sup>* A \<parallel> B \<triangleright>\<^sup>\<infinity> x. (\<currency>\<^sup>* A \<parallel> \<P> x) \<sim>\<^sub>s \<currency>\<^sup>* A \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x"
 proof -
   have "
-    (\<lambda>e. (((\<currency>\<^sup>? A \<parallel> \<currency>\<^sup>+ A) \<parallel> \<P> (X e)) \<guillemotleft> suffix n) e)
+    receive_follow_up (\<lambda>x. (\<currency>\<^sup>? A \<parallel> \<currency>\<^sup>+ A) \<parallel> \<P> x) n X
     \<sim>\<^sub>s
-    (\<lambda>e. ((\<currency>\<^sup>? A \<parallel> (\<currency>\<^sup>+ A \<parallel> \<P> (X e))) \<guillemotleft> suffix n) e)"
-    (is "?v \<sim>\<^sub>s ?w")
+    receive_follow_up (\<lambda>x. \<currency>\<^sup>? A \<parallel> (\<currency>\<^sup>+ A \<parallel> \<P> x)) n X"
     for n and X
   proof -
-    have "?v = (\<lambda>e. ((\<currency>\<^sup>? A \<guillemotleft> suffix n \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n) \<parallel> \<P> (X e) \<guillemotleft> suffix n) e)"
+    have "
+      (\<lambda>e. (((\<currency>\<^sup>? A \<parallel> \<currency>\<^sup>+ A) \<parallel> \<P> (X e)) \<guillemotleft> suffix n) e)
+      =
+      (\<lambda>e. ((\<currency>\<^sup>? A \<guillemotleft> suffix n \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n) \<parallel> \<P> (X e) \<guillemotleft> suffix n) e)"
       by (simp only: adapted_after_parallel)
     also have "\<dots> = (\<currency>\<^sup>? A \<guillemotleft> suffix n \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n) \<parallel> (\<lambda>e. (\<P> (X e) \<guillemotleft> suffix n) e)"
       by (subst environment_dependent_parallel) (fact refl)
@@ -138,9 +140,10 @@ proof -
       by
         (subst (3) environment_dependent_parallel, subst (4) environment_dependent_parallel)
         (fact refl)
-    also have "\<dots> = ?w"
+    also have "\<dots> = (\<lambda>e. ((\<currency>\<^sup>? A \<parallel> (\<currency>\<^sup>+ A \<parallel> \<P> (X e))) \<guillemotleft> suffix n) e)"
       by (simp only: adapted_after_parallel)
-    finally show ?thesis .
+    finally show ?thesis
+      unfolding receive_follow_up_def .
   qed
   then have "
     (\<currency>\<^sup>? A \<parallel> \<currency>\<^sup>+ A) \<parallel> B \<triangleright>\<^sup>\<infinity> x. ((\<currency>\<^sup>? A \<parallel> \<currency>\<^sup>+ A) \<parallel> \<P> x)
@@ -254,13 +257,15 @@ lemma inner_bidirectional_bridge_redundancy:
   shows "A \<leftrightarrow> B \<parallel> C \<triangleright>\<^sup>\<infinity> x. (A \<leftrightarrow> B \<parallel> \<P> x) \<sim>\<^sub>s A \<leftrightarrow> B \<parallel> C \<triangleright>\<^sup>\<infinity> x. \<P> x"
 proof -
   have "
-    (\<lambda>e. (((A \<rightarrow> B \<parallel> B \<rightarrow> A) \<parallel> \<P> (X e)) \<guillemotleft> suffix n) e)
+    receive_follow_up (\<lambda>x. (A \<rightarrow> B \<parallel> B \<rightarrow> A) \<parallel> \<P> x) n X
     \<sim>\<^sub>s
-    (\<lambda>e. ((A \<rightarrow> B \<parallel> (B \<rightarrow> A \<parallel> \<P> (X e))) \<guillemotleft> suffix n) e)"
-    (is "?v \<sim>\<^sub>s ?w")
+    receive_follow_up (\<lambda>x. A \<rightarrow> B \<parallel> (B \<rightarrow> A \<parallel> \<P> x)) n X"
     for n and X
   proof -
-    have "?v = (\<lambda>e. (((A \<rightarrow> B) \<guillemotleft> suffix n \<parallel> (B \<rightarrow> A) \<guillemotleft> suffix n) \<parallel> \<P> (X e) \<guillemotleft> suffix n) e)"
+    have "
+      (\<lambda>e. (((A \<rightarrow> B \<parallel> B \<rightarrow> A) \<parallel> \<P> (X e)) \<guillemotleft> suffix n) e)
+      =
+      (\<lambda>e. (((A \<rightarrow> B) \<guillemotleft> suffix n \<parallel> (B \<rightarrow> A) \<guillemotleft> suffix n) \<parallel> \<P> (X e) \<guillemotleft> suffix n) e)"
       by (simp only: adapted_after_parallel)
     also have "\<dots> = ((A \<rightarrow> B) \<guillemotleft> suffix n \<parallel> (B \<rightarrow> A) \<guillemotleft> suffix n) \<parallel> (\<lambda>e. (\<P> (X e) \<guillemotleft> suffix n) e)"
       by (subst environment_dependent_parallel) (fact refl)
@@ -270,9 +275,10 @@ proof -
       by
         (subst (3) environment_dependent_parallel, subst (4) environment_dependent_parallel)
         (fact refl)
-    also have "\<dots> = ?w"
+    also have "\<dots> = (\<lambda>e. ((A \<rightarrow> B \<parallel> (B \<rightarrow> A \<parallel> \<P> (X e))) \<guillemotleft> suffix n) e)"
       by (simp only: adapted_after_parallel)
-    finally show ?thesis .
+    finally show ?thesis
+      unfolding receive_follow_up_def .
   qed
   then have "
     (A \<rightarrow> B \<parallel> B \<rightarrow> A) \<parallel> C \<triangleright>\<^sup>\<infinity> x. ((A \<rightarrow> B \<parallel> B \<rightarrow> A) \<parallel> \<P> x)
@@ -395,9 +401,9 @@ proof -
     using send_channel_switch
     by (rule general_parallel_channel_switch)
   have receive_follow_up_targets_switch: "
-    (\<lambda>e. ((?\<P> vs \<parallel> \<Prod>v \<leftarrow> vs. fst v \<triangleleft> \<box> (X e)) \<guillemotleft> suffix n) e)
+    receive_follow_up (\<lambda>x. ?\<P> vs \<parallel> \<Prod>v \<leftarrow> vs. fst v \<triangleleft> \<box> x) n X
     \<approx>\<^sub>s
-    (\<lambda>e. ((?\<P> vs \<parallel> \<Prod>v \<leftarrow> vs. snd v \<triangleleft> \<box> (X e)) \<guillemotleft> suffix n) e)"
+    receive_follow_up (\<lambda>x. ?\<P> vs \<parallel> \<Prod>v \<leftarrow> vs. snd v \<triangleleft> \<box> x) n X"
     for n and X
   proof -
     let ?ws = "map (\<lambda>v. (fst v \<guillemotleft> suffix n, snd v \<guillemotleft> suffix n)) vs"
@@ -444,7 +450,8 @@ proof -
           adapted_after_bidirectional_bridge
           adapted_after_send
         )
-    finally show ?thesis .
+    finally show ?thesis
+      unfolding receive_follow_up_def .
   qed
   \<comment> \<open>The actual proof:\<close>
   have "?\<P> vs \<parallel> A \<triangleright>\<^sup>\<infinity> y. \<Prod>v \<leftarrow> vs. fst v \<triangleleft> \<box> y \<approx>\<^sub>s ?\<P> vs \<parallel> A \<triangleright>\<^sup>\<infinity> y. (?\<P> vs \<parallel> \<Prod>v \<leftarrow> vs. fst v \<triangleleft> \<box> y)"
