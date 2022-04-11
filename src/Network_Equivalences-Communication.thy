@@ -122,9 +122,9 @@ lemma inner_duploss_redundancy:
   shows "\<currency>\<^sup>* A \<parallel> B \<triangleright>\<^sup>\<infinity> x. (\<currency>\<^sup>* A \<parallel> \<P> x) \<sim>\<^sub>s \<currency>\<^sup>* A \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x"
 proof -
   have "
-    receive_follow_up (\<lambda>x. (\<currency>\<^sup>? A \<parallel> \<currency>\<^sup>+ A) \<parallel> \<P> x) n X
+    post_receive n X (\<lambda>x. (\<currency>\<^sup>? A \<parallel> \<currency>\<^sup>+ A) \<parallel> \<P> x)
     \<sim>\<^sub>s
-    receive_follow_up (\<lambda>x. \<currency>\<^sup>? A \<parallel> (\<currency>\<^sup>+ A \<parallel> \<P> x)) n X"
+    post_receive n X (\<lambda>x. \<currency>\<^sup>? A \<parallel> (\<currency>\<^sup>+ A \<parallel> \<P> x))"
     for n and X
   proof -
     have "
@@ -143,7 +143,7 @@ proof -
     also have "\<dots> = (\<lambda>e. ((\<currency>\<^sup>? A \<parallel> (\<currency>\<^sup>+ A \<parallel> \<P> (X e))) \<guillemotleft> suffix n) e)"
       by (simp only: adapted_after_parallel)
     finally show ?thesis
-      unfolding receive_follow_up_def .
+      unfolding post_receive_def .
   qed
   then have "
     (\<currency>\<^sup>? A \<parallel> \<currency>\<^sup>+ A) \<parallel> B \<triangleright>\<^sup>\<infinity> x. ((\<currency>\<^sup>? A \<parallel> \<currency>\<^sup>+ A) \<parallel> \<P> x)
@@ -257,9 +257,9 @@ lemma inner_bidirectional_bridge_redundancy:
   shows "A \<leftrightarrow> B \<parallel> C \<triangleright>\<^sup>\<infinity> x. (A \<leftrightarrow> B \<parallel> \<P> x) \<sim>\<^sub>s A \<leftrightarrow> B \<parallel> C \<triangleright>\<^sup>\<infinity> x. \<P> x"
 proof -
   have "
-    receive_follow_up (\<lambda>x. (A \<rightarrow> B \<parallel> B \<rightarrow> A) \<parallel> \<P> x) n X
+    post_receive n X (\<lambda>x. (A \<rightarrow> B \<parallel> B \<rightarrow> A) \<parallel> \<P> x)
     \<sim>\<^sub>s
-    receive_follow_up (\<lambda>x. A \<rightarrow> B \<parallel> (B \<rightarrow> A \<parallel> \<P> x)) n X"
+    post_receive n X (\<lambda>x. A \<rightarrow> B \<parallel> (B \<rightarrow> A \<parallel> \<P> x))"
     for n and X
   proof -
     have "
@@ -278,7 +278,7 @@ proof -
     also have "\<dots> = (\<lambda>e. ((A \<rightarrow> B \<parallel> (B \<rightarrow> A \<parallel> \<P> (X e))) \<guillemotleft> suffix n) e)"
       by (simp only: adapted_after_parallel)
     finally show ?thesis
-      unfolding receive_follow_up_def .
+      unfolding post_receive_def .
   qed
   then have "
     (A \<rightarrow> B \<parallel> B \<rightarrow> A) \<parallel> C \<triangleright>\<^sup>\<infinity> x. ((A \<rightarrow> B \<parallel> B \<rightarrow> A) \<parallel> \<P> x)
@@ -400,10 +400,10 @@ proof -
     "?\<P> ws \<parallel> \<Prod>w \<leftarrow> ws. fst w \<triangleleft> Y \<approx>\<^sub>s ?\<P> ws \<parallel> \<Prod>w \<leftarrow> ws. snd w \<triangleleft> Y" for ws and Y
     using send_channel_switch
     by (rule general_parallel_channel_switch)
-  have receive_follow_up_targets_switch: "
-    receive_follow_up (\<lambda>x. ?\<P> vs \<parallel> \<Prod>v \<leftarrow> vs. fst v \<triangleleft> \<box> x) n X
+  have post_receive_targets_switch: "
+    post_receive n X (\<lambda>x. ?\<P> vs \<parallel> \<Prod>v \<leftarrow> vs. fst v \<triangleleft> \<box> x)
     \<approx>\<^sub>s
-    receive_follow_up (\<lambda>x. ?\<P> vs \<parallel> \<Prod>v \<leftarrow> vs. snd v \<triangleleft> \<box> x) n X"
+    post_receive n X (\<lambda>x. ?\<P> vs \<parallel> \<Prod>v \<leftarrow> vs. snd v \<triangleleft> \<box> x)"
     for n and X
   proof -
     let ?ws = "map (\<lambda>v. (fst v \<guillemotleft> suffix n, snd v \<guillemotleft> suffix n)) vs"
@@ -451,7 +451,7 @@ proof -
           adapted_after_send
         )
     finally show ?thesis
-      unfolding receive_follow_up_def .
+      unfolding post_receive_def .
   qed
   \<comment> \<open>The actual proof:\<close>
   have "?\<P> vs \<parallel> A \<triangleright>\<^sup>\<infinity> y. \<Prod>v \<leftarrow> vs. fst v \<triangleleft> \<box> y \<approx>\<^sub>s ?\<P> vs \<parallel> A \<triangleright>\<^sup>\<infinity> y. (?\<P> vs \<parallel> \<Prod>v \<leftarrow> vs. fst v \<triangleleft> \<box> y)"
@@ -467,7 +467,7 @@ proof -
         parallel_is_right_compatible_with_synchronous_weak_bisimilarity
         repeated_receive_is_quasi_compatible_with_synchronous_weak_bisimilarity
       )
-      (fact receive_follow_up_targets_switch)
+      (fact post_receive_targets_switch)
   also have "\<dots> \<approx>\<^sub>s ?\<P> vs \<parallel> A \<triangleright>\<^sup>\<infinity> y. \<Prod>v \<leftarrow> vs. snd v \<triangleleft> \<box> y"
     by
       (rule synchronous.bisimilarity_in_weak_bisimilarity [THEN predicate2D])
