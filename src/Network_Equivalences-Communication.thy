@@ -556,8 +556,6 @@ next
       qed
       ultimately show ?thesis
       unfolding
-        post_receive_after_parallel
-      and
         \<open>\<alpha> = IO \<eta> A' n X\<close> and \<open>S = \<currency>\<^sup>+ A \<guillemotleft> suffix n \<parallel> Q\<close>
       and
         \<open>\<eta> = Receiving\<close> and \<open>A' = A\<close> and \<open>Q = R \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<Q> x) \<guillemotleft> suffix n\<close>
@@ -671,8 +669,6 @@ next
       qed
       ultimately show ?thesis
       unfolding
-        post_receive_after_parallel
-      and
         \<open>\<alpha> = IO \<eta> A' n X\<close> and \<open>S = \<currency>\<^sup>+ A \<guillemotleft> suffix n \<parallel> Q\<close>
       and
         \<open>\<eta> = Receiving\<close> and \<open>A' = A\<close> and \<open>Q = (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n \<parallel> R\<close>
