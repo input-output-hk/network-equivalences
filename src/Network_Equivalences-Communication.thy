@@ -1037,9 +1037,9 @@ proof (coinduction rule: synchronous.mixed.up_to_rule [where \<F> = "[\<sim>\<^s
         post_receive n X \<P> \<parallel> (A \<rightarrow> B \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n
         \<sim>\<^sub>s
         ((\<zero> \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n) \<parallel> (post_receive n X \<P> \<parallel> B \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n)"
-          unfolding adapted_after_parallel and adapted_after_repeated_receive
-          using thorn_simps
-          by equivalence
+        unfolding adapted_after_parallel and adapted_after_repeated_receive
+        using thorn_simps
+        by equivalence
       ultimately show ?thesis
         unfolding
           \<open>\<alpha> = IO \<eta> C n X\<close> and \<open>S = (A \<rightarrow> B) \<guillemotleft> suffix n \<parallel> Q\<close>
@@ -1100,7 +1100,7 @@ next
       "B' = B"
     and
       "Q = post_receive n X (\<lambda>x. \<P> x \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x)"
-    by (auto elim: transition_from_repeated_receive)
+      by (auto elim: transition_from_repeated_receive)
     with \<open>B \<triangleright>\<^sup>\<infinity> x. \<P> x \<rightarrow>\<^sub>s\<lparr>IO \<eta> B' n X\<rparr> Q\<close>
     have B_transition: "B \<triangleright>\<^sup>\<infinity> x. \<P> x \<rightarrow>\<^sub>s\<lparr>B \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> post_receive n X (\<lambda>x. \<P> x \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x)"
       by (simp only:)
