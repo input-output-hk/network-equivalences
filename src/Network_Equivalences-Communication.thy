@@ -81,18 +81,18 @@ context begin
 
 private lemma post_receive_from_unsplit_repeated_receive:
   shows "
-    (post_receive n X (\<lambda>x. \<Prod>B\<leftarrow>[A, A]. B \<triangleleft> \<box> x) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n) \<parallel>
+    (post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> [A, A]. B \<triangleleft> \<box> x) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n) \<parallel>
     (A \<triangleright>\<^sup>\<infinity> x. (\<P> x \<parallel> \<Q> x)) \<guillemotleft> suffix n
     \<sim>\<^sub>s
-    post_receive n X (\<lambda>x. \<Prod>B\<leftarrow>[A, A]. B \<triangleleft> \<box> x) \<parallel> (\<currency>\<^sup>+ A \<parallel> A \<triangleright>\<^sup>\<infinity> x. (\<P> x \<parallel> \<Q> x)) \<guillemotleft> suffix n"
+    post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> [A, A]. B \<triangleleft> \<box> x) \<parallel> (\<currency>\<^sup>+ A \<parallel> A \<triangleright>\<^sup>\<infinity> x. (\<P> x \<parallel> \<Q> x)) \<guillemotleft> suffix n"
   unfolding adapted_after_parallel
   using parallel_associativity .
 
 private lemma post_receive_from_split_repeated_receive:
   shows "
-    post_receive n X (\<lambda>x. \<Prod>B\<leftarrow>[A, A]. B \<triangleleft> \<box> x) \<parallel> (\<currency>\<^sup>+ A \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x)) \<guillemotleft> suffix n
+    post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> [A, A]. B \<triangleleft> \<box> x) \<parallel> (\<currency>\<^sup>+ A \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x)) \<guillemotleft> suffix n
     \<sim>\<^sub>s
-    (post_receive n X (\<lambda>x. \<Prod>B\<leftarrow>[A, A]. B \<triangleleft> \<box> x) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n) \<parallel>
+    (post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> [A, A]. B \<triangleleft> \<box> x) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n) \<parallel>
     (A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x) \<guillemotleft> suffix n"
   unfolding adapted_after_parallel
   using parallel_associativity [symmetric] .
