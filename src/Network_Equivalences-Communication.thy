@@ -753,20 +753,21 @@ proof -
     (\<currency>\<^sup>? A \<parallel> \<currency>\<^sup>+ A) \<parallel> B \<triangleright>\<^sup>\<infinity> x. (\<currency>\<^sup>? A \<parallel> (\<currency>\<^sup>+ A \<parallel> \<P> x))"
     by
       (intro
-        parallel_is_right_compatible_with_synchronous_bisimilarity
-        repeated_receive_is_quasi_compatible_with_synchronous_bisimilarity
+        synchronous.parallel_is_right_compatible_with_bisimilarity
+        synchronous.repeated_receive_is_quasi_compatible_with_bisimilarity
       )
+      simp
   also have "\<dots> \<sim>\<^sub>s \<currency>\<^sup>+ A \<parallel> (\<currency>\<^sup>? A \<parallel> B \<triangleright>\<^sup>\<infinity> x. (\<currency>\<^sup>? A \<parallel> (\<currency>\<^sup>+ A \<parallel> \<P> x)))"
     using thorn_simps
     by equivalence
   also have "\<dots> \<sim>\<^sub>s \<currency>\<^sup>+ A \<parallel> (\<currency>\<^sup>? A \<parallel> B \<triangleright>\<^sup>\<infinity> x. (\<currency>\<^sup>+ A \<parallel> \<P> x))"
     using inner_loss_redundancy
-    by (rule parallel_is_right_compatible_with_synchronous_bisimilarity)
+    by (rule synchronous.parallel_is_right_compatible_with_bisimilarity)
   also have "\<dots> \<sim>\<^sub>s \<currency>\<^sup>? A \<parallel> (\<currency>\<^sup>+ A \<parallel> B \<triangleright>\<^sup>\<infinity> x. (\<currency>\<^sup>+ A \<parallel> \<P> x))"
     using parallel_left_commutativity .
   also have "\<dots> \<sim>\<^sub>s \<currency>\<^sup>? A \<parallel> (\<currency>\<^sup>+ A \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x)"
     using inner_duplication_redundancy
-    by (rule parallel_is_right_compatible_with_synchronous_bisimilarity)
+    by (rule synchronous.parallel_is_right_compatible_with_bisimilarity)
   also have "\<dots> \<sim>\<^sub>s (\<currency>\<^sup>? A \<parallel> \<currency>\<^sup>+ A) \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x"
     using parallel_associativity
     by equivalence
@@ -1278,20 +1279,21 @@ proof -
     (A \<rightarrow> B \<parallel> B \<rightarrow> A) \<parallel> C \<triangleright>\<^sup>\<infinity> x. (A \<rightarrow> B \<parallel> (B \<rightarrow> A \<parallel> \<P> x))"
     by
       (intro
-        parallel_is_right_compatible_with_synchronous_bisimilarity
-        repeated_receive_is_quasi_compatible_with_synchronous_bisimilarity
+        synchronous.parallel_is_right_compatible_with_bisimilarity
+        synchronous.repeated_receive_is_quasi_compatible_with_bisimilarity
       )
+      simp
   also have "\<dots> \<sim>\<^sub>s B \<rightarrow> A \<parallel> (A \<rightarrow> B \<parallel> C \<triangleright>\<^sup>\<infinity> x. (A \<rightarrow> B \<parallel> (B \<rightarrow> A \<parallel> \<P> x)))"
     using thorn_simps
     by equivalence
   also have "\<dots> \<sim>\<^sub>s B \<rightarrow> A \<parallel> (A \<rightarrow> B \<parallel> C \<triangleright>\<^sup>\<infinity> x. (B \<rightarrow> A \<parallel> \<P> x))"
     using inner_unidirectional_bridge_redundancy
-    by (rule parallel_is_right_compatible_with_synchronous_bisimilarity)
+    by (rule synchronous.parallel_is_right_compatible_with_bisimilarity)
   also have "\<dots> \<sim>\<^sub>s A \<rightarrow> B \<parallel> (B \<rightarrow> A \<parallel> C \<triangleright>\<^sup>\<infinity> x. (B \<rightarrow> A \<parallel> \<P> x))"
     using parallel_left_commutativity .
   also have "\<dots> \<sim>\<^sub>s A \<rightarrow> B \<parallel> (B \<rightarrow> A \<parallel> C \<triangleright>\<^sup>\<infinity> x. \<P> x)"
     using inner_unidirectional_bridge_redundancy
-    by (rule parallel_is_right_compatible_with_synchronous_bisimilarity)
+    by (rule synchronous.parallel_is_right_compatible_with_bisimilarity)
   also have "\<dots> \<sim>\<^sub>s (A \<rightarrow> B \<parallel> B \<rightarrow> A) \<parallel> C \<triangleright>\<^sup>\<infinity> x. \<P> x"
     using thorn_simps
     by equivalence
@@ -1342,7 +1344,7 @@ next
     by equivalence
   also have "\<dots> \<approx>\<^sub>s (fst v \<leftrightarrow> snd v \<parallel> \<P> (snd v)) \<parallel> (\<Prod>v \<leftarrow> vs. fst v \<leftrightarrow> snd v \<parallel> \<Prod>v \<leftarrow> vs. \<P> (snd v))"
     using assms and Cons.IH
-    by (rule parallel_is_compatible_with_synchronous_weak_bisimilarity)
+    by (rule synchronous.weak.parallel_is_compatible_with_bisimilarity)
   also have "\<dots> \<approx>\<^sub>s (fst v \<leftrightarrow> snd v \<parallel> \<Prod>v \<leftarrow> vs. fst v \<leftrightarrow> snd v) \<parallel> (\<P> (snd v) \<parallel> \<Prod>v \<leftarrow> vs. \<P> (snd v))"
     using thorn_simps
     by equivalence
@@ -1454,12 +1456,13 @@ proof -
       )
       (fact inner_target_bridges_redundancy)
   also have "\<dots> \<approx>\<^sub>s ?\<P> vs \<parallel> A \<triangleright>\<^sup>\<infinity> y. (?\<P> vs \<parallel> \<Prod>v \<leftarrow> vs. snd v \<triangleleft> \<box> y)"
+    using post_receive_targets_switch
     by
       (intro
-        parallel_is_right_compatible_with_synchronous_weak_bisimilarity
-        repeated_receive_is_quasi_compatible_with_synchronous_weak_bisimilarity
+        synchronous.weak.parallel_is_right_compatible_with_bisimilarity
+        synchronous.weak.repeated_receive_is_quasi_compatible_with_bisimilarity
       )
-      (fact post_receive_targets_switch)
+      simp
   also have "\<dots> \<approx>\<^sub>s ?\<P> vs \<parallel> A \<triangleright>\<^sup>\<infinity> y. \<Prod>v \<leftarrow> vs. snd v \<triangleleft> \<box> y"
     by
       (rule synchronous.bisimilarity_in_weak_bisimilarity [THEN predicate2D])
@@ -1501,13 +1504,13 @@ proof -
     by equivalence
   also have "\<dots> \<approx>\<^sub>s (A \<leftrightarrow> B \<parallel> \<currency>\<^sup>? B) \<parallel> \<currency>\<^sup>+ A"
     using loss_channel_switch
-    by (rule parallel_is_left_compatible_with_synchronous_weak_bisimilarity)
+    by (rule synchronous.weak.parallel_is_left_compatible_with_bisimilarity)
   also have "\<dots> \<approx>\<^sub>s \<currency>\<^sup>? B \<parallel> (A \<leftrightarrow> B \<parallel> \<currency>\<^sup>+ A)"
     using thorn_simps
     by equivalence
   also have "\<dots> \<approx>\<^sub>s \<currency>\<^sup>? B \<parallel> (A \<leftrightarrow> B \<parallel> \<currency>\<^sup>+ B)"
     using duplication_channel_switch
-    by (rule parallel_is_right_compatible_with_synchronous_weak_bisimilarity)
+    by (rule synchronous.weak.parallel_is_right_compatible_with_bisimilarity)
   also have "\<dots> \<approx>\<^sub>s A \<leftrightarrow> B \<parallel> (\<currency>\<^sup>? B \<parallel> \<currency>\<^sup>+ B)"
     using thorn_simps
     by equivalence
@@ -1547,13 +1550,13 @@ proof -
     by equivalence
   also have "\<dots> \<approx>\<^sub>s (A \<leftrightarrow> B \<parallel> B \<rightarrow> C) \<parallel> C \<rightarrow> A"
     using unidirectional_bridge_source_switch
-    by (rule parallel_is_left_compatible_with_synchronous_weak_bisimilarity)
+    by (rule synchronous.weak.parallel_is_left_compatible_with_bisimilarity)
   also have "\<dots> \<approx>\<^sub>s B \<rightarrow> C \<parallel> (A \<leftrightarrow> B \<parallel> C \<rightarrow> A)"
     using thorn_simps
     by equivalence
   also have "\<dots> \<approx>\<^sub>s B \<rightarrow> C \<parallel> (A \<leftrightarrow> B \<parallel> C \<rightarrow> B)"
     using unidirectional_bridge_target_switch
-    by (rule parallel_is_right_compatible_with_synchronous_weak_bisimilarity)
+    by (rule synchronous.weak.parallel_is_right_compatible_with_bisimilarity)
   also have "\<dots> \<approx>\<^sub>s A \<leftrightarrow> B \<parallel> (B \<rightarrow> C \<parallel> C \<rightarrow> B)"
     using thorn_simps
     by equivalence
