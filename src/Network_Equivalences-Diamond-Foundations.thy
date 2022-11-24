@@ -115,7 +115,7 @@ proof -
     by (intro
       distributor_target_switch [THEN synchronous.weak.bisimilarity_symmetry_rule]
       synchronous.weak.bisimilarity_reflexivity_rule
-      parallel_is_compatible_with_synchronous_weak_bisimilarity
+      synchronous.weak.parallel_is_compatible_with_bisimilarity
     )
   also have "\<dots> \<approx>\<^sub>s
     \<currency>\<^sup>*l\<^sub>3\<^sub>0 \<parallel>
