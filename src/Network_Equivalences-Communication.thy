@@ -776,7 +776,56 @@ qed
 
 lemma send_idempotency_under_duploss:
   shows "\<currency>\<^sup>* A \<parallel> A \<triangleleft> X \<parallel> A \<triangleleft> X \<approx>\<^sub>s \<currency>\<^sup>* A \<parallel> A \<triangleleft> X"
-  sorry
+proof (rule synchronous.mutual_silent_weak_transitions_up_to_bisimilarity)
+  have "\<currency>\<^sup>? A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>0\<^esup> X\<rparr> post_receive 0 X (\<lambda>_. \<zero> \<parallel> \<currency>\<^sup>? A)"
+    unfolding loss_def and distributor_def and general_parallel.simps
+    using receiving
+    by (subst repeated_receive_proper_def)
+  then have "\<currency>\<^sup>? A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>0\<^esup> X\<rparr> \<zero> \<parallel> \<currency>\<^sup>? A"
+    unfolding post_receive_after_parallel and post_receive_after_stop and post_receive_def
+    by (transfer, simp)
+  then have "\<currency>\<^sup>* A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>0\<^esup> X\<rparr> (\<zero> \<parallel> \<currency>\<^sup>? A) \<parallel> \<currency>\<^sup>+ A"
+    using parallel_left_io [where n = 0]
+    by (transfer, simp)
+  moreover have "A \<triangleleft> X \<rightarrow>\<^sub>s\<lparr>A \<triangleleft> \<star>\<^bsup>0\<^esup> X\<rparr> \<zero>"
+    by (fact sending)
+  then have "A \<triangleleft> X \<parallel> A \<triangleleft> X \<rightarrow>\<^sub>s\<lparr>A \<triangleleft> \<star>\<^bsup>0\<^esup> X\<rparr> A \<triangleleft> X \<parallel> \<zero>"
+    using parallel_right_io [where n = 0]
+    by (transfer, simp)
+  ultimately have "\<currency>\<^sup>* A \<parallel> A \<triangleleft> X \<parallel> A \<triangleleft> X \<rightarrow>\<^sub>s\<lparr>\<tau>\<rparr> ((\<zero> \<parallel> \<currency>\<^sup>? A) \<parallel> \<currency>\<^sup>+ A) \<parallel> A \<triangleleft> X \<parallel> \<zero>"
+    using communication
+    by fastforce
+  then show "\<currency>\<^sup>* A \<parallel> A \<triangleleft> X \<parallel> A \<triangleleft> X \<Rightarrow>\<^sub>s\<lparr>\<tau>\<rparr> ((\<zero> \<parallel> \<currency>\<^sup>? A) \<parallel> \<currency>\<^sup>+ A) \<parallel> A \<triangleleft> X \<parallel> \<zero>"
+    by (fact synchronous.transition_in_weak_transition_rule)
+next
+  show "((\<zero> \<parallel> \<currency>\<^sup>? A) \<parallel> \<currency>\<^sup>+ A) \<parallel> A \<triangleleft> X \<parallel> \<zero> \<approx>\<^sub>s \<currency>\<^sup>* A \<parallel> A \<triangleleft> X"
+    unfolding duploss_def
+    using thorn_simps
+    by equivalence
+next
+  have "\<currency>\<^sup>+ A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>0\<^esup> X\<rparr> post_receive 0 X (\<lambda>x. (A \<triangleleft> \<box> x \<parallel> A \<triangleleft> \<box> x \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A)"
+    unfolding duplication_def and distributor_def and general_parallel.simps
+    using receiving
+    by (subst repeated_receive_proper_def)
+  then have "\<currency>\<^sup>+ A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>0\<^esup> X\<rparr> (A \<triangleleft> X \<parallel> A \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A"
+    unfolding post_receive_def
+    by (transfer, simp)
+  then have "\<currency>\<^sup>* A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>0\<^esup> X\<rparr> \<currency>\<^sup>? A \<parallel> (A \<triangleleft> X \<parallel> A \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A"
+    using parallel_right_io [where n = 0]
+    by (transfer, simp)
+  moreover have "A \<triangleleft> X \<rightarrow>\<^sub>s\<lparr>A \<triangleleft> \<star>\<^bsup>0\<^esup> X\<rparr> \<zero>"
+    by (fact sending)
+  ultimately have "\<currency>\<^sup>* A \<parallel> A \<triangleleft> X \<rightarrow>\<^sub>s\<lparr>\<tau>\<rparr> (\<currency>\<^sup>? A \<parallel> (A \<triangleleft> X \<parallel> A \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A) \<parallel> \<zero>"
+    using communication
+    by fastforce
+  then show "\<currency>\<^sup>* A \<parallel> A \<triangleleft> X \<Rightarrow>\<^sub>s\<lparr>\<tau>\<rparr> (\<currency>\<^sup>? A \<parallel> (A \<triangleleft> X \<parallel> A \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A) \<parallel> \<zero>"
+    by (fact synchronous.transition_in_weak_transition_rule)
+next
+  show "(\<currency>\<^sup>? A \<parallel> (A \<triangleleft> X \<parallel> A \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A) \<parallel> \<zero> \<approx>\<^sub>s \<currency>\<^sup>* A \<parallel> A \<triangleleft> X \<parallel> A \<triangleleft> X"
+    unfolding duploss_def
+    using thorn_simps
+    by equivalence
+qed
 
 subsection \<open>Unidirectional Bridges\<close>
 
