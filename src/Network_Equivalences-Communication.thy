@@ -1318,9 +1318,61 @@ lemma backward_bridge_absorption:
   using thorn_simps
   by equivalence
 
+context begin
+
+private lemma transition_from_unidirectional_bridge:
+  shows "A \<rightarrow> B \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n" (is "?S \<rightarrow>\<^sub>s\<lparr>_\<rparr> ?T")
+proof -
+  have "?S \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> post_receive n X (\<lambda>x. (B \<triangleleft> \<box> x \<parallel> \<zero>) \<parallel> A \<rightarrow> B)"
+    unfolding unidirectional_bridge_def and distributor_def and general_parallel.simps
+    using receiving
+    by (subst repeated_receive_proper_def)
+  moreover have "post_receive n X (\<lambda>x. (B \<triangleleft> \<box> x \<parallel> \<zero>) \<parallel> A \<rightarrow> B) = ?T"
+    unfolding post_receive_def
+    by (transfer, simp)
+  ultimately show ?thesis
+    by (simp only:)
+qed
+
 lemma send_channel_switch:
   shows "A \<leftrightarrow> B \<parallel> A \<triangleleft> X \<approx>\<^sub>s A \<leftrightarrow> B \<parallel> B \<triangleleft> X"
-  sorry
+proof (rule synchronous.mutual_silent_weak_transitions_up_to_bisimilarity)
+  have "A \<rightarrow> B \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>0\<^esup> X\<rparr> (B \<triangleleft> X \<parallel> \<zero>) \<parallel> A \<rightarrow> B"
+    using transition_from_unidirectional_bridge [where n = 0]
+    by (transfer, simp)
+  then have "A \<leftrightarrow> B \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>0\<^esup> X\<rparr> ((B \<triangleleft> X \<parallel> \<zero>) \<parallel> A \<rightarrow> B) \<parallel> B \<rightarrow> A"
+    using parallel_left_io [where n = 0]
+    by (transfer, simp)
+  moreover have "A \<triangleleft> X \<rightarrow>\<^sub>s\<lparr>A \<triangleleft> \<star>\<^bsup>0\<^esup> X\<rparr> \<zero>"
+    by (fact sending)
+  ultimately show "A \<leftrightarrow> B \<parallel> A \<triangleleft> X \<Rightarrow>\<^sub>s\<lparr>\<tau>\<rparr> (((B \<triangleleft> X \<parallel> \<zero>) \<parallel> A \<rightarrow> B) \<parallel> B \<rightarrow> A) \<parallel> \<zero>"
+    using communication
+    by fastforce
+next
+  show "(((B \<triangleleft> X \<parallel> \<zero>) \<parallel> A \<rightarrow> B) \<parallel> B \<rightarrow> A) \<parallel> \<zero> \<approx>\<^sub>s A \<leftrightarrow> B \<parallel> B \<triangleleft> X"
+    unfolding bidirectional_bridge_def
+    using thorn_simps
+    by equivalence
+next
+  have "B \<rightarrow> A \<rightarrow>\<^sub>s\<lparr>B \<triangleright> \<star>\<^bsup>0\<^esup> X\<rparr> (A \<triangleleft> X \<parallel> \<zero>) \<parallel> B \<rightarrow> A"
+    using transition_from_unidirectional_bridge [where n = 0]
+    by (transfer, simp)
+  then have "A \<leftrightarrow> B \<rightarrow>\<^sub>s\<lparr>B \<triangleright> \<star>\<^bsup>0\<^esup> X\<rparr> A \<rightarrow> B \<parallel> (A \<triangleleft> X \<parallel> \<zero>) \<parallel> B \<rightarrow> A"
+    using parallel_right_io [where n = 0]
+    by (transfer, simp)
+  moreover have "B \<triangleleft> X \<rightarrow>\<^sub>s\<lparr>B \<triangleleft> \<star>\<^bsup>0\<^esup> X\<rparr> \<zero>"
+    by (fact sending)
+  ultimately show "A \<leftrightarrow> B \<parallel> B \<triangleleft> X \<Rightarrow>\<^sub>s\<lparr>\<tau>\<rparr> (A \<rightarrow> B \<parallel> (A \<triangleleft> X \<parallel> \<zero>) \<parallel> B \<rightarrow> A) \<parallel> \<zero>"
+    using communication
+    by fastforce
+next
+  show "(A \<rightarrow> B \<parallel> (A \<triangleleft> X \<parallel> \<zero>) \<parallel> B \<rightarrow> A) \<parallel> \<zero> \<approx>\<^sub>s A \<leftrightarrow> B \<parallel> A \<triangleleft> X"
+    unfolding bidirectional_bridge_def
+    using thorn_simps
+    by equivalence
+qed
+
+end
 
 lemma receive_channel_switch:
   shows "A \<leftrightarrow> B \<parallel> A \<triangleright> x. \<P> x \<approx>\<^sub>s A \<leftrightarrow> B \<parallel> B \<triangleright> x. \<P> x"
