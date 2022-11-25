@@ -1320,6 +1320,7 @@ lemma backward_bridge_absorption:
 
 context begin
 
+(* TODO: Perhaps reuse in other proofs *)
 private lemma transition_from_unidirectional_bridge:
   shows "A \<rightarrow> B \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n" (is "?S \<rightarrow>\<^sub>s\<lparr>_\<rparr> ?T")
 proof -
