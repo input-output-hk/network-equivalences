@@ -220,8 +220,7 @@ proof (coinduction rule: synchronous.mixed.up_to_rule [where \<F> = "[\<sim>\<^s
       have "
         \<currency>\<^sup>+ A \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x
         \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
-        (((A \<guillemotleft> suffix n) \<triangleleft> post_receive n X \<box> \<parallel> (A \<guillemotleft> suffix n) \<triangleleft> post_receive n X \<box> \<parallel> \<zero>) \<parallel>
-         \<currency>\<^sup>+ A \<guillemotleft> suffix n) \<parallel>
+        (((A \<guillemotleft> suffix n) \<triangleleft> X \<parallel> (A \<guillemotleft> suffix n) \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n) \<parallel>
         (A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n \<parallel> A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<Q> x \<guillemotleft> suffix n)"
       proof -
         have "\<currency>\<^sup>+ A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> [A, A]. B \<triangleleft> \<box> x \<parallel> \<currency>\<^sup>+ A)"
@@ -244,8 +243,7 @@ proof (coinduction rule: synchronous.mixed.up_to_rule [where \<F> = "[\<sim>\<^s
         have "
           post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> [A, A]. B \<triangleleft> \<box> x \<parallel> \<currency>\<^sup>+ A)
           =
-          (A \<guillemotleft> suffix n \<triangleleft> post_receive n X \<box> \<parallel> A \<guillemotleft> suffix n \<triangleleft> post_receive n X \<box> \<parallel> \<zero>) \<parallel>
-          \<currency>\<^sup>+ A \<guillemotleft> suffix n"
+          (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
         proof -
           have "
             post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> [A, A]. B \<triangleleft> \<box> x \<parallel> \<currency>\<^sup>+ A)
@@ -258,13 +256,10 @@ proof (coinduction rule: synchronous.mixed.up_to_rule [where \<F> = "[\<sim>\<^s
             \<currency>\<^sup>+ A \<guillemotleft> suffix n"
             unfolding post_receive_after_parallel and post_receive_after_stop ..
           also have "\<dots> =
-            (post_receive n X (\<lambda>_. A) \<triangleleft> post_receive n X \<box> \<parallel>
-             post_receive n X (\<lambda>_. A) \<triangleleft> post_receive n X \<box> \<parallel> \<zero>) \<parallel>
-            \<currency>\<^sup>+ A \<guillemotleft> suffix n"
-            unfolding post_receive_after_send ..
-          also have "\<dots> =
-            (A \<guillemotleft> suffix n \<triangleleft> post_receive n X \<box> \<parallel> A \<guillemotleft> suffix n \<triangleleft> post_receive n X \<box> \<parallel> \<zero>) \<parallel>
-            \<currency>\<^sup>+ A \<guillemotleft> suffix n"
+            (post_receive n X (\<lambda>_. A) \<triangleleft> X \<parallel> post_receive n X (\<lambda>_. A) \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
+            unfolding post_receive_after_send and post_receive_def
+            by (transfer, simp)
+          also have "\<dots> = (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
             unfolding post_receive_def ..
           finally show ?thesis .
         qed
@@ -273,62 +268,54 @@ proof (coinduction rule: synchronous.mixed.up_to_rule [where \<F> = "[\<sim>\<^s
       qed
       moreover
       have "
-        ((A \<guillemotleft> suffix n \<triangleleft> post_receive n X \<box> \<parallel> A \<guillemotleft> suffix n \<triangleleft> post_receive n X \<box> \<parallel> \<zero>) \<parallel>
-         \<currency>\<^sup>+ A \<guillemotleft> suffix n) \<parallel>
+        ((A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n) \<parallel>
         (A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n \<parallel> A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<Q> x \<guillemotleft> suffix n)
         \<rightarrow>\<^sub>s\<lparr>\<tau>\<rparr>
-        ((\<zero> \<parallel> A \<guillemotleft> suffix n \<triangleleft> post_receive n X \<box> \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n) \<parallel>
+        ((\<zero> \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n) \<parallel>
         ((post_receive n X \<P> \<parallel> A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n) \<parallel>
          A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<Q> x \<guillemotleft> suffix n)"
       proof -
-        have "A \<guillemotleft> suffix n \<triangleleft> post_receive n X \<box> \<rightarrow>\<^sub>s\<lparr>A \<guillemotleft> suffix n \<triangleleft> \<star>\<^bsup>0\<^esup> post_receive n X \<box>\<rparr> \<zero>"
+        have "A \<guillemotleft> suffix n \<triangleleft> X \<rightarrow>\<^sub>s\<lparr>A \<guillemotleft> suffix n \<triangleleft> \<star>\<^bsup>0\<^esup> X\<rparr> \<zero>"
           by (fact sending)
         then have "
-          A \<guillemotleft> suffix n \<triangleleft> post_receive n X \<box> \<parallel> (A \<guillemotleft> suffix n \<triangleleft> post_receive n X \<box> \<parallel> \<zero>)
-          \<rightarrow>\<^sub>s\<lparr>A \<guillemotleft> suffix n \<triangleleft> \<star>\<^bsup>0\<^esup> post_receive n X \<box>\<rparr>
-          \<zero> \<parallel> (A \<guillemotleft> suffix n \<triangleleft> post_receive n X \<box> \<parallel> \<zero>)"
+          A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero> \<rightarrow>\<^sub>s\<lparr>A \<guillemotleft> suffix n \<triangleleft> \<star>\<^bsup>0\<^esup> X\<rparr> \<zero> \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>"
+          unfolding post_receive_def
           using parallel_left_io [where n = 0]
           by (transfer, simp)
         then have "
-          (A \<guillemotleft> suffix n \<triangleleft> post_receive n X \<box> \<parallel> (A \<guillemotleft> suffix n \<triangleleft> post_receive n X \<box> \<parallel> \<zero>)) \<parallel>
-          \<currency>\<^sup>+ A \<guillemotleft> suffix n
-          \<rightarrow>\<^sub>s\<lparr>A \<guillemotleft> suffix n \<triangleleft> \<star>\<^bsup>0\<^esup> post_receive n X \<box>\<rparr>
-          (\<zero> \<parallel> A \<guillemotleft> suffix n \<triangleleft> post_receive n X \<box> \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
+          (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>)) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n
+          \<rightarrow>\<^sub>s\<lparr>A \<guillemotleft> suffix n \<triangleleft> \<star>\<^bsup>0\<^esup> X\<rparr>
+          (\<zero> \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
           using parallel_left_io [where n = 0]
           by (transfer, simp)
         moreover
         have "
           A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n
-          \<rightarrow>\<^sub>s\<lparr>A \<guillemotleft> suffix n \<triangleright> \<star>\<^bsup>0\<^esup> post_receive n X \<box>\<rparr>
-          post_receive 0 (post_receive n X \<box>)
-          (\<lambda>x. \<P> x \<guillemotleft> suffix n \<parallel> A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n)"
+          \<rightarrow>\<^sub>s\<lparr>A \<guillemotleft> suffix n \<triangleright> \<star>\<^bsup>0\<^esup> X\<rparr>
+          post_receive 0 X (\<lambda>x. \<P> x \<guillemotleft> suffix n \<parallel> A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n)"
           using receiving
           by (subst repeated_receive_proper_def)
         then have "
           A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n \<parallel> A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<Q> x \<guillemotleft> suffix n
-          \<rightarrow>\<^sub>s\<lparr>A \<guillemotleft> suffix n \<triangleright> \<star>\<^bsup>0\<^esup> post_receive n X \<box>\<rparr>
-          (post_receive 0 (post_receive n X \<box>)
-           (\<lambda>x. \<P> x \<guillemotleft> suffix n \<parallel> A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n)) \<parallel>
+          \<rightarrow>\<^sub>s\<lparr>A \<guillemotleft> suffix n \<triangleright> \<star>\<^bsup>0\<^esup> X\<rparr>
+          (post_receive 0 X (\<lambda>x. \<P> x \<guillemotleft> suffix n \<parallel> A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n)) \<parallel>
           A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<Q> x \<guillemotleft> suffix n"
           using parallel_left_io [where n = 0]
           by (transfer, simp)
         ultimately have "
-          ((A \<guillemotleft> suffix n \<triangleleft> post_receive n X \<box> \<parallel> A \<guillemotleft> suffix n \<triangleleft> post_receive n X \<box> \<parallel> \<zero>) \<parallel>
-           \<currency>\<^sup>+ A \<guillemotleft> suffix n) \<parallel>
+          ((A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n) \<parallel>
           (A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n \<parallel> A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<Q> x \<guillemotleft> suffix n)
           \<rightarrow>\<^sub>s\<lparr>\<tau>\<rparr>
-          ((\<zero> \<parallel> A \<guillemotleft> suffix n \<triangleleft> post_receive n X \<box> \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n) \<parallel>
-          ((post_receive 0 (post_receive n X \<box>)
-           (\<lambda>x. \<P> x \<guillemotleft> suffix n \<parallel> A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n)) \<parallel>
+          ((\<zero> \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n) \<parallel>
+          ((post_receive 0 X (\<lambda>x. \<P> x \<guillemotleft> suffix n \<parallel> A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n)) \<parallel>
            A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<Q> x \<guillemotleft> suffix n)"
           using communication [where n = 0]
           by fastforce
         then have "
-          ((A \<guillemotleft> suffix n \<triangleleft> post_receive n X \<box> \<parallel> A \<guillemotleft> suffix n \<triangleleft> post_receive n X \<box> \<parallel> \<zero>) \<parallel>
-           \<currency>\<^sup>+ A \<guillemotleft> suffix n) \<parallel>
+          ((A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n) \<parallel>
           (A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n \<parallel> A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<Q> x \<guillemotleft> suffix n)
           \<rightarrow>\<^sub>s\<lparr>\<tau>\<rparr>
-          ((\<zero> \<parallel> A \<guillemotleft> suffix n \<triangleleft> post_receive n X \<box> \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n) \<parallel>
+          ((\<zero> \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n) \<parallel>
           ((post_receive n X \<P> \<parallel> A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n) \<parallel>
            A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<Q> x \<guillemotleft> suffix n)"
           unfolding post_receive_def
@@ -337,7 +324,7 @@ proof (coinduction rule: synchronous.mixed.up_to_rule [where \<F> = "[\<sim>\<^s
       qed
       moreover
       have "
-        ((\<zero> \<parallel> A \<guillemotleft> suffix n \<triangleleft> post_receive n X \<box> \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n) \<parallel>
+        ((\<zero> \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n) \<parallel>
         ((post_receive n X \<P> \<parallel> A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n) \<parallel>
          A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<Q> x \<guillemotleft> suffix n)
         \<rightarrow>\<^sub>s\<lparr>\<tau>\<rparr>
@@ -345,56 +332,49 @@ proof (coinduction rule: synchronous.mixed.up_to_rule [where \<F> = "[\<sim>\<^s
         ((post_receive n X \<P> \<parallel> A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n) \<parallel>
          (post_receive n X \<Q> \<parallel> A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<Q> x \<guillemotleft> suffix n))"
       proof -
-        have "A \<guillemotleft> suffix n \<triangleleft> post_receive n X \<box> \<rightarrow>\<^sub>s\<lparr>A \<guillemotleft> suffix n \<triangleleft> \<star>\<^bsup>0\<^esup> post_receive n X \<box>\<rparr> \<zero>"
+        have "A \<guillemotleft> suffix n \<triangleleft> X \<rightarrow>\<^sub>s\<lparr>A \<guillemotleft> suffix n \<triangleleft> \<star>\<^bsup>0\<^esup> X\<rparr> \<zero>"
           by (fact sending)
         then have "
-          A \<guillemotleft> suffix n \<triangleleft> post_receive n X \<box> \<parallel> \<zero>
-          \<rightarrow>\<^sub>s\<lparr>A \<guillemotleft> suffix n \<triangleleft> \<star>\<^bsup>0\<^esup> post_receive n X \<box>\<rparr>
-          \<zero> \<parallel> \<zero>"
+          A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero> \<rightarrow>\<^sub>s\<lparr>A \<guillemotleft> suffix n \<triangleleft> \<star>\<^bsup>0\<^esup> X\<rparr> \<zero> \<parallel> \<zero>"
           using parallel_left_io
           by (transfer, simp)
         then have "
-          \<zero> \<parallel> A \<guillemotleft> suffix n \<triangleleft> post_receive n X \<box> \<parallel> \<zero>
-          \<rightarrow>\<^sub>s\<lparr>A \<guillemotleft> suffix n \<triangleleft> \<star>\<^bsup>0\<^esup> post_receive n X \<box>\<rparr>
-          \<zero> \<parallel> \<zero> \<parallel> \<zero>"
+          \<zero> \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero> \<rightarrow>\<^sub>s\<lparr>A \<guillemotleft> suffix n \<triangleleft> \<star>\<^bsup>0\<^esup> X\<rparr> \<zero> \<parallel> \<zero> \<parallel> \<zero>"
           using synchronous_transition.parallel_right_io
           by (transfer, simp)
         then have "
-          (\<zero> \<parallel> A \<guillemotleft> suffix n \<triangleleft> post_receive n X \<box> \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n
-          \<rightarrow>\<^sub>s\<lparr>A \<guillemotleft> suffix n \<triangleleft> \<star>\<^bsup>0\<^esup> post_receive n X \<box>\<rparr>
+          (\<zero> \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n
+          \<rightarrow>\<^sub>s\<lparr>A \<guillemotleft> suffix n \<triangleleft> \<star>\<^bsup>0\<^esup> X\<rparr>
           (\<zero> \<parallel> \<zero> \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
           using parallel_left_io [where n = 0]
           by (transfer, simp)
         moreover
         have "
           A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<Q> x \<guillemotleft> suffix n
-          \<rightarrow>\<^sub>s\<lparr>A \<guillemotleft> suffix n \<triangleright> \<star>\<^bsup>0\<^esup> post_receive n X \<box>\<rparr>
-          post_receive 0 (post_receive n X \<box>)
-           (\<lambda>x. \<Q> x \<guillemotleft> suffix n \<parallel> A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<Q> x \<guillemotleft> suffix n)"
+          \<rightarrow>\<^sub>s\<lparr>A \<guillemotleft> suffix n \<triangleright> \<star>\<^bsup>0\<^esup> X\<rparr>
+          post_receive 0 X (\<lambda>x. \<Q> x \<guillemotleft> suffix n \<parallel> A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<Q> x \<guillemotleft> suffix n)"
           using receiving
           by (subst repeated_receive_proper_def)
         then have "
           (post_receive n X \<P> \<parallel> A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n) \<parallel>
           A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<Q> x \<guillemotleft> suffix n
-          \<rightarrow>\<^sub>s\<lparr>A \<guillemotleft> suffix n \<triangleright> \<star>\<^bsup>0\<^esup> post_receive n X \<box>\<rparr>
+          \<rightarrow>\<^sub>s\<lparr>A \<guillemotleft> suffix n \<triangleright> \<star>\<^bsup>0\<^esup> X\<rparr>
           (post_receive n X \<P> \<parallel> A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n) \<parallel>
-          post_receive 0 (post_receive n X \<box>)
-           (\<lambda>x. \<Q> x \<guillemotleft> suffix n \<parallel> A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<Q> x \<guillemotleft> suffix n)"
+          post_receive 0 X (\<lambda>x. \<Q> x \<guillemotleft> suffix n \<parallel> A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<Q> x \<guillemotleft> suffix n)"
           using synchronous_transition.parallel_right_io [where n = 0]
           by (transfer, simp)
         ultimately have "
-          ((\<zero> \<parallel> A \<guillemotleft> suffix n \<triangleleft> post_receive n X \<box> \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n) \<parallel>
+          ((\<zero> \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n) \<parallel>
           ((post_receive n X \<P> \<parallel> A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n) \<parallel>
            A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<Q> x \<guillemotleft> suffix n)
           \<rightarrow>\<^sub>s\<lparr>\<tau>\<rparr>
           ((\<zero> \<parallel> \<zero> \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n) \<parallel>
           ((post_receive n X \<P> \<parallel> A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n) \<parallel>
-           post_receive 0 (post_receive n X \<box>)
-            (\<lambda>x. \<Q> x \<guillemotleft> suffix n \<parallel> A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<Q> x \<guillemotleft> suffix n))"
+           post_receive 0 X (\<lambda>x. \<Q> x \<guillemotleft> suffix n \<parallel> A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<Q> x \<guillemotleft> suffix n))"
           using communication
           by fastforce
         then have "
-          ((\<zero> \<parallel> (A \<guillemotleft> suffix n) \<triangleleft> post_receive n X \<box> \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n) \<parallel>
+          ((\<zero> \<parallel> (A \<guillemotleft> suffix n) \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n) \<parallel>
           ((post_receive n X \<P> \<parallel> A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n) \<parallel>
            A \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<Q> x \<guillemotleft> suffix n)
           \<rightarrow>\<^sub>s\<lparr>\<tau>\<rparr>
@@ -623,10 +603,7 @@ next
         "R = post_receive n X (\<lambda>x. \<Q> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x)"
         by (auto elim: transition_from_repeated_receive)
       with \<open>A \<triangleright>\<^sup>\<infinity> x. \<Q> x \<rightarrow>\<^sub>s\<lparr>IO \<eta> A' n X\<rparr> R\<close>
-      have "
-        A \<triangleright>\<^sup>\<infinity> x. \<Q> x
-        \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
-        post_receive n X (\<lambda>x. \<Q> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x)"
+      have "A \<triangleright>\<^sup>\<infinity> x. \<Q> x \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> post_receive n X (\<lambda>x. \<Q> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x)"
         by (simp only:)
       then have "
         A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x
