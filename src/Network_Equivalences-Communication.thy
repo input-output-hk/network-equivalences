@@ -98,8 +98,10 @@ private lemma post_receive_from_split_repeated_receive:
   using parallel_associativity [symmetric] .
 
 lemma repeated_receive_split:
-  assumes "P' \<sim>\<^sub>s \<zero>" and "Q' \<sim>\<^sub>s \<zero>"
-    and "\<And>n X. post_receive n X \<P> \<rightarrow>\<^sub>s\<lparr>\<tau>\<rparr> P'" and "\<And>n X. post_receive n X \<Q> \<rightarrow>\<^sub>s\<lparr>\<tau>\<rparr> Q'"
+  assumes
+    "P' \<sim>\<^sub>s \<zero>" and "Q' \<sim>\<^sub>s \<zero>"
+  and
+    "\<And>n X. post_receive n X \<P> \<rightarrow>\<^sub>s\<lparr>\<tau>\<rparr> P'" and "\<And>n X. post_receive n X \<Q> \<rightarrow>\<^sub>s\<lparr>\<tau>\<rparr> Q'"
   shows "\<currency>\<^sup>+ A \<parallel> A \<triangleright>\<^sup>\<infinity> x. (\<P> x \<parallel> \<Q> x) \<approx>\<^sub>s \<currency>\<^sup>+ A \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x"
 unfolding synchronous.weak_bisimilarity_is_mixed_bisimilarity
 proof (coinduction rule: synchronous.mixed.up_to_rule [where \<F> = "[\<sim>\<^sub>s] \<frown> \<M> \<frown> [\<sim>\<^sub>s]"])
