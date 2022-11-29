@@ -1067,37 +1067,31 @@ proof (coinduction rule: synchronous.mixed.up_to_rule [where \<F> = "[\<sim>\<^s
         then have "
           post_receive n X (\<lambda>x. (B \<triangleleft> \<box> x \<parallel> \<zero>) \<parallel> A \<rightarrow> B) \<parallel> (B \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n
           =
-          ((B \<guillemotleft> suffix n \<triangleleft> post_receive n X \<box> \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n) \<parallel>
-          B \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n"
+          ((B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n) \<parallel> B \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n"
           unfolding post_receive_after_send and post_receive_def and adapted_after_repeated_receive
-          by (simp only:)
+          by (transfer, simp)
         moreover have "
-          ((B \<guillemotleft> suffix n \<triangleleft> post_receive n X \<box> \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n) \<parallel>
-          B \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n
+          ((B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n) \<parallel> B \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n
           \<rightarrow>\<^sub>s\<lparr>\<tau>\<rparr>
-          ((\<zero> \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n) \<parallel>
-          (post_receive n X \<P> \<parallel> B \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n)"
+          ((\<zero> \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n) \<parallel> (post_receive n X \<P> \<parallel> B \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n)"
         proof -
           have "
-            ((B \<guillemotleft> suffix n \<triangleleft> post_receive n X \<box> \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n)
-            \<rightarrow>\<^sub>s\<lparr>B \<guillemotleft> suffix n \<triangleleft> \<star>\<^bsup>0\<^esup> post_receive n X \<box>\<rparr>
+            ((B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n)
+            \<rightarrow>\<^sub>s\<lparr>B \<guillemotleft> suffix n \<triangleleft> \<star>\<^bsup>0\<^esup> X\<rparr>
             ((\<zero> \<parallel> \<zero> \<guillemotleft> suffix 0) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n \<guillemotleft> suffix 0)"
             by (intro sending parallel_left_io)
           moreover
           have "
             B \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n
-            \<rightarrow>\<^sub>s\<lparr>B \<guillemotleft> suffix n \<triangleright> \<star>\<^bsup>0\<^esup> post_receive n X \<box>\<rparr>
-            post_receive 0 (post_receive n X \<box>)
-            (\<lambda>x. \<P> x \<guillemotleft> suffix n \<parallel> B \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n)"
+            \<rightarrow>\<^sub>s\<lparr>B \<guillemotleft> suffix n \<triangleright> \<star>\<^bsup>0\<^esup> X\<rparr>
+            post_receive 0 X (\<lambda>x. \<P> x \<guillemotleft> suffix n \<parallel> B \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n)"
             using receiving
             by (subst repeated_receive_proper_def)
           ultimately have "
-            (((B \<guillemotleft> suffix n \<triangleleft> post_receive n X \<box> \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n)) \<parallel>
-            B \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n
+            (((B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n)) \<parallel> B \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n
             \<rightarrow>\<^sub>s\<lparr>\<tau>\<rparr>
             ((\<zero> \<parallel> \<zero> \<guillemotleft> suffix 0) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n \<guillemotleft> suffix 0) \<parallel>
-            post_receive 0 (post_receive n X \<box>)
-              (\<lambda>x. \<P> x \<guillemotleft> suffix n \<parallel> B \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n)"
+            post_receive 0 X (\<lambda>x. \<P> x \<guillemotleft> suffix n \<parallel> B \<guillemotleft> suffix n \<triangleright>\<^sup>\<infinity> x. \<P> x \<guillemotleft> suffix n)"
             using communication
             by fastforce
           then show ?thesis
