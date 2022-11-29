@@ -13,6 +13,32 @@ lemma adapted_after_distributor:
   shows "(A \<Rightarrow> Bs) \<guillemotleft> \<E> = A \<guillemotleft> \<E> \<Rightarrow> map (\<lambda>B. B \<guillemotleft> \<E>) Bs"
   sorry
 
+lemma transition_from_distributor:
+  assumes "A \<Rightarrow> Bs \<rightarrow>\<^sub>s\<lparr>\<alpha>\<rparr> Q"
+  obtains n and X
+  where
+    "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X"
+  and
+    "Q = \<Prod>B \<leftarrow> Bs. B \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<Rightarrow> map (\<lambda>B. B \<guillemotleft> suffix n) Bs"
+proof -
+  obtain n X where "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X" and "Q = post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> Bs. B \<triangleleft> \<box> x \<parallel> A \<Rightarrow> Bs)"
+    unfolding distributor_def
+    using assms
+    by (fastforce elim: transition_from_repeated_receive)
+  moreover have "post_receive n X (\<lambda>x. B \<triangleleft> \<box> x) = B \<guillemotleft> suffix n \<triangleleft> X" for B
+    unfolding post_receive_after_send and post_receive_def
+    by (transfer, simp)
+  then have "post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> Bs. B \<triangleleft> \<box> x) = \<Prod>B \<leftarrow> Bs. B \<guillemotleft> suffix n \<triangleleft> X"
+    by
+      (
+        induction Bs,
+        unfold general_parallel.simps post_receive_after_parallel post_receive_after_stop
+      ) simp_all
+  ultimately show ?thesis
+    unfolding post_receive_after_parallel and post_receive_def and adapted_after_distributor
+    by (simp only: that)
+qed
+
 lemma distributor_idempotency [thorn_simps]:
   shows "A \<Rightarrow> Bs \<parallel> A \<Rightarrow> Bs \<sim>\<^sub>s A \<Rightarrow> Bs"
   unfolding distributor_def
@@ -62,6 +88,13 @@ lemma adapted_after_duplication:
   shows "\<currency>\<^sup>+ A \<guillemotleft> \<E> = \<currency>\<^sup>+ (A \<guillemotleft> \<E>)"
   by (simp del: distributor_def add: adapted_after_distributor)
 
+lemma transition_from_duplication:
+  assumes "\<currency>\<^sup>+ A \<rightarrow>\<^sub>s\<lparr>\<alpha>\<rparr> Q"
+  obtains n and X
+  where "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X" and "Q = (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ (A \<guillemotleft> suffix n)"
+  using assms unfolding duplication_def
+  by (fastforce elim: transition_from_distributor)
+
 lemma duplication_idempotency [thorn_simps]:
   shows "\<currency>\<^sup>+ A \<parallel> \<currency>\<^sup>+ A \<sim>\<^sub>s \<currency>\<^sup>+ A"
   unfolding duplication_def
@@ -79,22 +112,22 @@ lemma inner_duplication_redundancy:
 
 context begin
 
-private lemma post_receive_from_unsplit_repeated_receive:
+private lemma double_send_unsplit_repeated_receive_rearrangement:
   shows "
-    (post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> [A, A]. B \<triangleleft> \<box> x) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n) \<parallel>
+    ((A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ (A \<guillemotleft> suffix n)) \<parallel>
     (A \<triangleright>\<^sup>\<infinity> x. (\<P> x \<parallel> \<Q> x)) \<guillemotleft> suffix n
     \<sim>\<^sub>s
-    post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> [A, A]. B \<triangleleft> \<box> x) \<parallel> (\<currency>\<^sup>+ A \<parallel> A \<triangleright>\<^sup>\<infinity> x. (\<P> x \<parallel> \<Q> x)) \<guillemotleft> suffix n"
-  unfolding adapted_after_parallel
+    (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (\<currency>\<^sup>+ A \<parallel> A \<triangleright>\<^sup>\<infinity> x. (\<P> x \<parallel> \<Q> x)) \<guillemotleft> suffix n"
+  unfolding adapted_after_parallel and adapted_after_duplication
   using parallel_associativity .
 
-private lemma post_receive_from_split_repeated_receive:
+private lemma double_send_split_repeated_receive_rearrangement:
   shows "
-    post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> [A, A]. B \<triangleleft> \<box> x) \<parallel> (\<currency>\<^sup>+ A \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x)) \<guillemotleft> suffix n
+    (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (\<currency>\<^sup>+ A \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x)) \<guillemotleft> suffix n
     \<sim>\<^sub>s
-    (post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> [A, A]. B \<triangleleft> \<box> x) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n) \<parallel>
+    ((A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ (A \<guillemotleft> suffix n)) \<parallel>
     (A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x) \<guillemotleft> suffix n"
-  unfolding adapted_after_parallel
+  unfolding adapted_after_parallel and adapted_after_duplication
   using parallel_associativity [symmetric] .
 
 lemma repeated_receive_split:
@@ -115,15 +148,16 @@ proof (coinduction rule: synchronous.mixed.up_to_rule [where \<F> = "[\<sim>\<^s
     and
       "A' = A"
     and
-      "Q = post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> [A, A]. B \<triangleleft> \<box> x \<parallel> \<currency>\<^sup>+ A)"
-      by (auto elim: transition_from_repeated_receive)
+      "Q = (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ (A \<guillemotleft> suffix n)"
+      by (blast elim: transition_from_duplication)+
     with \<open>\<currency>\<^sup>+ A \<rightarrow>\<^sub>s\<lparr>IO \<eta> A' n X\<rparr> Q\<close>
-    have "\<currency>\<^sup>+ A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> [A, A]. B \<triangleleft> \<box> x \<parallel> \<currency>\<^sup>+ A)"
+    have "\<currency>\<^sup>+ A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ (A \<guillemotleft> suffix n)"
       by (simp only:)
     then have "
       \<currency>\<^sup>+ A \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x
       \<Rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
-      post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> [A, A]. B \<triangleleft> \<box> x \<parallel> \<currency>\<^sup>+ A) \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x) \<guillemotleft> suffix n"
+      ((A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ (A \<guillemotleft> suffix n)) \<parallel>
+      (A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x) \<guillemotleft> suffix n"
       by
         (intro
           synchronous_transition.parallel_left_io
@@ -131,13 +165,17 @@ proof (coinduction rule: synchronous.mixed.up_to_rule [where \<F> = "[\<sim>\<^s
         )
     then show ?thesis
       unfolding
-        post_receive_after_parallel
-      and
         \<open>\<alpha> = IO \<eta> A' n X\<close> and \<open>S = Q \<parallel> (A \<triangleright>\<^sup>\<infinity> x. (\<P> x \<parallel> \<Q> x)) \<guillemotleft> suffix n\<close>
       and
-        \<open>\<eta> = Receiving\<close> and \<open>A' = A\<close> and \<open>Q = post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> [A, A]. B \<triangleleft> \<box> x \<parallel> \<currency>\<^sup>+ A)\<close>
+        \<open>\<eta> = Receiving\<close>
+      and
+        \<open>A' = A\<close>
+      and
+        \<open>Q = (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ (A \<guillemotleft> suffix n)\<close>
       using
-        post_receive_from_unsplit_repeated_receive and post_receive_from_split_repeated_receive
+        double_send_unsplit_repeated_receive_rearrangement
+      and
+        double_send_split_repeated_receive_rearrangement
       and
         composition_in_universe
           [OF suffix_adapted_mutation_in_universe parallel_mutation_in_universe]
@@ -424,15 +462,16 @@ next
     and
       "A' = A"
     and
-      "Q = post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> [A, A]. B \<triangleleft> \<box> x \<parallel> \<currency>\<^sup>+ A)"
-      by (auto elim: transition_from_repeated_receive)
+      "Q = (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ (A \<guillemotleft> suffix n)"
+      by (blast elim: transition_from_duplication)+
     with \<open>\<currency>\<^sup>+ A \<rightarrow>\<^sub>s\<lparr>IO \<eta> A' n X\<rparr> Q\<close>
-    have "\<currency>\<^sup>+ A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> [A, A]. B \<triangleleft> \<box> x \<parallel> \<currency>\<^sup>+ A)"
+    have "\<currency>\<^sup>+ A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ (A \<guillemotleft> suffix n)"
       by (simp only:)
     then have "
       \<currency>\<^sup>+ A \<parallel> A \<triangleright>\<^sup>\<infinity> x. (\<P> x \<parallel> \<Q> x)
       \<Rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
-      post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> [A, A]. B \<triangleleft> \<box> x \<parallel> \<currency>\<^sup>+ A) \<parallel> (A \<triangleright>\<^sup>\<infinity> x. (\<P> x \<parallel> \<Q> x)) \<guillemotleft> suffix n"
+      ((A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ (A \<guillemotleft> suffix n)) \<parallel>
+      (A \<triangleright>\<^sup>\<infinity> x. (\<P> x \<parallel> \<Q> x)) \<guillemotleft> suffix n"
       by
         (intro
           synchronous_transition.parallel_left_io
@@ -444,9 +483,15 @@ next
       and
         \<open>\<alpha> = IO \<eta> A' n X\<close> and \<open>S = Q \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x) \<guillemotleft> suffix n\<close>
       and
-        \<open>\<eta> = Receiving\<close> and \<open>A' = A\<close> and \<open>Q = post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> [A, A]. B \<triangleleft> \<box> x \<parallel> \<currency>\<^sup>+ A)\<close>
+        \<open>\<eta> = Receiving\<close>
+      and
+        \<open>A' = A\<close>
+      and
+        \<open>Q = (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ (A \<guillemotleft> suffix n)\<close>
       using
-        post_receive_from_unsplit_repeated_receive and post_receive_from_split_repeated_receive
+        double_send_unsplit_repeated_receive_rearrangement
+      and
+        double_send_split_repeated_receive_rearrangement
       and
         composition_in_universe
           [OF suffix_adapted_mutation_in_universe parallel_mutation_in_universe]
