@@ -864,6 +864,17 @@ lemma adapted_after_unidirectional_bridge:
   shows "(A \<rightarrow> B) \<guillemotleft> \<E> = A \<guillemotleft> \<E> \<rightarrow> B \<guillemotleft> \<E>"
   by (simp del: distributor_def add: adapted_after_distributor)
 
+lemma transition_from_unidirectional_bridge:
+  assumes "A \<rightarrow> B \<rightarrow>\<^sub>s\<lparr>\<alpha>\<rparr> Q"
+  obtains n and X
+  where
+    "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X"
+  and
+    "Q = (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> A \<guillemotleft> suffix n \<rightarrow> B \<guillemotleft> suffix n"
+  using assms
+  unfolding unidirectional_bridge_def
+  by (fastforce elim: transition_from_distributor)
+
 lemma unidirectional_bridge_idempotency [thorn_simps]:
   shows "A \<rightarrow> B \<parallel> A \<rightarrow> B \<sim>\<^sub>s A \<rightarrow> B"
   unfolding unidirectional_bridge_def
@@ -881,22 +892,14 @@ lemma inner_unidirectional_bridge_redundancy:
 
 context begin
 
-private lemma post_receive_unfolded_bridge_pullout:
+private lemma adapted_unfolded_bridge_pullout:
   shows "
-    post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> [B]. B \<triangleleft> \<box> x \<parallel> A \<rightarrow> B) \<parallel> R \<guillemotleft> suffix n
+    ((B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> A \<guillemotleft> suffix n \<rightarrow> B \<guillemotleft> suffix n) \<parallel> R \<guillemotleft> suffix n
     \<sim>\<^sub>s
-    post_receive n X (\<lambda>x. B \<triangleleft> \<box> x) \<parallel> (A \<rightarrow> B \<parallel> R) \<guillemotleft> suffix n"
-    (is "?S \<sim>\<^sub>s ?T")
-proof -
-  have "?S = ((post_receive n X (\<lambda>x. B \<triangleleft> \<box> x) \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n) \<parallel> R \<guillemotleft> suffix n"
-    unfolding general_parallel.simps and post_receive_after_parallel
-      and post_receive_after_stop and post_receive_def ..
-  also have "\<dots> \<sim>\<^sub>s ?T"
-    unfolding adapted_after_parallel
-    using thorn_simps
-    by equivalence
-  finally show ?thesis .
-qed
+    ((B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>)) \<parallel> (A \<rightarrow> B \<parallel> R) \<guillemotleft> suffix n"
+  unfolding adapted_after_parallel and adapted_after_unidirectional_bridge
+  using thorn_simps
+  by equivalence
 
 lemma repeated_receive_shortcut_redundancy:
   shows "A \<rightarrow> B \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x \<approx>\<^sub>s A \<rightarrow> B \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x"
@@ -907,7 +910,7 @@ proof (coinduction rule: synchronous.mixed.up_to_rule [where \<F> = "[\<sim>\<^s
   proof cases
     case (communication \<eta> \<mu> A' n X P Q)
     from \<open>A \<rightarrow> B \<rightarrow>\<^sub>s\<lparr>IO \<eta> A' n X\<rparr> P\<close> have "\<eta> = Receiving"
-      by (fastforce elim: transition_from_repeated_receive)
+      by (fastforce elim: transition_from_unidirectional_bridge)
     moreover
     from \<open>B \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x \<rightarrow>\<^sub>s\<lparr>IO \<mu> A' n X\<rparr> Q\<close> have "\<mu> = Receiving"
       by (cases, auto elim: transition_from_repeated_receive)
@@ -916,8 +919,7 @@ proof (coinduction rule: synchronous.mixed.up_to_rule [where \<F> = "[\<sim>\<^s
   next
     case (parallel_left_communication P)
     then show ?thesis
-      unfolding distributor_def and unidirectional_bridge_def
-      by (fastforce elim: transition_from_repeated_receive)
+      by (blast elim: transition_from_unidirectional_bridge)
   next
     case (parallel_right_communication Q)
     from \<open>B \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x \<rightarrow>\<^sub>s\<lparr>\<tau>\<rparr> Q\<close> show ?thesis
@@ -930,14 +932,15 @@ proof (coinduction rule: synchronous.mixed.up_to_rule [where \<F> = "[\<sim>\<^s
     and
       "A' = A"
     and
-      "P = post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> [B]. B \<triangleleft> \<box> x \<parallel> A \<rightarrow> B)"
-      unfolding distributor_def and unidirectional_bridge_def
-      by (auto elim: transition_from_repeated_receive)
+      "P = (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> A \<guillemotleft> suffix n \<rightarrow> B \<guillemotleft> suffix n"
+      by (blast elim: transition_from_unidirectional_bridge)+
     with \<open>A \<rightarrow> B \<rightarrow>\<^sub>s\<lparr>IO \<eta> A' n X\<rparr> P\<close>
-    have "A \<rightarrow> B \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> [B]. B \<triangleleft> \<box> x \<parallel> A \<rightarrow> B)"
+    have "A \<rightarrow> B \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> A \<guillemotleft> suffix n \<rightarrow> B \<guillemotleft> suffix n"
       by (simp only:)
     then have "
-      A \<rightarrow> B \<parallel> R \<Rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> [B]. B \<triangleleft> \<box> x \<parallel> A \<rightarrow> B) \<parallel> R \<guillemotleft> suffix n"
+      A \<rightarrow> B \<parallel> R
+      \<Rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
+      ((B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> A \<guillemotleft> suffix n \<rightarrow> B \<guillemotleft> suffix n) \<parallel> R \<guillemotleft> suffix n"
       for R
       by
         (intro
@@ -948,12 +951,12 @@ proof (coinduction rule: synchronous.mixed.up_to_rule [where \<F> = "[\<sim>\<^s
       unfolding
         \<open>\<alpha> = IO \<eta> A' n X\<close> and \<open>S = P \<parallel> (B \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n\<close>
       and
-        \<open>\<eta> = Receiving\<close> and \<open>A' = A\<close> and \<open>P = post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> [B]. B \<triangleleft> \<box> x \<parallel> A \<rightarrow> B)\<close>
+        \<open>\<eta> = Receiving\<close> and \<open>A' = A\<close> and \<open>P = (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> A \<guillemotleft> suffix n \<rightarrow> B \<guillemotleft> suffix n\<close>
       using
-        post_receive_unfolded_bridge_pullout and post_receive_unfolded_bridge_pullout [symmetric]
-      and
         composition_in_universe
           [OF suffix_adapted_mutation_in_universe parallel_mutation_in_universe]
+      and
+        adapted_unfolded_bridge_pullout and adapted_unfolded_bridge_pullout [symmetric]
       by (intro exI conjI, use in assumption) (fastforce intro: rev_bexI)
   next
     case (parallel_right_io \<eta> C n X Q)
@@ -1132,16 +1135,15 @@ next
     and
       "A' = A"
     and
-      "P = post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> [B]. B \<triangleleft> \<box> x \<parallel> A \<rightarrow> B)"
-      unfolding distributor_def and unidirectional_bridge_def
-      by (auto elim: transition_from_repeated_receive)
+      "P = (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> A \<guillemotleft> suffix n \<rightarrow> B \<guillemotleft> suffix n"
+      by (blast elim: transition_from_unidirectional_bridge)+
     with \<open>A \<rightarrow> B \<rightarrow>\<^sub>s\<lparr>IO \<eta> A' n X\<rparr> P\<close>
-    have "A \<rightarrow> B \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> [B]. B \<triangleleft> \<box> x \<parallel> A \<rightarrow> B)"
+    have "A \<rightarrow> B \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> A \<guillemotleft> suffix n \<rightarrow> B \<guillemotleft> suffix n"
       by (simp only:)
     then have "
       A \<rightarrow> B \<parallel> R
       \<Rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
-      post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> [B]. B \<triangleleft> \<box> x \<parallel> A \<rightarrow> B) \<parallel> R \<guillemotleft> suffix n"
+      ((B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> A \<guillemotleft> suffix n \<rightarrow> B \<guillemotleft> suffix n) \<parallel> R \<guillemotleft> suffix n"
       for R
       by
         (intro
@@ -1152,9 +1154,9 @@ next
       unfolding
         \<open>\<alpha> = IO \<eta> A' n X\<close> and \<open>S = P \<parallel> (B \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n\<close>
       and
-        \<open>\<eta> = Receiving\<close> and \<open>A' = A\<close> and \<open>P = post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> [B]. B \<triangleleft> \<box> x \<parallel> A \<rightarrow> B)\<close>
+        \<open>\<eta> = Receiving\<close> and \<open>A' = A\<close> and \<open>P = (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> A \<guillemotleft> suffix n \<rightarrow> B \<guillemotleft> suffix n\<close>
       using
-        post_receive_unfolded_bridge_pullout and post_receive_unfolded_bridge_pullout [symmetric]
+        adapted_unfolded_bridge_pullout and adapted_unfolded_bridge_pullout [symmetric]
       and
         composition_in_universe
           [OF suffix_adapted_mutation_in_universe parallel_mutation_in_universe]
