@@ -92,9 +92,14 @@ lemma adapted_after_duplication:
 lemma transition_from_duplication:
   assumes "\<currency>\<^sup>+ A \<rightarrow>\<^sub>s\<lparr>\<alpha>\<rparr> Q"
   obtains n and X
-  where "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X" and "Q = (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ (A \<guillemotleft> suffix n)"
-  using assms unfolding duplication_def
-  by (fastforce elim: transition_from_distributor)
+  where "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X" and "Q = (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
+  using assms
+  by
+    (fastforce
+      elim: transition_from_distributor
+      simp del: distributor_def
+      simp add: adapted_after_distributor
+    )
 
 lemma duplication_idempotency [thorn_simps]:
   shows "\<currency>\<^sup>+ A \<parallel> \<currency>\<^sup>+ A \<sim>\<^sub>s \<currency>\<^sup>+ A"
@@ -115,20 +120,19 @@ context begin
 
 private lemma double_send_unsplit_repeated_receive_rearrangement:
   shows "
-    ((A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ (A \<guillemotleft> suffix n)) \<parallel>
-    (A \<triangleright>\<^sup>\<infinity> x. (\<P> x \<parallel> \<Q> x)) \<guillemotleft> suffix n
+    ((A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n) \<parallel> (A \<triangleright>\<^sup>\<infinity> x. (\<P> x \<parallel> \<Q> x)) \<guillemotleft> suffix n
     \<sim>\<^sub>s
     (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (\<currency>\<^sup>+ A \<parallel> A \<triangleright>\<^sup>\<infinity> x. (\<P> x \<parallel> \<Q> x)) \<guillemotleft> suffix n"
-  unfolding adapted_after_parallel and adapted_after_duplication
+  unfolding adapted_after_parallel
   using parallel_associativity .
 
 private lemma double_send_split_repeated_receive_rearrangement:
   shows "
     (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (\<currency>\<^sup>+ A \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x)) \<guillemotleft> suffix n
     \<sim>\<^sub>s
-    ((A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ (A \<guillemotleft> suffix n)) \<parallel>
+    ((A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n) \<parallel>
     (A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x) \<guillemotleft> suffix n"
-  unfolding adapted_after_parallel and adapted_after_duplication
+  unfolding adapted_after_parallel
   using parallel_associativity [symmetric] .
 
 lemma repeated_receive_split:
@@ -149,15 +153,15 @@ proof (coinduction rule: synchronous.mixed.up_to_rule [where \<F> = "[\<sim>\<^s
     and
       "A' = A"
     and
-      "Q = (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ (A \<guillemotleft> suffix n)"
+      "Q = (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
       by (blast elim: transition_from_duplication)+
     with \<open>\<currency>\<^sup>+ A \<rightarrow>\<^sub>s\<lparr>IO \<eta> A' n X\<rparr> Q\<close>
-    have "\<currency>\<^sup>+ A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ (A \<guillemotleft> suffix n)"
+    have "\<currency>\<^sup>+ A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
       by (simp only:)
     then have "
       \<currency>\<^sup>+ A \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x
       \<Rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
-      ((A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ (A \<guillemotleft> suffix n)) \<parallel>
+      ((A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n) \<parallel>
       (A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x) \<guillemotleft> suffix n"
       by
         (intro
@@ -172,7 +176,7 @@ proof (coinduction rule: synchronous.mixed.up_to_rule [where \<F> = "[\<sim>\<^s
       and
         \<open>A' = A\<close>
       and
-        \<open>Q = (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ (A \<guillemotleft> suffix n)\<close>
+        \<open>Q = (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n\<close>
       using
         double_send_unsplit_repeated_receive_rearrangement
       and
@@ -443,15 +447,15 @@ next
     and
       "A' = A"
     and
-      "Q = (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ (A \<guillemotleft> suffix n)"
+      "Q = (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
       by (blast elim: transition_from_duplication)+
     with \<open>\<currency>\<^sup>+ A \<rightarrow>\<^sub>s\<lparr>IO \<eta> A' n X\<rparr> Q\<close>
-    have "\<currency>\<^sup>+ A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ (A \<guillemotleft> suffix n)"
+    have "\<currency>\<^sup>+ A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
       by (simp only:)
     then have "
       \<currency>\<^sup>+ A \<parallel> A \<triangleright>\<^sup>\<infinity> x. (\<P> x \<parallel> \<Q> x)
       \<Rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
-      ((A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ (A \<guillemotleft> suffix n)) \<parallel>
+      ((A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n) \<parallel>
       (A \<triangleright>\<^sup>\<infinity> x. (\<P> x \<parallel> \<Q> x)) \<guillemotleft> suffix n"
       by
         (intro
@@ -468,7 +472,7 @@ next
       and
         \<open>A' = A\<close>
       and
-        \<open>Q = (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ (A \<guillemotleft> suffix n)\<close>
+        \<open>Q = (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n\<close>
       using
         double_send_unsplit_repeated_receive_rearrangement
       and
@@ -844,10 +848,14 @@ lemma transition_from_unidirectional_bridge:
   where
     "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X"
   and
-    "Q = (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> A \<guillemotleft> suffix n \<rightarrow> B \<guillemotleft> suffix n"
+    "Q = (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n"
   using assms
-  unfolding unidirectional_bridge_def
-  by (fastforce elim: transition_from_distributor)
+  by
+    (fastforce
+      elim: transition_from_distributor
+      simp del: distributor_def
+      simp add: adapted_after_distributor
+    )
 
 lemma unidirectional_bridge_idempotency [thorn_simps]:
   shows "A \<rightarrow> B \<parallel> A \<rightarrow> B \<sim>\<^sub>s A \<rightarrow> B"
@@ -868,10 +876,10 @@ context begin
 
 private lemma adapted_unfolded_bridge_pullout:
   shows "
-    ((B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> A \<guillemotleft> suffix n \<rightarrow> B \<guillemotleft> suffix n) \<parallel> R \<guillemotleft> suffix n
+    ((B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n) \<parallel> R \<guillemotleft> suffix n
     \<sim>\<^sub>s
     ((B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>)) \<parallel> (A \<rightarrow> B \<parallel> R) \<guillemotleft> suffix n"
-  unfolding adapted_after_parallel and adapted_after_unidirectional_bridge
+  unfolding adapted_after_parallel
   using thorn_simps
   by equivalence
 
@@ -906,16 +914,13 @@ proof (coinduction rule: synchronous.mixed.up_to_rule [where \<F> = "[\<sim>\<^s
     and
       "A' = A"
     and
-      "P = (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> A \<guillemotleft> suffix n \<rightarrow> B \<guillemotleft> suffix n"
+      "P = (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n"
       by (blast elim: transition_from_unidirectional_bridge)+
     with \<open>A \<rightarrow> B \<rightarrow>\<^sub>s\<lparr>IO \<eta> A' n X\<rparr> P\<close>
-    have "A \<rightarrow> B \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> A \<guillemotleft> suffix n \<rightarrow> B \<guillemotleft> suffix n"
+    have "A \<rightarrow> B \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n"
       by (simp only:)
     then have "
-      A \<rightarrow> B \<parallel> R
-      \<Rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
-      ((B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> A \<guillemotleft> suffix n \<rightarrow> B \<guillemotleft> suffix n) \<parallel> R \<guillemotleft> suffix n"
-      for R
+      A \<rightarrow> B \<parallel> R \<Rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> ((B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n) \<parallel> R \<guillemotleft> suffix n" for R
       by
         (intro
           synchronous_transition.parallel_left_io
@@ -925,12 +930,14 @@ proof (coinduction rule: synchronous.mixed.up_to_rule [where \<F> = "[\<sim>\<^s
       unfolding
         \<open>\<alpha> = IO \<eta> A' n X\<close> and \<open>S = P \<parallel> (B \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n\<close>
       and
-        \<open>\<eta> = Receiving\<close> and \<open>A' = A\<close> and \<open>P = (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> A \<guillemotleft> suffix n \<rightarrow> B \<guillemotleft> suffix n\<close>
+        \<open>\<eta> = Receiving\<close> and \<open>A' = A\<close> and \<open>P = (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n\<close>
       using
         composition_in_universe
           [OF suffix_adapted_mutation_in_universe parallel_mutation_in_universe]
       and
-        adapted_unfolded_bridge_pullout and adapted_unfolded_bridge_pullout [symmetric]
+        adapted_unfolded_bridge_pullout
+      and
+        adapted_unfolded_bridge_pullout [symmetric]
       by (intro exI conjI, use in assumption) (fastforce intro: rev_bexI)
   next
     case (parallel_right_io \<eta> C n X Q)
@@ -1109,16 +1116,13 @@ next
     and
       "A' = A"
     and
-      "P = (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> A \<guillemotleft> suffix n \<rightarrow> B \<guillemotleft> suffix n"
+      "P = (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n"
       by (blast elim: transition_from_unidirectional_bridge)+
     with \<open>A \<rightarrow> B \<rightarrow>\<^sub>s\<lparr>IO \<eta> A' n X\<rparr> P\<close>
-    have "A \<rightarrow> B \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> A \<guillemotleft> suffix n \<rightarrow> B \<guillemotleft> suffix n"
+    have "A \<rightarrow> B \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n"
       by (simp only:)
     then have "
-      A \<rightarrow> B \<parallel> R
-      \<Rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
-      ((B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> A \<guillemotleft> suffix n \<rightarrow> B \<guillemotleft> suffix n) \<parallel> R \<guillemotleft> suffix n"
-      for R
+      A \<rightarrow> B \<parallel> R \<Rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> ((B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n) \<parallel> R \<guillemotleft> suffix n" for R
       by
         (intro
           synchronous_transition.parallel_left_io
@@ -1128,9 +1132,11 @@ next
       unfolding
         \<open>\<alpha> = IO \<eta> A' n X\<close> and \<open>S = P \<parallel> (B \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n\<close>
       and
-        \<open>\<eta> = Receiving\<close> and \<open>A' = A\<close> and \<open>P = (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> A \<guillemotleft> suffix n \<rightarrow> B \<guillemotleft> suffix n\<close>
+        \<open>\<eta> = Receiving\<close> and \<open>A' = A\<close> and \<open>P = (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n\<close>
       using
-        adapted_unfolded_bridge_pullout and adapted_unfolded_bridge_pullout [symmetric]
+        adapted_unfolded_bridge_pullout
+      and
+        adapted_unfolded_bridge_pullout [symmetric]
       and
         composition_in_universe
           [OF suffix_adapted_mutation_in_universe parallel_mutation_in_universe]
