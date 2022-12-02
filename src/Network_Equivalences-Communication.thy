@@ -21,7 +21,8 @@ lemma transition_from_distributor:
   and
     "Q = \<Prod>B \<leftarrow> Bs. B \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<Rightarrow> map (\<lambda>B. B \<guillemotleft> suffix n) Bs"
 proof -
-  obtain n X where "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X" and "Q = post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> Bs. B \<triangleleft> \<box> x \<parallel> A \<Rightarrow> Bs)"
+  obtain n and X
+  where "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X" and "Q = post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> Bs. B \<triangleleft> \<box> x) \<parallel> (A \<Rightarrow> Bs) \<guillemotleft> suffix n"
     unfolding distributor_def
     using assms
     by (fastforce elim: transition_from_repeated_receive)
@@ -188,18 +189,18 @@ proof (coinduction rule: synchronous.mixed.up_to_rule [where \<F> = "[\<sim>\<^s
     and
       "A' = A"
     and
-      "Q = post_receive n X (\<lambda>x. (\<P> x \<parallel> \<Q> x) \<parallel> A \<triangleright>\<^sup>\<infinity> x. (\<P> x \<parallel> \<Q> x))"
+      "Q = post_receive n X (\<lambda>x. \<P> x \<parallel> \<Q> x) \<parallel> (A \<triangleright>\<^sup>\<infinity> x. (\<P> x \<parallel> \<Q> x)) \<guillemotleft> suffix n"
       by (auto elim: transition_from_repeated_receive)
     with \<open>A \<triangleright>\<^sup>\<infinity> x. (\<P> x \<parallel> \<Q> x) \<rightarrow>\<^sub>s\<lparr>IO \<eta> A' n X\<rparr> Q\<close>
     have "
       A \<triangleright>\<^sup>\<infinity> x. (\<P> x \<parallel> \<Q> x)
       \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
-      post_receive n X (\<lambda>x. (\<P> x \<parallel> \<Q> x) \<parallel> A \<triangleright>\<^sup>\<infinity> x. (\<P> x \<parallel> \<Q> x))"
+      post_receive n X (\<lambda>x. \<P> x \<parallel> \<Q> x) \<parallel> (A \<triangleright>\<^sup>\<infinity> x. (\<P> x \<parallel> \<Q> x)) \<guillemotleft> suffix n"
       by (simp only:)
     then have "
       \<currency>\<^sup>+ A \<parallel> A \<triangleright>\<^sup>\<infinity> x. (\<P> x \<parallel> \<Q> x)
       \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
-      \<currency>\<^sup>+ A \<guillemotleft> suffix n \<parallel> post_receive n X (\<lambda>x. (\<P> x \<parallel> \<Q> x) \<parallel> A \<triangleright>\<^sup>\<infinity> x. (\<P> x \<parallel> \<Q> x))"
+      \<currency>\<^sup>+ A \<guillemotleft> suffix n \<parallel> post_receive n X (\<lambda>x. \<P> x \<parallel> \<Q> x) \<parallel> (A \<triangleright>\<^sup>\<infinity> x. (\<P> x \<parallel> \<Q> x)) \<guillemotleft> suffix n"
       by (fact synchronous_transition.parallel_right_io)
     moreover
     have "
@@ -408,7 +409,7 @@ proof (coinduction rule: synchronous.mixed.up_to_rule [where \<F> = "[\<sim>\<^s
       and
         \<open>A' = A\<close>
       and
-        \<open>Q = post_receive n X (\<lambda>x. (\<P> x \<parallel> \<Q> x) \<parallel> A \<triangleright>\<^sup>\<infinity> x. (\<P> x \<parallel> \<Q> x))\<close>
+        \<open>Q = post_receive n X (\<lambda>x. \<P> x \<parallel> \<Q> x) \<parallel> (A \<triangleright>\<^sup>\<infinity> x. (\<P> x \<parallel> \<Q> x)) \<guillemotleft> suffix n\<close>
       using
         composition_in_universe
           [OF suffix_adapted_mutation_in_universe parallel_mutation_in_universe]
@@ -487,44 +488,29 @@ next
       and
         "A' = A"
       and
-        "R = post_receive n X (\<lambda>x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x)"
+        "R = post_receive n X \<P> \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n"
         by (auto elim: transition_from_repeated_receive)
       with \<open>A \<triangleright>\<^sup>\<infinity> x. \<P> x \<rightarrow>\<^sub>s\<lparr>IO \<eta> A' n X\<rparr> R\<close>
-      have "
-        A \<triangleright>\<^sup>\<infinity> x. \<P> x
-        \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
-        post_receive n X (\<lambda>x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x)"
+      have "A \<triangleright>\<^sup>\<infinity> x. \<P> x \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> post_receive n X \<P> \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n"
         by (simp only:)
       then have "
         A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x
         \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
-        post_receive n X (\<lambda>x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<Q> x) \<guillemotleft> suffix n"
+        (post_receive n X \<P> \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n) \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<Q> x) \<guillemotleft> suffix n"
         by (fact synchronous_transition.parallel_left_io)
       then have "
         \<currency>\<^sup>+ A \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x
         \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
-        \<currency>\<^sup>+ A \<guillemotleft> suffix n \<parallel> post_receive n X (\<lambda>x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<Q> x) \<guillemotleft> suffix n"
+        \<currency>\<^sup>+ A \<guillemotleft> suffix n \<parallel> (post_receive n X \<P> \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n) \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<Q> x) \<guillemotleft> suffix n"
         by (fact synchronous_transition.parallel_right_io)
       moreover
       have "
         post_receive n X \<P> \<parallel> (\<currency>\<^sup>+ A \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x) \<guillemotleft> suffix n
         \<sim>\<^sub>s
-        \<currency>\<^sup>+ A \<guillemotleft> suffix n \<parallel> post_receive n X (\<lambda>x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<Q> x) \<guillemotleft> suffix n"
-      proof -
-        have "
-          post_receive n X \<P> \<parallel> (\<currency>\<^sup>+ A \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x) \<guillemotleft> suffix n
-          =
-          post_receive n X \<P> \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<Q> x) \<guillemotleft> suffix n"
-          unfolding adapted_after_parallel ..
-        also have "\<dots> \<sim>\<^sub>s
-          \<currency>\<^sup>+ A \<guillemotleft> suffix n \<parallel> (post_receive n X \<P> \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n) \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<Q> x) \<guillemotleft> suffix n"
-          using thorn_simps
-          by equivalence
-        also have "\<dots> =
-          \<currency>\<^sup>+ A \<guillemotleft> suffix n \<parallel> post_receive n X (\<lambda>x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<Q> x) \<guillemotleft> suffix n"
-          unfolding post_receive_after_parallel and post_receive_def ..
-        finally show ?thesis .
-      qed
+        \<currency>\<^sup>+ A \<guillemotleft> suffix n \<parallel> (post_receive n X \<P> \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n) \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<Q> x) \<guillemotleft> suffix n"
+        unfolding adapted_after_parallel
+        using thorn_simps
+        by equivalence
       moreover
       have "
         \<currency>\<^sup>+ A \<parallel> A \<triangleright>\<^sup>\<infinity> x. (\<P> x \<parallel> \<Q> x)
@@ -587,7 +573,7 @@ next
       and
         \<open>\<eta> = Receiving\<close> and \<open>A' = A\<close> and \<open>Q = R \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<Q> x) \<guillemotleft> suffix n\<close>
       and
-        \<open>R = post_receive n X (\<lambda>x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x)\<close>
+        \<open>R = post_receive n X \<P> \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n\<close>
       using
         composition_in_universe
           [OF suffix_adapted_mutation_in_universe parallel_mutation_in_universe]
@@ -600,41 +586,29 @@ next
       and
         "A' = A"
       and
-        "R = post_receive n X (\<lambda>x. \<Q> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x)"
+        "R = post_receive n X \<Q> \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<Q> x) \<guillemotleft> suffix n"
         by (auto elim: transition_from_repeated_receive)
       with \<open>A \<triangleright>\<^sup>\<infinity> x. \<Q> x \<rightarrow>\<^sub>s\<lparr>IO \<eta> A' n X\<rparr> R\<close>
-      have "A \<triangleright>\<^sup>\<infinity> x. \<Q> x \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> post_receive n X (\<lambda>x. \<Q> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x)"
+      have "A \<triangleright>\<^sup>\<infinity> x. \<Q> x \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> post_receive n X \<Q> \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<Q> x) \<guillemotleft> suffix n"
         by (simp only:)
       then have "
         A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x
         \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
-        (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n \<parallel> post_receive n X (\<lambda>x. \<Q> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x)"
+        (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n \<parallel> post_receive n X \<Q> \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<Q> x) \<guillemotleft> suffix n"
         by (fact synchronous_transition.parallel_right_io)
       then have "
         \<currency>\<^sup>+ A \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x
         \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
-        \<currency>\<^sup>+ A \<guillemotleft> suffix n \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n \<parallel> post_receive n X (\<lambda>x. \<Q> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x)"
+        \<currency>\<^sup>+ A \<guillemotleft> suffix n \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n \<parallel> post_receive n X \<Q> \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<Q> x) \<guillemotleft> suffix n"
         by (fact synchronous_transition.parallel_right_io)
       moreover
       have "
         post_receive n X \<Q> \<parallel> (\<currency>\<^sup>+ A \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x) \<guillemotleft> suffix n
         \<sim>\<^sub>s
-        \<currency>\<^sup>+ A \<guillemotleft> suffix n \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n \<parallel> post_receive n X (\<lambda>x. \<Q> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x)"
-      proof -
-        have "
-          post_receive n X \<Q> \<parallel> (\<currency>\<^sup>+ A \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x) \<guillemotleft> suffix n
-          =
-          post_receive n X \<Q> \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<Q> x) \<guillemotleft> suffix n"
-          unfolding adapted_after_parallel ..
-        also have "\<dots> \<sim>\<^sub>s
-          \<currency>\<^sup>+ A \<guillemotleft> suffix n  \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n \<parallel> (post_receive n X \<Q> \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<Q> x) \<guillemotleft> suffix n)"
-          using thorn_simps
-          by equivalence
-        also have "\<dots> =
-          \<currency>\<^sup>+ A \<guillemotleft> suffix n \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n \<parallel> post_receive n X (\<lambda>x. \<Q> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x)"
-          unfolding post_receive_after_parallel and post_receive_def ..
-        finally show ?thesis .
-      qed
+        \<currency>\<^sup>+ A \<guillemotleft> suffix n \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n \<parallel> post_receive n X \<Q> \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<Q> x) \<guillemotleft> suffix n"
+        unfolding adapted_after_parallel
+        using thorn_simps
+        by equivalence
       moreover
       have "
         \<currency>\<^sup>+ A \<parallel> A \<triangleright>\<^sup>\<infinity> x. (\<P> x \<parallel> \<Q> x)
@@ -697,7 +671,7 @@ next
       and
         \<open>\<eta> = Receiving\<close> and \<open>A' = A\<close> and \<open>Q = (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n \<parallel> R\<close>
       and
-        \<open>R = post_receive n X (\<lambda>x. \<Q> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<Q> x)\<close>
+        \<open>R = post_receive n X \<Q> \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<Q> x) \<guillemotleft> suffix n\<close>
       using
         composition_in_universe
           [OF suffix_adapted_mutation_in_universe parallel_mutation_in_universe]
@@ -969,34 +943,34 @@ proof (coinduction rule: synchronous.mixed.up_to_rule [where \<F> = "[\<sim>\<^s
       and
         "C = B"
       and
-        "R = post_receive n X (\<lambda>x. \<P> x \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x)"
+        "R = post_receive n X \<P> \<parallel> (B \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n"
         by (auto elim: transition_from_repeated_receive)
       with \<open>B \<triangleright>\<^sup>\<infinity> x. \<P> x \<rightarrow>\<^sub>s\<lparr>IO \<eta> C n X\<rparr> R\<close>
-      have B_transition: "B \<triangleright>\<^sup>\<infinity> x. \<P> x \<rightarrow>\<^sub>s\<lparr>B \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> post_receive n X (\<lambda>x. \<P> x \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x)"
+      have B_transition: "B \<triangleright>\<^sup>\<infinity> x. \<P> x \<rightarrow>\<^sub>s\<lparr>B \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> post_receive n X \<P> \<parallel> (B \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n"
         by (simp only:)
       then have "
         B \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x
         \<rightarrow>\<^sub>s\<lparr>B \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
-        post_receive n X (\<lambda>x. \<P> x \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x) \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n"
+        (post_receive n X \<P> \<parallel> (B \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n) \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n"
         by (fact synchronous_transition.parallel_left_io)
       then have "
         A \<rightarrow> B \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x
         \<rightarrow>\<^sub>s\<lparr>B \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
-        (A \<rightarrow> B) \<guillemotleft> suffix n \<parallel> post_receive n X (\<lambda>x. \<P> x \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x) \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n"
+        (A \<rightarrow> B) \<guillemotleft> suffix n \<parallel> (post_receive n X \<P> \<parallel> (B \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n) \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n"
         by (fact synchronous_transition.parallel_right_io)
       moreover
       have "
-        (A \<rightarrow> B) \<guillemotleft> suffix n \<parallel> post_receive n X (\<lambda>x. \<P> x \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x) \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n
+        (A \<rightarrow> B) \<guillemotleft> suffix n \<parallel> (post_receive n X \<P> \<parallel> (B \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n) \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n
         \<sim>\<^sub>s
         post_receive n X \<P> \<parallel> (A \<rightarrow> B \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n"
-        unfolding post_receive_after_parallel and adapted_after_parallel and post_receive_def
+        unfolding adapted_after_parallel
         using thorn_simps
         by equivalence
       moreover
       from B_transition have "
         A \<rightarrow> B \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x
         \<Rightarrow>\<^sub>s\<lparr>B \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
-        (A \<rightarrow> B) \<guillemotleft> suffix n \<parallel> post_receive n X (\<lambda>x. \<P> x \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x)"
+        (A \<rightarrow> B) \<guillemotleft> suffix n \<parallel> post_receive n X \<P> \<parallel> (B \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n"
         by
           (intro
             synchronous_transition.parallel_right_io
@@ -1006,8 +980,8 @@ proof (coinduction rule: synchronous.mixed.up_to_rule [where \<F> = "[\<sim>\<^s
       have "
         post_receive n X \<P> \<parallel> (A \<rightarrow> B \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n
         \<sim>\<^sub>s
-        (A \<rightarrow> B) \<guillemotleft> suffix n \<parallel> post_receive n X (\<lambda>x. \<P> x \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x)"
-        unfolding post_receive_after_parallel and adapted_after_parallel and post_receive_def
+        (A \<rightarrow> B) \<guillemotleft> suffix n \<parallel> post_receive n X \<P> \<parallel> (B \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n"
+        unfolding adapted_after_parallel
         using thorn_simps
         by equivalence
       ultimately show ?thesis
@@ -1016,7 +990,7 @@ proof (coinduction rule: synchronous.mixed.up_to_rule [where \<F> = "[\<sim>\<^s
         and
           \<open>\<eta> = Receiving\<close> and \<open>C = B\<close> and \<open>Q = R \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n\<close>
         and
-          \<open>R = post_receive n X (\<lambda>x. \<P> x \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x)\<close>
+          \<open>R = post_receive n X \<P> \<parallel> (B \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n\<close>
         using
           composition_in_universe
             [OF suffix_adapted_mutation_in_universe parallel_mutation_in_universe]
@@ -1029,22 +1003,22 @@ proof (coinduction rule: synchronous.mixed.up_to_rule [where \<F> = "[\<sim>\<^s
       and
         "C = A"
       and
-        "R = post_receive n X (\<lambda>x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x)"
+        "R = post_receive n X \<P> \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n"
         by (auto elim: transition_from_repeated_receive)
       with \<open>A \<triangleright>\<^sup>\<infinity> x. \<P> x \<rightarrow>\<^sub>s\<lparr>IO \<eta> C n X\<rparr> R\<close>
-      have A_transition: "A \<triangleright>\<^sup>\<infinity> x. \<P> x \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> post_receive n X (\<lambda>x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x)"
+      have A_transition: "A \<triangleright>\<^sup>\<infinity> x. \<P> x \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> post_receive n X \<P> \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n"
         by (simp only:)
       then have "
         A \<rightarrow> B \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x
         \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
-        (A \<rightarrow> B) \<guillemotleft> suffix n \<parallel> (B \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n \<parallel> post_receive n X (\<lambda>x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x)"
+        (A \<rightarrow> B) \<guillemotleft> suffix n \<parallel> (B \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n \<parallel> post_receive n X \<P> \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n"
         by (intro synchronous_transition.parallel_right_io)
       moreover
       have "
-        (A \<rightarrow> B) \<guillemotleft> suffix n \<parallel> (B \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n \<parallel> post_receive n X (\<lambda>x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x)
+        (A \<rightarrow> B) \<guillemotleft> suffix n \<parallel> (B \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n \<parallel> post_receive n X \<P> \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n
         \<sim>\<^sub>s
         post_receive n X \<P> \<parallel> (A \<rightarrow> B \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n"
-        unfolding post_receive_after_parallel and adapted_after_parallel and post_receive_def
+        unfolding adapted_after_parallel
         using thorn_simps
         by equivalence
       moreover
@@ -1117,7 +1091,7 @@ proof (coinduction rule: synchronous.mixed.up_to_rule [where \<F> = "[\<sim>\<^s
         and
           \<open>\<eta> = Receiving\<close> and \<open>C = A\<close> and \<open>Q = (B \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n \<parallel> R\<close>
         and
-          \<open>R = post_receive n X (\<lambda>x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x)\<close>
+          \<open>R = post_receive n X \<P> \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n\<close>
         using
           composition_in_universe
             [OF suffix_adapted_mutation_in_universe parallel_mutation_in_universe]
@@ -1169,29 +1143,29 @@ next
     and
       "B' = B"
     and
-      "Q = post_receive n X (\<lambda>x. \<P> x \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x)"
+      "Q = post_receive n X \<P> \<parallel> (B \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n"
       by (auto elim: transition_from_repeated_receive)
     with \<open>B \<triangleright>\<^sup>\<infinity> x. \<P> x \<rightarrow>\<^sub>s\<lparr>IO \<eta> B' n X\<rparr> Q\<close>
-    have B_transition: "B \<triangleright>\<^sup>\<infinity> x. \<P> x \<rightarrow>\<^sub>s\<lparr>B \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> post_receive n X (\<lambda>x. \<P> x \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x)"
+    have B_transition: "B \<triangleright>\<^sup>\<infinity> x. \<P> x \<rightarrow>\<^sub>s\<lparr>B \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> post_receive n X \<P> \<parallel> (B \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n"
       by (simp only:)
     then have "
       A \<rightarrow> B \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x
       \<rightarrow>\<^sub>s\<lparr>B \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
-      (A \<rightarrow> B) \<guillemotleft> suffix n \<parallel> post_receive n X (\<lambda>x. \<P> x \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x)"
+      (A \<rightarrow> B) \<guillemotleft> suffix n \<parallel> post_receive n X \<P> \<parallel> (B \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n"
       by (fact synchronous_transition.parallel_right_io)
     moreover
     have "
       post_receive n X \<P> \<parallel> (A \<rightarrow> B \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n
       \<sim>\<^sub>s
-      (A \<rightarrow> B) \<guillemotleft> suffix n \<parallel> post_receive n X (\<lambda>x. \<P> x \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x)"
-      unfolding post_receive_after_parallel and adapted_after_parallel and post_receive_def
+      (A \<rightarrow> B) \<guillemotleft> suffix n \<parallel> post_receive n X \<P> \<parallel> (B \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n"
+      unfolding adapted_after_parallel
       using thorn_simps
       by equivalence
     moreover
     from B_transition have "
       A \<rightarrow> B \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x
       \<Rightarrow>\<^sub>s\<lparr>B \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
-      (A \<rightarrow> B) \<guillemotleft> suffix n \<parallel> post_receive n X (\<lambda>x. \<P> x \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x) \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n"
+      (A \<rightarrow> B) \<guillemotleft> suffix n \<parallel> (post_receive n X \<P> \<parallel> (B \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n) \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n"
       by
         (intro
           synchronous_transition.parallel_right_io
@@ -1200,17 +1174,17 @@ next
         )
     moreover
     have "
-      (A \<rightarrow> B) \<guillemotleft> suffix n \<parallel> post_receive n X (\<lambda>x. \<P> x \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x) \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n
+      (A \<rightarrow> B) \<guillemotleft> suffix n \<parallel> (post_receive n X \<P> \<parallel> (B \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n) \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n
       \<sim>\<^sub>s
       post_receive n X \<P> \<parallel> (A \<rightarrow> B \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x \<parallel> A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n"
-      unfolding post_receive_after_parallel and adapted_after_parallel and post_receive_def
+      unfolding adapted_after_parallel
       using thorn_simps
       by equivalence
     ultimately show ?thesis
       unfolding
         \<open>\<alpha> = IO \<eta> B' n X\<close> and \<open>S = (A \<rightarrow> B) \<guillemotleft> suffix n \<parallel> Q\<close>
       and
-        \<open>\<eta> = Receiving\<close> and \<open>B' = B\<close> and \<open>Q = post_receive n X (\<lambda>x. \<P> x \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x)\<close>
+        \<open>\<eta> = Receiving\<close> and \<open>B' = B\<close> and \<open>Q = post_receive n X \<P> \<parallel> (B \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n\<close>
       using
         composition_in_universe
           [OF suffix_adapted_mutation_in_universe parallel_mutation_in_universe]
