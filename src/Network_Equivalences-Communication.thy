@@ -16,13 +16,13 @@ lemma adapted_after_distributor:
 lemma transition_from_distributor:
   assumes "A \<Rightarrow> Bs \<rightarrow>\<^sub>s\<lparr>\<alpha>\<rparr> Q"
   obtains n and X
-  where
-    "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X"
-  and
-    "Q = \<Prod>B \<leftarrow> Bs. B \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<Rightarrow> map (\<lambda>B. B \<guillemotleft> suffix n) Bs"
+    where
+      "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X"
+    and
+      "Q = \<Prod>B \<leftarrow> Bs. B \<guillemotleft> suffix n \<triangleleft> X \<parallel> (A \<Rightarrow> Bs) \<guillemotleft> suffix n"
 proof -
   obtain n and X
-  where "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X" and "Q = post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> Bs. B \<triangleleft> \<box> x) \<parallel> (A \<Rightarrow> Bs) \<guillemotleft> suffix n"
+    where "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X" and "Q = post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> Bs. B \<triangleleft> \<box> x) \<parallel> (A \<Rightarrow> Bs) \<guillemotleft> suffix n"
     unfolding distributor_def
     using assms
     by (fastforce elim: transition_from_repeated_receive)
@@ -36,7 +36,6 @@ proof -
         unfold general_parallel.simps post_receive_after_parallel post_receive_after_stop
       ) simp_all
   ultimately show ?thesis
-    unfolding post_receive_after_parallel and post_receive_def and adapted_after_distributor
     by (simp only: that)
 qed
 
@@ -92,14 +91,12 @@ lemma adapted_after_duplication:
 lemma transition_from_duplication:
   assumes "\<currency>\<^sup>+ A \<rightarrow>\<^sub>s\<lparr>\<alpha>\<rparr> Q"
   obtains n and X
-  where "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X" and "Q = (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
-  using assms
-  by
-    (fastforce
-      elim: transition_from_distributor
-      simp del: distributor_def
-      simp add: adapted_after_distributor
-    )
+    where
+      "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X"
+    and
+      "Q = (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
+  using assms unfolding duplication_def
+  by (fastforce elim: transition_from_distributor)
 
 lemma duplication_idempotency [thorn_simps]:
   shows "\<currency>\<^sup>+ A \<parallel> \<currency>\<^sup>+ A \<sim>\<^sub>s \<currency>\<^sup>+ A"
@@ -845,17 +842,12 @@ lemma adapted_after_unidirectional_bridge:
 lemma transition_from_unidirectional_bridge:
   assumes "A \<rightarrow> B \<rightarrow>\<^sub>s\<lparr>\<alpha>\<rparr> Q"
   obtains n and X
-  where
-    "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X"
-  and
-    "Q = (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n"
-  using assms
-  by
-    (fastforce
-      elim: transition_from_distributor
-      simp del: distributor_def
-      simp add: adapted_after_distributor
-    )
+    where
+      "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X"
+    and
+      "Q = (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n"
+  using assms unfolding unidirectional_bridge_def
+  by (fastforce elim: transition_from_distributor)
 
 lemma unidirectional_bridge_idempotency [thorn_simps]:
   shows "A \<rightarrow> B \<parallel> A \<rightarrow> B \<sim>\<^sub>s A \<rightarrow> B"
