@@ -569,16 +569,16 @@ next
         finally show ?thesis .
       qed
       ultimately show ?thesis
-      unfolding
-        \<open>\<alpha> = IO \<eta> A' n X\<close> and \<open>S = \<currency>\<^sup>+ A \<guillemotleft> suffix n \<parallel> Q\<close>
-      and
-        \<open>\<eta> = Receiving\<close> and \<open>A' = A\<close> and \<open>Q = R \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<Q> x) \<guillemotleft> suffix n\<close>
-      and
-        \<open>R = post_receive n X \<P> \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n\<close>
-      using
-        composition_in_universe
-          [OF suffix_adapted_mutation_in_universe parallel_mutation_in_universe]
-      by (intro exI conjI, use in assumption) (fastforce intro: rev_bexI)
+        unfolding
+          \<open>\<alpha> = IO \<eta> A' n X\<close> and \<open>S = \<currency>\<^sup>+ A \<guillemotleft> suffix n \<parallel> Q\<close>
+        and
+          \<open>\<eta> = Receiving\<close> and \<open>A' = A\<close> and \<open>Q = R \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<Q> x) \<guillemotleft> suffix n\<close>
+        and
+          \<open>R = post_receive n X \<P> \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n\<close>
+        using
+          composition_in_universe
+            [OF suffix_adapted_mutation_in_universe parallel_mutation_in_universe]
+        by (intro exI conjI, use in assumption) (fastforce intro: rev_bexI)
     next
       case (parallel_right_io R)
       from \<open>A \<triangleright>\<^sup>\<infinity> x. \<Q> x \<rightarrow>\<^sub>s\<lparr>IO \<eta> A' n X\<rparr> R\<close>
@@ -667,16 +667,16 @@ next
         finally show ?thesis .
       qed
       ultimately show ?thesis
-      unfolding
-        \<open>\<alpha> = IO \<eta> A' n X\<close> and \<open>S = \<currency>\<^sup>+ A \<guillemotleft> suffix n \<parallel> Q\<close>
-      and
-        \<open>\<eta> = Receiving\<close> and \<open>A' = A\<close> and \<open>Q = (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n \<parallel> R\<close>
-      and
-        \<open>R = post_receive n X \<Q> \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<Q> x) \<guillemotleft> suffix n\<close>
-      using
-        composition_in_universe
-          [OF suffix_adapted_mutation_in_universe parallel_mutation_in_universe]
-      by (intro exI conjI, use in assumption) (fastforce intro: rev_bexI)
+        unfolding
+          \<open>\<alpha> = IO \<eta> A' n X\<close> and \<open>S = \<currency>\<^sup>+ A \<guillemotleft> suffix n \<parallel> Q\<close>
+        and
+          \<open>\<eta> = Receiving\<close> and \<open>A' = A\<close> and \<open>Q = (A \<triangleright>\<^sup>\<infinity> x. \<P> x) \<guillemotleft> suffix n \<parallel> R\<close>
+        and
+          \<open>R = post_receive n X \<Q> \<parallel> (A \<triangleright>\<^sup>\<infinity> x. \<Q> x) \<guillemotleft> suffix n\<close>
+        using
+          composition_in_universe
+            [OF suffix_adapted_mutation_in_universe parallel_mutation_in_universe]
+        by (intro exI conjI, use in assumption) (fastforce intro: rev_bexI)
     qed
   qed
 qed respectful
