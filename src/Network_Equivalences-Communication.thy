@@ -1185,7 +1185,7 @@ next
         composition_in_universe
           [OF suffix_adapted_mutation_in_universe parallel_mutation_in_universe]
       by (intro exI conjI, use in assumption) (fastforce intro: rev_bexI)
-  qed (fastforce elim: transition_from_repeated_receive)+
+  qed (auto elim: transition_from_repeated_receive)
 qed respectful
 
 end
