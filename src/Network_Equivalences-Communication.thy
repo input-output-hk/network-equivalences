@@ -15,11 +15,7 @@ lemma adapted_after_distributor:
 
 lemma transition_from_distributor:
   assumes "A \<Rightarrow> Bs \<rightarrow>\<^sub>s\<lparr>\<alpha>\<rparr> Q"
-  obtains n and X
-    where
-      "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X"
-    and
-      "Q = \<Prod>B \<leftarrow> Bs. B \<guillemotleft> suffix n \<triangleleft> X \<parallel> (A \<Rightarrow> Bs) \<guillemotleft> suffix n"
+  obtains n and X where "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X" and "Q = \<Prod>B \<leftarrow> Bs. B \<guillemotleft> suffix n \<triangleleft> X \<parallel> (A \<Rightarrow> Bs) \<guillemotleft> suffix n"
 proof -
   obtain n and X
     where "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X" and "Q = post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> Bs. B \<triangleleft> \<box> x) \<parallel> (A \<Rightarrow> Bs) \<guillemotleft> suffix n"
@@ -60,11 +56,7 @@ lemma adapted_after_loss:
 
 lemma transition_from_loss:
   assumes "\<currency>\<^sup>? A \<rightarrow>\<^sub>s\<lparr>\<alpha>\<rparr> Q"
-  obtains n and X
-    where
-      "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X"
-    and
-      "Q = \<zero> \<parallel> \<currency>\<^sup>? A \<guillemotleft> suffix n"
+  obtains n and X where "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X" and "Q = \<zero> \<parallel> \<currency>\<^sup>? A \<guillemotleft> suffix n"
   using assms
   unfolding loss_def
   by (auto elim: transition_from_distributor simp only: general_parallel.simps(1))
@@ -96,10 +88,7 @@ lemma adapted_after_duplication:
 lemma transition_from_duplication:
   assumes "\<currency>\<^sup>+ A \<rightarrow>\<^sub>s\<lparr>\<alpha>\<rparr> Q"
   obtains n and X
-    where
-      "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X"
-    and
-      "Q = (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
+    where "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X" and "Q = (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
   using assms
   unfolding duplication_def
   by (auto elim: transition_from_distributor simp only: general_parallel.simps)
@@ -862,11 +851,7 @@ lemma adapted_after_unidirectional_bridge:
 
 lemma transition_from_unidirectional_bridge:
   assumes "A \<rightarrow> B \<rightarrow>\<^sub>s\<lparr>\<alpha>\<rparr> Q"
-  obtains n and X
-    where
-      "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X"
-    and
-      "Q = (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n"
+  obtains n and X where "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X" and "Q = (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n"
   using assms
   unfolding unidirectional_bridge_def
   by (auto elim: transition_from_distributor simp only: general_parallel.simps)
