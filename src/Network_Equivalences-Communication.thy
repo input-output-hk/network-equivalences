@@ -23,9 +23,9 @@ lemma transition_from_distributor:
 proof -
   obtain n and X
     where "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X" and "Q = post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> Bs. B \<triangleleft> \<box> x) \<parallel> (A \<Rightarrow> Bs) \<guillemotleft> suffix n"
-    unfolding distributor_def
     using assms
-    by (fastforce elim: transition_from_repeated_receive)
+    unfolding distributor_def
+    by (erule transition_from_repeated_receive)
   moreover have "post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> Bs. B \<triangleleft> \<box> x) = \<Prod>B \<leftarrow> Bs. B \<guillemotleft> suffix n \<triangleleft> X"
     unfolding post_receive_after_general_parallel and post_receive_def
     by transfer simp
