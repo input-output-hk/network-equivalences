@@ -58,6 +58,17 @@ lemma adapted_after_loss:
   shows "\<currency>\<^sup>? A \<guillemotleft> \<E> = \<currency>\<^sup>? (A \<guillemotleft> \<E>)"
   by (simp del: distributor_def add: adapted_after_distributor)
 
+lemma transition_from_loss:
+  assumes "\<currency>\<^sup>? A \<rightarrow>\<^sub>s\<lparr>\<alpha>\<rparr> Q"
+  obtains n and X
+    where
+      "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X"
+    and
+      "Q = \<zero> \<parallel> \<currency>\<^sup>? A \<guillemotleft> suffix n"
+  using assms
+  unfolding loss_def
+  by (auto elim: transition_from_distributor simp only: general_parallel.simps)
+
 lemma loss_idempotency [thorn_simps]:
   shows "\<currency>\<^sup>? A \<parallel> \<currency>\<^sup>? A \<sim>\<^sub>s \<currency>\<^sup>? A"
   unfolding loss_def
@@ -684,6 +695,23 @@ definition duploss :: "chan family \<Rightarrow> process family" (\<open>\<curre
 lemma adapted_after_duploss:
   shows "\<currency>\<^sup>* A \<guillemotleft> \<E> = \<currency>\<^sup>* (A \<guillemotleft> \<E>)"
   by (simp only: duploss_def adapted_after_parallel adapted_after_loss adapted_after_duplication)
+
+lemma transition_from_duploss:
+  assumes "\<currency>\<^sup>* A \<rightarrow>\<^sub>s\<lparr>\<alpha>\<rparr> Q"
+  obtains
+    (losing) n and X
+    where
+      "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X"
+    and
+      "Q = (\<zero> \<parallel> \<currency>\<^sup>? A \<guillemotleft> suffix n) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n" |
+    (duplicating) n and X
+    where
+      "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X"
+    and
+      "Q = \<currency>\<^sup>? A \<guillemotleft> suffix n \<parallel> (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
+  using assms
+  unfolding duploss_def
+  by cases (auto elim: transition_from_loss transition_from_duplication simp only:)
 
 lemma duploss_idempotency [thorn_simps]:
   shows "\<currency>\<^sup>* A \<parallel> \<currency>\<^sup>* A \<sim>\<^sub>s \<currency>\<^sup>* A"
