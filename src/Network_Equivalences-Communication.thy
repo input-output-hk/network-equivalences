@@ -91,7 +91,7 @@ lemma transition_from_duplication:
       "Q = (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
   using assms
   unfolding duplication_def
-  by (fastforce elim: transition_from_distributor)
+  by (auto elim: transition_from_distributor simp only: general_parallel.simps)
 
 lemma duplication_idempotency [thorn_simps]:
   shows "\<currency>\<^sup>+ A \<parallel> \<currency>\<^sup>+ A \<sim>\<^sub>s \<currency>\<^sup>+ A"
