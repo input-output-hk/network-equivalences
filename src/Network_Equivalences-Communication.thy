@@ -89,7 +89,8 @@ lemma transition_from_duplication:
       "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X"
     and
       "Q = (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
-  using assms unfolding duplication_def
+  using assms
+  unfolding duplication_def
   by (fastforce elim: transition_from_distributor)
 
 lemma duplication_idempotency [thorn_simps]:
