@@ -67,7 +67,7 @@ lemma transition_from_loss:
       "Q = \<zero> \<parallel> \<currency>\<^sup>? A \<guillemotleft> suffix n"
   using assms
   unfolding loss_def
-  by (auto elim: transition_from_distributor simp only: general_parallel.simps)
+  by (auto elim: transition_from_distributor simp only: general_parallel.simps(1))
 
 lemma loss_idempotency [thorn_simps]:
   shows "\<currency>\<^sup>? A \<parallel> \<currency>\<^sup>? A \<sim>\<^sub>s \<currency>\<^sup>? A"
