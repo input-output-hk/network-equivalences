@@ -841,7 +841,7 @@ lemma transition_from_unidirectional_bridge:
       "Q = (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n"
   using assms
   unfolding unidirectional_bridge_def
-  by (fastforce elim: transition_from_distributor)
+  by (auto elim: transition_from_distributor simp only: general_parallel.simps)
 
 lemma unidirectional_bridge_idempotency [thorn_simps]:
   shows "A \<rightarrow> B \<parallel> A \<rightarrow> B \<sim>\<^sub>s A \<rightarrow> B"
