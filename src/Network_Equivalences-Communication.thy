@@ -26,15 +26,9 @@ proof -
     unfolding distributor_def
     using assms
     by (fastforce elim: transition_from_repeated_receive)
-  moreover have "post_receive n X (\<lambda>x. B \<triangleleft> \<box> x) = B \<guillemotleft> suffix n \<triangleleft> X" for B
-    unfolding post_receive_after_send and post_receive_def
-    by (transfer, simp)
-  then have "post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> Bs. B \<triangleleft> \<box> x) = \<Prod>B \<leftarrow> Bs. B \<guillemotleft> suffix n \<triangleleft> X"
-    by
-      (
-        induction Bs,
-        unfold general_parallel.simps post_receive_after_parallel post_receive_after_stop
-      ) simp_all
+  moreover have "post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> Bs. B \<triangleleft> \<box> x) = \<Prod>B \<leftarrow> Bs. B \<guillemotleft> suffix n \<triangleleft> X"
+    unfolding post_receive_after_general_parallel and post_receive_def
+    by transfer simp
   ultimately show ?thesis
     by (simp only: that)
 qed
