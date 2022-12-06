@@ -1224,9 +1224,225 @@ lemma unidirectional_bridge_shortcut_redundancy:
   using distributor_shortcut_redundancy
   unfolding unidirectional_bridge_def .
 
+context begin
+
+(* TODO: Perhaps reuse in other proofs *)
+private lemma loss_transition:
+  shows "\<currency>\<^sup>? A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> \<zero> \<parallel> \<currency>\<^sup>? A \<guillemotleft> suffix n"
+proof -
+  have "\<currency>\<^sup>? A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> post_receive n X (\<lambda>_. \<zero> \<parallel> \<currency>\<^sup>? A)"
+    unfolding loss_def and distributor_def and general_parallel.simps
+    using receiving
+    by (subst repeated_receive_proper_def)
+  then show ?thesis
+    by (elim transition_from_loss, auto simp only:)
+qed
+
+(* TODO: Perhaps reuse in other proofs *)
+private lemma duplication_transition:
+  shows "\<currency>\<^sup>+ A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
+proof -
+  have "\<currency>\<^sup>+ A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> [A, A]. B \<triangleleft> \<box> x \<parallel> \<currency>\<^sup>+ A)"
+    unfolding duplication_def and distributor_def and general_parallel.simps
+    using receiving
+    by (subst repeated_receive_proper_def)
+  then show ?thesis
+    by (elim transition_from_duplication, auto simp only:)
+qed
+
+(* TODO: Perhaps reuse in other proofs *)
+private lemma duploss_transition_from_loss:
+  shows "\<currency>\<^sup>* A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> (\<zero> \<parallel> \<currency>\<^sup>? A \<guillemotleft> suffix n) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
+  unfolding duploss_def
+  by (intro loss_transition parallel_left_io)
+
+(* TODO: Perhaps reuse in other proofs *)
+private lemma duploss_receiving_from_duplication:
+  shows "
+    \<currency>\<^sup>* A
+    \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
+    \<currency>\<^sup>? A \<guillemotleft> suffix n \<parallel> (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
+  unfolding duploss_def
+  by (intro duplication_transition parallel_right_io)
+
 lemma loop_redundancy_under_duploss:
   shows "\<currency>\<^sup>* A \<parallel> A \<rightarrow> A \<approx>\<^sub>s \<currency>\<^sup>* A"
-  sorry
+unfolding synchronous.weak_bisimilarity_is_mixed_bisimilarity
+proof (coinduction rule: synchronous.mixed.up_to_rule [where \<F> = "[\<sim>\<^sub>s] \<frown> \<M> \<frown> [\<sim>\<^sub>s]"])
+  case (forward_simulation \<alpha> S)
+  then show ?case
+  proof cases
+    case (communication \<eta> \<mu> A' n X P Q)
+    from \<open>\<currency>\<^sup>* A \<rightarrow>\<^sub>s\<lparr>IO \<eta> A' n X\<rparr> P\<close> have "\<eta> = Receiving"
+      by (blast elim: transition_from_duploss)
+    moreover from \<open>A \<rightarrow> A \<rightarrow>\<^sub>s\<lparr>IO \<mu> A' n X\<rparr> Q\<close> have "\<mu> = Receiving"
+      by (blast elim: transition_from_unidirectional_bridge)
+    ultimately show ?thesis
+      using \<open>\<eta> \<noteq> \<mu>\<close>
+      by blast
+  next
+    case (parallel_left_communication P)
+    from \<open>\<currency>\<^sup>* A \<rightarrow>\<^sub>s\<lparr>\<tau>\<rparr> P\<close> show ?thesis
+      by (blast elim: transition_from_duploss)
+  next
+    case (parallel_right_communication Q)
+    from \<open>A \<rightarrow> A \<rightarrow>\<^sub>s\<lparr>\<tau>\<rparr> Q\<close> show ?thesis
+      by (blast elim: transition_from_unidirectional_bridge)
+  next
+    case (parallel_left_io \<eta> A' n X P)
+    from \<open>\<currency>\<^sup>* A \<rightarrow>\<^sub>s\<lparr>IO \<eta> A' n X\<rparr> P\<close> have "\<exists>P'. P' \<parallel> \<currency>\<^sup>* A \<guillemotleft> suffix n \<sim>\<^sub>s P"
+    proof (cases rule: transition_from_duploss)
+      case losing
+      then show ?thesis
+        using parallel_associativity and adapted_after_parallel
+        by (fastforce intro: synchronous.bisimilarity_symmetry_rule)
+    next
+      case duplicating
+      then show ?thesis
+        using parallel_left_commutativity and adapted_after_parallel
+        by fastforce
+    qed
+    then obtain P' where "P' \<parallel> \<currency>\<^sup>* A \<guillemotleft> suffix n \<sim>\<^sub>s P" ..
+    moreover
+    from \<open>P' \<parallel> \<currency>\<^sup>* A \<guillemotleft> suffix n \<sim>\<^sub>s P\<close> have "P \<parallel> (A \<rightarrow> A) \<guillemotleft> suffix n \<sim>\<^sub>s P' \<parallel> (\<currency>\<^sup>* A \<parallel> A \<rightarrow> A) \<guillemotleft> suffix n"
+      unfolding adapted_after_parallel
+      using
+        parallel_associativity
+      and
+        synchronous.bisimilarity_symmetry_rule
+      and
+        synchronous.bisimilarity_transitivity_rule
+      and
+        synchronous.parallel_is_left_compatible_with_bisimilarity
+      by meson
+    moreover from \<open>\<currency>\<^sup>* A \<rightarrow>\<^sub>s\<lparr>IO \<eta> A' n X\<rparr> P\<close> and \<open>\<alpha> = IO \<eta> A' n X\<close> have "\<currency>\<^sup>* A \<Rightarrow>\<^sub>s\<lparr>\<alpha>\<rparr> P"
+      by (blast intro: synchronous.transition_in_weak_transition_rule)
+    ultimately show ?thesis
+      unfolding \<open>S = P \<parallel> (A \<rightarrow> A) \<guillemotleft> suffix n\<close>
+      using
+        composition_in_universe
+          [OF suffix_adapted_mutation_in_universe parallel_mutation_in_universe]
+      by (intro exI conjI, use in assumption) (fastforce intro: rev_bexI)
+  next
+    case (parallel_right_io \<eta> A' n X Q)
+    from \<open>A \<rightarrow> A \<rightarrow>\<^sub>s\<lparr>IO \<eta> A' n X\<rparr> Q\<close>
+    have
+      "\<eta> = Receiving"
+    and
+      "A' = A"
+    and
+      "Q = (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> A) \<guillemotleft> suffix n"
+      by (fastforce elim: transition_from_unidirectional_bridge)+
+    with \<open>A \<rightarrow> A \<rightarrow>\<^sub>s\<lparr>IO \<eta> A' n X\<rparr> Q\<close>
+    have "A \<rightarrow> A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> A) \<guillemotleft> suffix n"
+      by (simp only:)
+    then have "
+      \<currency>\<^sup>* A \<parallel> A \<rightarrow> A
+      \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
+      \<currency>\<^sup>* A \<guillemotleft> suffix n \<parallel> (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> A) \<guillemotleft> suffix n"
+      by (intro synchronous_transition.parallel_right_io)
+    moreover have "
+      \<currency>\<^sup>* A  \<guillemotleft> suffix n \<parallel> (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> A) \<guillemotleft> suffix n
+      \<sim>\<^sub>s
+      A \<guillemotleft> suffix n \<triangleleft> X \<parallel> (\<currency>\<^sup>* A \<parallel> A \<rightarrow> A) \<guillemotleft> suffix n"
+      unfolding adapted_after_parallel
+      using thorn_simps
+      by equivalence
+    moreover have "
+      \<currency>\<^sup>* A
+      \<Rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
+      (\<zero> \<parallel> \<currency>\<^sup>? A \<guillemotleft> suffix n) \<parallel> (\<zero> \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
+    proof -
+      have "
+        \<currency>\<^sup>* A
+        \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
+        \<currency>\<^sup>? A \<guillemotleft> suffix n \<parallel> (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
+        by (fact duploss_receiving_from_duplication)
+      moreover have "
+        \<currency>\<^sup>? A \<guillemotleft> suffix n \<parallel> (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n
+        \<rightarrow>\<^sub>s\<lparr>\<tau>\<rparr>
+        (\<zero> \<parallel> \<currency>\<^sup>? A \<guillemotleft> suffix n) \<parallel> (\<zero> \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
+      proof -
+        have "\<currency>\<^sup>? (A \<guillemotleft> suffix n) \<rightarrow>\<^sub>s\<lparr>A \<guillemotleft> suffix n \<triangleright> \<star>\<^bsup>0\<^esup> X\<rparr> \<zero> \<parallel> \<currency>\<^sup>? (A \<guillemotleft> suffix n) \<guillemotleft> suffix 0"
+          by (fact loss_transition)
+        moreover have "A \<guillemotleft> suffix n \<triangleleft> X \<rightarrow>\<^sub>s\<lparr>A \<guillemotleft> suffix n \<triangleleft> \<star>\<^bsup>0\<^esup> X\<rparr> \<zero>"
+          by (fact sending)
+        then have "
+          (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n
+          \<rightarrow>\<^sub>s\<lparr>A \<guillemotleft> suffix n \<triangleleft> \<star>\<^bsup>0\<^esup> X\<rparr>
+          (\<zero> \<parallel> (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<guillemotleft> suffix 0) \<parallel> (\<currency>\<^sup>+ A \<guillemotleft> suffix n) \<guillemotleft> suffix 0"
+          by (blast intro: parallel_left_io)
+        ultimately have "
+          \<currency>\<^sup>? (A \<guillemotleft> suffix n) \<parallel> (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n
+          \<rightarrow>\<^sub>s\<lparr>\<tau>\<rparr>
+          (\<zero> \<parallel> \<currency>\<^sup>? (A \<guillemotleft> suffix n) \<guillemotleft> suffix 0) \<parallel>
+          ((\<zero> \<parallel> (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<guillemotleft> suffix 0) \<parallel> (\<currency>\<^sup>+ A \<guillemotleft> suffix n) \<guillemotleft> suffix 0)"
+          using communication
+          by fastforce
+        then show ?thesis
+          by (unfold adapted_after_loss, transfer, simp)
+      qed
+      ultimately show ?thesis
+        by (simp, blast intro: rtranclp_trans)
+    qed
+    moreover have "
+      A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<currency>\<^sup>* A \<guillemotleft> suffix n
+      \<sim>\<^sub>s
+      (\<zero> \<parallel> \<currency>\<^sup>? A \<guillemotleft> suffix n) \<parallel> (\<zero> \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
+      unfolding duploss_def and adapted_after_parallel
+      using thorn_simps
+      by equivalence
+    ultimately show ?thesis
+      unfolding
+        \<open>\<alpha> = IO \<eta> A' n X\<close> and \<open>S = \<currency>\<^sup>* A \<guillemotleft> suffix n \<parallel> Q\<close>
+      and
+        \<open>\<eta> = Receiving\<close> and \<open>A' = A\<close> and \<open>Q = (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> A) \<guillemotleft> suffix n\<close>
+      using
+        composition_in_universe
+          [OF suffix_adapted_mutation_in_universe parallel_mutation_in_universe]
+      by (intro exI conjI, use in assumption) (fastforce intro: rev_bexI)
+  qed
+next
+  case (backward_simulation \<alpha> S)
+  from \<open>\<currency>\<^sup>* A \<rightarrow>\<^sub>s\<lparr>\<alpha>\<rparr> S\<close> have "\<exists>n X S'. S' \<parallel> \<currency>\<^sup>* A \<guillemotleft> suffix n \<sim>\<^sub>s S \<and> \<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X"
+  proof (cases rule: transition_from_duploss)
+    case losing
+    then show ?thesis
+      using parallel_associativity and adapted_after_parallel
+      by (fastforce intro: synchronous.bisimilarity_symmetry_rule)
+  next
+    case duplicating
+    then show ?thesis
+      using parallel_left_commutativity and adapted_after_parallel
+      by fastforce
+  qed
+  then obtain n and X and S' where "S' \<parallel> \<currency>\<^sup>* A \<guillemotleft> suffix n \<sim>\<^sub>s S" and "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X"
+    by blast
+  moreover
+  from \<open>S' \<parallel> \<currency>\<^sup>* A \<guillemotleft> suffix n \<sim>\<^sub>s S\<close> have "S \<parallel> (A \<rightarrow> A) \<guillemotleft> suffix n \<sim>\<^sub>s S' \<parallel> (\<currency>\<^sup>* A \<parallel> A \<rightarrow> A) \<guillemotleft> suffix n"
+    unfolding adapted_after_parallel
+    using
+      parallel_associativity
+    and
+      synchronous.bisimilarity_symmetry_rule
+    and
+      synchronous.bisimilarity_transitivity_rule
+    and
+      synchronous.parallel_is_left_compatible_with_bisimilarity
+    by meson
+  moreover
+  from \<open>\<currency>\<^sup>* A \<rightarrow>\<^sub>s\<lparr>\<alpha>\<rparr> S\<close> and \<open>\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X\<close> have "\<currency>\<^sup>* A \<parallel> A \<rightarrow> A \<rightarrow>\<^sub>s\<lparr>\<alpha>\<rparr> S \<parallel> (A \<rightarrow> A) \<guillemotleft> suffix n"
+    by (fastforce intro: parallel_left_io simp only:)
+  then have "\<currency>\<^sup>* A \<parallel> A \<rightarrow> A \<Rightarrow>\<^sub>s\<lparr>\<alpha>\<rparr> S \<parallel> (A \<rightarrow> A) \<guillemotleft> suffix n"
+    by (blast intro: synchronous.transition_in_weak_transition_rule)
+  ultimately show ?case
+    using
+      composition_in_universe
+        [OF suffix_adapted_mutation_in_universe parallel_mutation_in_universe]
+    by (intro exI conjI, use in assumption) (fastforce intro: rev_bexI)
+qed respectful
+
+end
 
 lemma sidetrack_redundancy:
   shows "\<Prod>B \<leftarrow> Bs. \<currency>\<^sup>? B \<parallel> A \<Rightarrow> (B\<^sub>0 # Bs) \<parallel> A \<rightarrow> B\<^sub>0 \<approx>\<^sub>s \<Prod>B \<leftarrow> Bs. \<currency>\<^sup>? B \<parallel> A \<Rightarrow> (B\<^sub>0 # Bs)"
