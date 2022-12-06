@@ -1551,7 +1551,7 @@ lemma backward_bridge_absorption:
 context begin
 
 (* TODO: Perhaps reuse in other proofs *)
-private lemma transition_from_unidirectional_bridge_construction:
+private lemma unidirectional_bridge_transition:
   shows "A \<rightarrow> B \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n" (is "?S \<rightarrow>\<^sub>s\<lparr>_\<rparr> ?T")
 proof -
   have "?S \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> post_receive n X (\<lambda>x. (B \<triangleleft> \<box> x \<parallel> \<zero>) \<parallel> A \<rightarrow> B)"
@@ -1569,7 +1569,7 @@ lemma send_channel_switch:
   shows "A \<leftrightarrow> B \<parallel> A \<triangleleft> X \<approx>\<^sub>s A \<leftrightarrow> B \<parallel> B \<triangleleft> X"
 proof (rule synchronous.mutual_silent_weak_transitions_up_to_bisimilarity)
   have "A \<rightarrow> B \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>0\<^esup> X\<rparr> (B \<triangleleft> X \<parallel> \<zero>) \<parallel> A \<rightarrow> B"
-    using transition_from_unidirectional_bridge_construction [where n = 0]
+    using unidirectional_bridge_transition [where n = 0]
     by (transfer, simp)
   then have "A \<leftrightarrow> B \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>0\<^esup> X\<rparr> ((B \<triangleleft> X \<parallel> \<zero>) \<parallel> A \<rightarrow> B) \<parallel> B \<rightarrow> A"
     using parallel_left_io [where n = 0]
@@ -1586,7 +1586,7 @@ next
     by equivalence
 next
   have "B \<rightarrow> A \<rightarrow>\<^sub>s\<lparr>B \<triangleright> \<star>\<^bsup>0\<^esup> X\<rparr> (A \<triangleleft> X \<parallel> \<zero>) \<parallel> B \<rightarrow> A"
-    using transition_from_unidirectional_bridge_construction [where n = 0]
+    using unidirectional_bridge_transition [where n = 0]
     by (transfer, simp)
   then have "A \<leftrightarrow> B \<rightarrow>\<^sub>s\<lparr>B \<triangleright> \<star>\<^bsup>0\<^esup> X\<rparr> A \<rightarrow> B \<parallel> (A \<triangleleft> X \<parallel> \<zero>) \<parallel> B \<rightarrow> A"
     using parallel_right_io [where n = 0]
