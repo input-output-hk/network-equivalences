@@ -1419,6 +1419,53 @@ lemma adapted_after_bidirectional_bridge:
   shows "(A \<leftrightarrow> B) \<guillemotleft> \<E> = A \<guillemotleft> \<E> \<leftrightarrow> B \<guillemotleft> \<E>"
   by (simp only: bidirectional_bridge_def adapted_after_parallel adapted_after_unidirectional_bridge)
 
+lemma transition_from_bidirectional_bridge:
+  assumes "A \<leftrightarrow> B \<rightarrow>\<^sub>s\<lparr>\<alpha>\<rparr> Q"
+  obtains
+    (forward)
+      n and X
+        where "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X" and "Q \<sim>\<^sub>s B \<guillemotleft> suffix n \<triangleleft> X \<parallel> (A \<leftrightarrow> B) \<guillemotleft> suffix n" |
+    (backward)
+      n and X
+        where "\<alpha> = B \<triangleright> \<star>\<^bsup>n\<^esup> X" and "Q \<sim>\<^sub>s A \<guillemotleft> suffix n \<triangleleft> X \<parallel> (A \<leftrightarrow> B) \<guillemotleft> suffix n"
+using assms
+unfolding bidirectional_bridge_def
+proof cases
+  case (parallel_left_io \<eta> A' n X R)
+  from \<open>A \<rightarrow> B \<rightarrow>\<^sub>s\<lparr>IO \<eta> A' n X\<rparr> R\<close> and \<open>\<alpha> = IO \<eta> A' n X\<close>
+  have "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X" and "R = (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n"
+    by (auto elim: transition_from_unidirectional_bridge simp only:)
+  then have "Q \<sim>\<^sub>s B \<guillemotleft> suffix n \<triangleleft> X \<parallel> (A \<leftrightarrow> B) \<guillemotleft> suffix n"
+    unfolding
+      \<open>Q = R \<parallel> (B \<rightarrow> A) \<guillemotleft> suffix n\<close>
+    and
+      \<open>R = (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n\<close>
+    and
+      adapted_after_parallel
+    and
+      bidirectional_bridge_def
+    using thorn_simps
+    by equivalence
+  with forward and \<open>\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X\<close> show ?thesis .
+next
+  case (parallel_right_io \<eta> B' n X R)
+  from \<open>B \<rightarrow> A \<rightarrow>\<^sub>s\<lparr>IO \<eta> B' n X\<rparr> R\<close> and \<open>\<alpha> = IO \<eta> B' n X\<close>
+  have "\<alpha> = B \<triangleright> \<star>\<^bsup>n\<^esup> X" and "R = (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (B \<rightarrow> A) \<guillemotleft> suffix n"
+    by (auto elim: transition_from_unidirectional_bridge simp only:)
+  then have "Q \<sim>\<^sub>s A \<guillemotleft> suffix n \<triangleleft> X \<parallel> (A \<leftrightarrow> B) \<guillemotleft> suffix n"
+    unfolding
+      \<open>Q = (A \<rightarrow> B) \<guillemotleft> suffix n \<parallel> R\<close>
+    and
+      \<open>R = (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (B \<rightarrow> A) \<guillemotleft> suffix n\<close>
+    and
+      adapted_after_parallel
+    and
+      bidirectional_bridge_def
+    using thorn_simps
+    by equivalence
+  with backward and \<open>\<alpha> = B \<triangleright> \<star>\<^bsup>n\<^esup> X\<close> show ?thesis .
+qed (fastforce elim: transition_from_repeated_receive)+
+
 lemma bidirectional_bridge_idempotency [thorn_simps]:
   shows "A \<leftrightarrow> B \<parallel> A \<leftrightarrow> B \<sim>\<^sub>s A \<leftrightarrow> B"
   unfolding bidirectional_bridge_def
