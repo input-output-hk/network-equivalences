@@ -688,19 +688,25 @@ lemma adapted_after_duploss:
 lemma transition_from_duploss:
   assumes "\<currency>\<^sup>* A \<rightarrow>\<^sub>s\<lparr>\<alpha>\<rparr> Q"
   obtains
-    (losing) n and X
-    where
-      "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X"
-    and
-      "Q = (\<zero> \<parallel> \<currency>\<^sup>? A \<guillemotleft> suffix n) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n" |
-    (duplicating) n and X
-    where
-      "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X"
-    and
-      "Q = \<currency>\<^sup>? A \<guillemotleft> suffix n \<parallel> (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
-  using assms
-  unfolding duploss_def
-  by cases (auto elim: transition_from_loss transition_from_duplication simp only:)
+    (losing)
+      n and X
+        where "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X" and "Q \<sim>\<^sub>s \<zero> \<parallel> \<currency>\<^sup>* A \<guillemotleft> suffix n" |
+    (duplicating)
+      n and X
+        where "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X" and "Q \<sim>\<^sub>s (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>* A \<guillemotleft> suffix n"
+using assms
+unfolding duploss_def
+proof cases
+  case parallel_left_io
+  with losing show ?thesis
+    using adapted_after_parallel and parallel_associativity
+    by (elim transition_from_loss, simp only:, fastforce)
+next
+  case parallel_right_io
+  with duplicating show ?thesis
+    using adapted_after_parallel and parallel_left_commutativity
+    by (elim transition_from_duplication, simp only:, fastforce)
+qed (fastforce elim: transition_from_repeated_receive)+
 
 lemma duploss_idempotency [thorn_simps]:
   shows "\<currency>\<^sup>* A \<parallel> \<currency>\<^sup>* A \<sim>\<^sub>s \<currency>\<^sup>* A"
@@ -1275,36 +1281,19 @@ proof (coinduction rule: synchronous.mixed.up_to_rule [where \<F> = "[\<sim>\<^s
       by (blast elim: transition_from_unidirectional_bridge)
   next
     case (parallel_left_io \<eta> A' n X P)
-    from \<open>\<currency>\<^sup>* A \<rightarrow>\<^sub>s\<lparr>IO \<eta> A' n X\<rparr> P\<close> have "\<exists>P'. P' \<parallel> \<currency>\<^sup>* A \<guillemotleft> suffix n \<sim>\<^sub>s P"
-    proof (cases rule: transition_from_duploss)
-      case losing
-      then show ?thesis
-        using parallel_associativity and adapted_after_parallel
-        by (fastforce intro: synchronous.bisimilarity_symmetry_rule)
-    next
-      case duplicating
-      then show ?thesis
-        using parallel_left_commutativity and adapted_after_parallel
-        by fastforce
-    qed
-    then obtain P' where "P' \<parallel> \<currency>\<^sup>* A \<guillemotleft> suffix n \<sim>\<^sub>s P" ..
-    moreover
-    from \<open>P' \<parallel> \<currency>\<^sup>* A \<guillemotleft> suffix n \<sim>\<^sub>s P\<close> have "P \<parallel> (A \<rightarrow> A) \<guillemotleft> suffix n \<sim>\<^sub>s P' \<parallel> (\<currency>\<^sup>* A \<parallel> A \<rightarrow> A) \<guillemotleft> suffix n"
+    from \<open>\<currency>\<^sup>* A \<rightarrow>\<^sub>s\<lparr>IO \<eta> A' n X\<rparr> P\<close> obtain P' where "P \<sim>\<^sub>s P' \<parallel> \<currency>\<^sup>* A \<guillemotleft> suffix n"
+      by (blast elim: transition_from_duploss)
+    then have "P \<parallel> (A \<rightarrow> A) \<guillemotleft> suffix n \<sim>\<^sub>s P' \<parallel> (\<currency>\<^sup>* A \<parallel> A \<rightarrow> A) \<guillemotleft> suffix n"
       unfolding adapted_after_parallel
-      using
-        parallel_associativity
-      and
-        synchronous.bisimilarity_symmetry_rule
-      and
-        synchronous.bisimilarity_transitivity_rule
-      and
-        synchronous.parallel_is_left_compatible_with_bisimilarity
-      by meson
+      using thorn_simps
+      by equivalence
     moreover from \<open>\<currency>\<^sup>* A \<rightarrow>\<^sub>s\<lparr>IO \<eta> A' n X\<rparr> P\<close> and \<open>\<alpha> = IO \<eta> A' n X\<close> have "\<currency>\<^sup>* A \<Rightarrow>\<^sub>s\<lparr>\<alpha>\<rparr> P"
       by (blast intro: synchronous.transition_in_weak_transition_rule)
     ultimately show ?thesis
       unfolding \<open>S = P \<parallel> (A \<rightarrow> A) \<guillemotleft> suffix n\<close>
       using
+        \<open>P \<sim>\<^sub>s P' \<parallel> \<currency>\<^sup>* A \<guillemotleft> suffix n\<close> [symmetric]
+      and
         composition_in_universe
           [OF suffix_adapted_mutation_in_universe parallel_mutation_in_universe]
       by (intro exI conjI, use in assumption) (fastforce intro: rev_bexI)
@@ -1389,32 +1378,12 @@ proof (coinduction rule: synchronous.mixed.up_to_rule [where \<F> = "[\<sim>\<^s
   qed
 next
   case (backward_simulation \<alpha> S)
-  from \<open>\<currency>\<^sup>* A \<rightarrow>\<^sub>s\<lparr>\<alpha>\<rparr> S\<close> have "\<exists>n X S'. S' \<parallel> \<currency>\<^sup>* A \<guillemotleft> suffix n \<sim>\<^sub>s S \<and> \<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X"
-  proof (cases rule: transition_from_duploss)
-    case losing
-    then show ?thesis
-      using parallel_associativity and adapted_after_parallel
-      by (fastforce intro: synchronous.bisimilarity_symmetry_rule)
-  next
-    case duplicating
-    then show ?thesis
-      using parallel_left_commutativity and adapted_after_parallel
-      by fastforce
-  qed
-  then obtain n and X and S' where "S' \<parallel> \<currency>\<^sup>* A \<guillemotleft> suffix n \<sim>\<^sub>s S" and "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X"
-    by blast
-  moreover
-  from \<open>S' \<parallel> \<currency>\<^sup>* A \<guillemotleft> suffix n \<sim>\<^sub>s S\<close> have "S \<parallel> (A \<rightarrow> A) \<guillemotleft> suffix n \<sim>\<^sub>s S' \<parallel> (\<currency>\<^sup>* A \<parallel> A \<rightarrow> A) \<guillemotleft> suffix n"
+  from \<open>\<currency>\<^sup>* A \<rightarrow>\<^sub>s\<lparr>\<alpha>\<rparr> S\<close> obtain n and X and S' where "S \<sim>\<^sub>s S' \<parallel> \<currency>\<^sup>* A \<guillemotleft> suffix n" and "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X"
+    by (blast elim: transition_from_duploss)
+  then have "S \<parallel> (A \<rightarrow> A) \<guillemotleft> suffix n \<sim>\<^sub>s S' \<parallel> (\<currency>\<^sup>* A \<parallel> A \<rightarrow> A) \<guillemotleft> suffix n"
     unfolding adapted_after_parallel
-    using
-      parallel_associativity
-    and
-      synchronous.bisimilarity_symmetry_rule
-    and
-      synchronous.bisimilarity_transitivity_rule
-    and
-      synchronous.parallel_is_left_compatible_with_bisimilarity
-    by meson
+    using thorn_simps
+    by equivalence
   moreover
   from \<open>\<currency>\<^sup>* A \<rightarrow>\<^sub>s\<lparr>\<alpha>\<rparr> S\<close> and \<open>\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X\<close> have "\<currency>\<^sup>* A \<parallel> A \<rightarrow> A \<rightarrow>\<^sub>s\<lparr>\<alpha>\<rparr> S \<parallel> (A \<rightarrow> A) \<guillemotleft> suffix n"
     by (fastforce intro: parallel_left_io simp only:)
@@ -1422,6 +1391,7 @@ next
     by (blast intro: synchronous.transition_in_weak_transition_rule)
   ultimately show ?case
     using
+      \<open>S \<sim>\<^sub>s S' \<parallel> \<currency>\<^sup>* A \<guillemotleft> suffix n\<close> [symmetric]
       composition_in_universe
         [OF suffix_adapted_mutation_in_universe parallel_mutation_in_universe]
     by (intro exI conjI, use in assumption) (fastforce intro: rev_bexI)
