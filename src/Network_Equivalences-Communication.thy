@@ -1429,16 +1429,14 @@ lemma transition_from_bidirectional_bridge:
 using assms unfolding bidirectional_bridge_def proof cases
   case parallel_left_io
   with forward show ?thesis
-    using
-      parallel_associativity and parallel_left_commutativity and parallel_left_identity
+    using parallel_associativity and parallel_left_commutativity and parallel_left_identity
     by
       (elim transition_from_unidirectional_bridge, clarify, unfold bidirectional_bridge_def)
       (metis synchronous.bisimilarity_transitivity_rule adapted_after_parallel)
 next
   case parallel_right_io
   with backward show ?thesis
-    using
-      parallel_left_commutativity and parallel_associativity and parallel_left_identity
+    using parallel_left_commutativity and parallel_associativity and parallel_left_identity
     by
       (elim transition_from_unidirectional_bridge, clarify, unfold bidirectional_bridge_def)
       (metis synchronous.bisimilarity_transitivity_rule adapted_after_parallel)
