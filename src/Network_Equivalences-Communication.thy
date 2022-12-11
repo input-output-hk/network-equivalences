@@ -697,12 +697,12 @@ lemma transition_from_duploss:
 using assms unfolding duploss_def proof cases
   case parallel_left_io
   with losing show ?thesis
-    using adapted_after_parallel and parallel_associativity
+    using parallel_associativity and adapted_after_parallel
     by (elim transition_from_loss, simp only:, fastforce)
 next
   case parallel_right_io
   with duplicating show ?thesis
-    using adapted_after_parallel and parallel_left_commutativity
+    using parallel_left_commutativity and adapted_after_parallel
     by (elim transition_from_duplication, simp only:, fastforce)
 qed (fastforce elim: transition_from_repeated_receive)+
 
