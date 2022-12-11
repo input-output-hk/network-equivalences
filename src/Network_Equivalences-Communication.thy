@@ -694,9 +694,7 @@ lemma transition_from_duploss:
     (duplicating)
       n and X
         where "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X" and "Q \<sim>\<^sub>s (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>* A \<guillemotleft> suffix n"
-using assms
-unfolding duploss_def
-proof cases
+using assms unfolding duploss_def proof cases
   case parallel_left_io
   with losing show ?thesis
     using adapted_after_parallel and parallel_associativity
