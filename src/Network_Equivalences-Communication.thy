@@ -704,7 +704,7 @@ next
   with duplicating show ?thesis
     using parallel_left_commutativity and adapted_after_parallel
     by (elim transition_from_duplication) simp
-qed (auto elim: transition_from_repeated_receive)
+qed (fast elim: transition_from_loss transition_from_duplication)+
 
 lemma duploss_idempotency [thorn_simps]:
   shows "\<currency>\<^sup>* A \<parallel> \<currency>\<^sup>* A \<sim>\<^sub>s \<currency>\<^sup>* A"
@@ -1436,7 +1436,7 @@ next
   with backward show ?thesis
     using parallel_left_commutativity and adapted_after_parallel
     by (elim transition_from_unidirectional_bridge) simp
-qed (auto elim: transition_from_repeated_receive)
+qed (fast elim: transition_from_unidirectional_bridge)+
 
 lemma bidirectional_bridge_idempotency [thorn_simps]:
   shows "A \<leftrightarrow> B \<parallel> A \<leftrightarrow> B \<sim>\<^sub>s A \<leftrightarrow> B"
