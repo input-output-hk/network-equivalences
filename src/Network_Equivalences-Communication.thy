@@ -1422,10 +1422,10 @@ lemma transition_from_bidirectional_bridge:
   obtains
     (forward)
       n and X
-        where "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X" and "Q \<sim>\<^sub>s B \<guillemotleft> suffix n \<triangleleft> X \<parallel> (A \<leftrightarrow> B) \<guillemotleft> suffix n" |
+        where "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X" and "Q \<sim>\<^sub>s (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<leftrightarrow> B) \<guillemotleft> suffix n" |
     (backward)
       n and X
-        where "\<alpha> = B \<triangleright> \<star>\<^bsup>n\<^esup> X" and "Q \<sim>\<^sub>s A \<guillemotleft> suffix n \<triangleleft> X \<parallel> (A \<leftrightarrow> B) \<guillemotleft> suffix n"
+        where "\<alpha> = B \<triangleright> \<star>\<^bsup>n\<^esup> X" and "Q \<sim>\<^sub>s (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<leftrightarrow> B) \<guillemotleft> suffix n"
 using assms unfolding bidirectional_bridge_def proof cases
   case parallel_left_io
   with forward show ?thesis
