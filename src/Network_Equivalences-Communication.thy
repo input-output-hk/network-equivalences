@@ -698,12 +698,12 @@ using assms unfolding duploss_def proof cases
   case parallel_left_io
   with losing show ?thesis
     using parallel_associativity and adapted_after_parallel
-    by (elim transition_from_loss, simp)
+    by (elim transition_from_loss) simp
 next
   case parallel_right_io
   with duplicating show ?thesis
     using parallel_left_commutativity and adapted_after_parallel
-    by (elim transition_from_duplication, simp)
+    by (elim transition_from_duplication) simp
 qed (auto elim: transition_from_repeated_receive)
 
 lemma duploss_idempotency [thorn_simps]:
