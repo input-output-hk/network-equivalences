@@ -792,7 +792,7 @@ lemma send_idempotency_under_duploss:
   shows "\<currency>\<^sup>* A \<parallel> A \<triangleleft> X \<parallel> A \<triangleleft> X \<approx>\<^sub>s \<currency>\<^sup>* A \<parallel> A \<triangleleft> X"
 proof (rule synchronous.mutual_silent_weak_transitions_up_to_bisimilarity)
   have "\<currency>\<^sup>? A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>0\<^esup> X\<rparr> post_receive 0 X (\<lambda>_. \<zero> \<parallel> \<currency>\<^sup>? A)"
-    unfolding loss_def and distributor_def and general_parallel.simps
+    unfolding loss_def and distributor_def and general_parallel.simps(1)
     using receiving
     by (subst repeated_receive_proper_def)
   then have "\<currency>\<^sup>? A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>0\<^esup> X\<rparr> \<zero> \<parallel> \<currency>\<^sup>? A"
@@ -1220,7 +1220,7 @@ private lemma loss_transition:
   shows "\<currency>\<^sup>? A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> \<zero> \<parallel> \<currency>\<^sup>? A \<guillemotleft> suffix n"
 proof -
   have "\<currency>\<^sup>? A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> post_receive n X (\<lambda>_. \<zero> \<parallel> \<currency>\<^sup>? A)"
-    unfolding loss_def and distributor_def and general_parallel.simps
+    unfolding loss_def and distributor_def and general_parallel.simps(1)
     using receiving
     by (subst repeated_receive_proper_def)
   then show ?thesis
@@ -1232,7 +1232,7 @@ private lemma duplication_transition:
   shows "\<currency>\<^sup>+ A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
 proof -
   have "\<currency>\<^sup>+ A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> [A, A]. B \<triangleleft> \<box> x \<parallel> \<currency>\<^sup>+ A)"
-    unfolding duplication_def and distributor_def and general_parallel.simps
+    unfolding duplication_def and distributor_def and general_parallel.simps(1)
     using receiving
     by (subst repeated_receive_proper_def)
   then show ?thesis
