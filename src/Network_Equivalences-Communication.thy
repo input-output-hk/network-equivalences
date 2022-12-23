@@ -17,8 +17,9 @@ lemma distributor_transition:
   shows "A \<Rightarrow> Bs \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> \<Prod>B \<leftarrow> Bs. B \<guillemotleft> suffix n \<triangleleft> X \<parallel> (A \<Rightarrow> Bs) \<guillemotleft> suffix n"
   using
     repeated_receive_transition
-      [where \<P> = "\<lambda>x. \<Prod>B \<leftarrow> Bs. B \<triangleleft> \<box> x",
-       unfolded post_receive_after_general_parallel post_receive_def
+      [
+        where \<P> = "\<lambda>x. \<Prod>B \<leftarrow> Bs. B \<triangleleft> \<box> x",
+        unfolded post_receive_after_general_parallel post_receive_def
       ]
   by transfer simp
 
