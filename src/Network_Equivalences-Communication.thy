@@ -698,12 +698,12 @@ next
     by (elim transition_from_duplication) simp
 qed (fast elim: transition_from_loss transition_from_duplication)+
 
-lemma duploss_transition_from_loss:
+lemma duploss_losing_transition:
   shows "\<currency>\<^sup>* A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> (\<zero> \<parallel> \<currency>\<^sup>? A \<guillemotleft> suffix n) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
   unfolding duploss_def
   by (intro loss_transition parallel_left_io)
 
-lemma duploss_transition_from_duplication:
+lemma duploss_duplicating_transition:
   shows "
     \<currency>\<^sup>* A
     \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
@@ -1255,7 +1255,7 @@ proof (coinduction rule: synchronous.mixed.up_to_rule [where \<F> = "[\<sim>\<^s
         \<currency>\<^sup>* A
         \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
         \<currency>\<^sup>? A \<guillemotleft> suffix n \<parallel> (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
-        by (fact duploss_transition_from_duplication)
+        by (fact duploss_duplicating_transition)
       moreover have "
         \<currency>\<^sup>? A \<guillemotleft> suffix n \<parallel> (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n
         \<rightarrow>\<^sub>s\<lparr>\<tau>\<rparr>
