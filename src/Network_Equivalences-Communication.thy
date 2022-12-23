@@ -31,14 +31,12 @@ qed
 
 lemma distributor_transition:
   shows "A \<Rightarrow> Bs \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> \<Prod>B \<leftarrow> Bs. B \<guillemotleft> suffix n \<triangleleft> X \<parallel> (A \<Rightarrow> Bs) \<guillemotleft> suffix n"
-proof -
-  have "A \<Rightarrow> Bs \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> post_receive n X (\<lambda>x. \<Prod>B \<leftarrow> Bs. B \<triangleleft> \<box> x \<parallel> A \<Rightarrow> Bs)"
-    unfolding distributor_def
-    using receiving
-    by (subst repeated_receive_proper_def)
-  then show ?thesis
-    by (elim transition_from_distributor, auto simp only:)
-qed
+  using
+    repeated_receive_transition
+      [where \<P> = "\<lambda>x. \<Prod>B \<leftarrow> Bs. B \<triangleleft> \<box> x",
+       unfolded post_receive_after_general_parallel post_receive_def
+      ]
+  by transfer simp
 
 lemma distributor_idempotency [thorn_simps]:
   shows "A \<Rightarrow> Bs \<parallel> A \<Rightarrow> Bs \<sim>\<^sub>s A \<Rightarrow> Bs"
