@@ -13,6 +13,15 @@ lemma adapted_after_distributor:
   shows "(A \<Rightarrow> Bs) \<guillemotleft> \<E> = A \<guillemotleft> \<E> \<Rightarrow> map (\<lambda>B. B \<guillemotleft> \<E>) Bs"
   sorry
 
+lemma distributor_transition:
+  shows "A \<Rightarrow> Bs \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> \<Prod>B \<leftarrow> Bs. B \<guillemotleft> suffix n \<triangleleft> X \<parallel> (A \<Rightarrow> Bs) \<guillemotleft> suffix n"
+  using
+    repeated_receive_transition
+      [where \<P> = "\<lambda>x. \<Prod>B \<leftarrow> Bs. B \<triangleleft> \<box> x",
+       unfolded post_receive_after_general_parallel post_receive_def
+      ]
+  by transfer simp
+
 lemma transition_from_distributor:
   assumes "A \<Rightarrow> Bs \<rightarrow>\<^sub>s\<lparr>\<alpha>\<rparr> Q"
   obtains n and X where "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X" and "Q = \<Prod>B \<leftarrow> Bs. B \<guillemotleft> suffix n \<triangleleft> X \<parallel> (A \<Rightarrow> Bs) \<guillemotleft> suffix n"
@@ -28,15 +37,6 @@ proof -
   ultimately show ?thesis
     by (simp only: that)
 qed
-
-lemma distributor_transition:
-  shows "A \<Rightarrow> Bs \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> \<Prod>B \<leftarrow> Bs. B \<guillemotleft> suffix n \<triangleleft> X \<parallel> (A \<Rightarrow> Bs) \<guillemotleft> suffix n"
-  using
-    repeated_receive_transition
-      [where \<P> = "\<lambda>x. \<Prod>B \<leftarrow> Bs. B \<triangleleft> \<box> x",
-       unfolded post_receive_after_general_parallel post_receive_def
-      ]
-  by transfer simp
 
 lemma distributor_idempotency [thorn_simps]:
   shows "A \<Rightarrow> Bs \<parallel> A \<Rightarrow> Bs \<sim>\<^sub>s A \<Rightarrow> Bs"
@@ -63,17 +63,17 @@ lemma adapted_after_loss:
   shows "\<currency>\<^sup>? A \<guillemotleft> \<E> = \<currency>\<^sup>? (A \<guillemotleft> \<E>)"
   by (simp del: distributor_def add: adapted_after_distributor)
 
+lemma loss_transition:
+  shows "\<currency>\<^sup>? A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> \<zero> \<parallel> \<currency>\<^sup>? A \<guillemotleft> suffix n"
+  using distributor_transition [where Bs = "[]"]
+  by simp
+
 lemma transition_from_loss:
   assumes "\<currency>\<^sup>? A \<rightarrow>\<^sub>s\<lparr>\<alpha>\<rparr> Q"
   obtains n and X where "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X" and "Q = \<zero> \<parallel> \<currency>\<^sup>? A \<guillemotleft> suffix n"
   using assms
   unfolding loss_def
   by (auto elim: transition_from_distributor simp only: general_parallel.simps(1))
-
-lemma loss_transition:
-  shows "\<currency>\<^sup>? A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> \<zero> \<parallel> \<currency>\<^sup>? A \<guillemotleft> suffix n"
-  using distributor_transition [where Bs = "[]"]
-  by simp
 
 lemma loss_idempotency [thorn_simps]:
   shows "\<currency>\<^sup>? A \<parallel> \<currency>\<^sup>? A \<sim>\<^sub>s \<currency>\<^sup>? A"
@@ -99,6 +99,11 @@ lemma adapted_after_duplication:
   shows "\<currency>\<^sup>+ A \<guillemotleft> \<E> = \<currency>\<^sup>+ (A \<guillemotleft> \<E>)"
   by (simp del: distributor_def add: adapted_after_distributor)
 
+lemma duplication_transition:
+  shows "\<currency>\<^sup>+ A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
+  using distributor_transition [where Bs = "[A, A]"]
+  by simp
+
 lemma transition_from_duplication:
   assumes "\<currency>\<^sup>+ A \<rightarrow>\<^sub>s\<lparr>\<alpha>\<rparr> Q"
   obtains n and X
@@ -106,11 +111,6 @@ lemma transition_from_duplication:
   using assms
   unfolding duplication_def
   by (auto elim: transition_from_distributor simp only: general_parallel.simps)
-
-lemma duplication_transition:
-  shows "\<currency>\<^sup>+ A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
-  using distributor_transition [where Bs = "[A, A]"]
-  by simp
 
 lemma duplication_idempotency [thorn_simps]:
   shows "\<currency>\<^sup>+ A \<parallel> \<currency>\<^sup>+ A \<sim>\<^sub>s \<currency>\<^sup>+ A"
@@ -675,6 +675,19 @@ lemma adapted_after_duploss:
   shows "\<currency>\<^sup>* A \<guillemotleft> \<E> = \<currency>\<^sup>* (A \<guillemotleft> \<E>)"
   by (simp only: duploss_def adapted_after_parallel adapted_after_loss adapted_after_duplication)
 
+lemma duploss_losing_transition:
+  shows "\<currency>\<^sup>* A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> (\<zero> \<parallel> \<currency>\<^sup>? A \<guillemotleft> suffix n) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
+  unfolding duploss_def
+  by (intro loss_transition parallel_left_io)
+
+lemma duploss_duplicating_transition:
+  shows "
+    \<currency>\<^sup>* A
+    \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
+    \<currency>\<^sup>? A \<guillemotleft> suffix n \<parallel> (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
+  unfolding duploss_def
+  by (intro duplication_transition parallel_right_io)
+
 lemma transition_from_duploss:
   assumes "\<currency>\<^sup>* A \<rightarrow>\<^sub>s\<lparr>\<alpha>\<rparr> Q"
   obtains
@@ -695,19 +708,6 @@ next
     using parallel_left_commutativity and adapted_after_parallel
     by (elim transition_from_duplication) simp
 qed (fast elim: transition_from_loss transition_from_duplication)+
-
-lemma duploss_losing_transition:
-  shows "\<currency>\<^sup>* A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> (\<zero> \<parallel> \<currency>\<^sup>? A \<guillemotleft> suffix n) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
-  unfolding duploss_def
-  by (intro loss_transition parallel_left_io)
-
-lemma duploss_duplicating_transition:
-  shows "
-    \<currency>\<^sup>* A
-    \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
-    \<currency>\<^sup>? A \<guillemotleft> suffix n \<parallel> (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
-  unfolding duploss_def
-  by (intro duplication_transition parallel_right_io)
 
 lemma duploss_idempotency [thorn_simps]:
   shows "\<currency>\<^sup>* A \<parallel> \<currency>\<^sup>* A \<sim>\<^sub>s \<currency>\<^sup>* A"
@@ -856,17 +856,17 @@ lemma adapted_after_unidirectional_bridge:
   shows "(A \<rightarrow> B) \<guillemotleft> \<E> = A \<guillemotleft> \<E> \<rightarrow> B \<guillemotleft> \<E>"
   by (simp del: distributor_def add: adapted_after_distributor)
 
+lemma unidirectional_bridge_transition:
+  shows "A \<rightarrow> B \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n"
+  using distributor_transition [where Bs = "[B]"]
+  by simp
+
 lemma transition_from_unidirectional_bridge:
   assumes "A \<rightarrow> B \<rightarrow>\<^sub>s\<lparr>\<alpha>\<rparr> Q"
   obtains n and X where "\<alpha> = A \<triangleright> \<star>\<^bsup>n\<^esup> X" and "Q = (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n"
   using assms
   unfolding unidirectional_bridge_def
   by (auto elim: transition_from_distributor simp only: general_parallel.simps)
-
-lemma unidirectional_bridge_transition:
-  shows "A \<rightarrow> B \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> (B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n"
-  using distributor_transition [where Bs = "[B]"]
-  by simp
 
 lemma unidirectional_bridge_idempotency [thorn_simps]:
   shows "A \<rightarrow> B \<parallel> A \<rightarrow> B \<sim>\<^sub>s A \<rightarrow> B"
@@ -1339,6 +1339,16 @@ lemma adapted_after_bidirectional_bridge:
   shows "(A \<leftrightarrow> B) \<guillemotleft> \<E> = A \<guillemotleft> \<E> \<leftrightarrow> B \<guillemotleft> \<E>"
   by (simp only: bidirectional_bridge_def adapted_after_parallel adapted_after_unidirectional_bridge)
 
+lemma bidirectional_bridge_forward_transition:
+  shows "A \<leftrightarrow> B \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> ((B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n) \<parallel> (B \<rightarrow> A) \<guillemotleft> suffix n"
+  unfolding bidirectional_bridge_def
+  by (intro unidirectional_bridge_transition parallel_left_io)
+
+lemma bidirectional_bridge_backward_transition:
+  shows "A \<leftrightarrow> B \<rightarrow>\<^sub>s\<lparr>B \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> (A \<rightarrow> B) \<guillemotleft> suffix n \<parallel> ((A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (B \<rightarrow> A) \<guillemotleft> suffix n)"
+  unfolding bidirectional_bridge_def
+  by (intro unidirectional_bridge_transition parallel_right_io)
+
 lemma transition_from_bidirectional_bridge:
   assumes "A \<leftrightarrow> B \<rightarrow>\<^sub>s\<lparr>\<alpha>\<rparr> Q"
   obtains
@@ -1359,16 +1369,6 @@ next
     using parallel_left_commutativity and adapted_after_parallel
     by (elim transition_from_unidirectional_bridge) simp
 qed (fast elim: transition_from_unidirectional_bridge)+
-
-lemma bidirectional_bridge_forward_transition:
-  shows "A \<leftrightarrow> B \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> ((B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n) \<parallel> (B \<rightarrow> A) \<guillemotleft> suffix n"
-  unfolding bidirectional_bridge_def
-  by (intro unidirectional_bridge_transition parallel_left_io)
-
-lemma bidirectional_bridge_backward_transition:
-  shows "A \<leftrightarrow> B \<rightarrow>\<^sub>s\<lparr>B \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> (A \<rightarrow> B) \<guillemotleft> suffix n \<parallel> ((A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (B \<rightarrow> A) \<guillemotleft> suffix n)"
-  unfolding bidirectional_bridge_def
-  by (intro unidirectional_bridge_transition parallel_right_io)
 
 lemma bidirectional_bridge_idempotency [thorn_simps]:
   shows "A \<leftrightarrow> B \<parallel> A \<leftrightarrow> B \<sim>\<^sub>s A \<leftrightarrow> B"
