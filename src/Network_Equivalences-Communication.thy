@@ -677,17 +677,24 @@ lemma adapted_after_duploss:
   by (simp only: duploss_def adapted_after_parallel adapted_after_loss adapted_after_duplication)
 
 lemma duploss_losing_transition:
-  shows "\<currency>\<^sup>* A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> (\<zero> \<parallel> \<currency>\<^sup>? A \<guillemotleft> suffix n) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
-  unfolding duploss_def
-  by (intro loss_transition parallel_left_io)
+  obtains Q
+    where
+      "\<currency>\<^sup>* A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> Q"
+    and
+      "Q \<sim>\<^sub>s \<zero> \<parallel> \<currency>\<^sup>* A \<guillemotleft> suffix n"
+  unfolding duploss_def and adapted_after_parallel
+  using parallel_associativity
+  by (fast intro: loss_transition parallel_left_io)
 
 lemma duploss_duplicating_transition:
-  shows "
-    \<currency>\<^sup>* A
-    \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
-    \<currency>\<^sup>? A \<guillemotleft> suffix n \<parallel> (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
-  unfolding duploss_def
-  by (intro duplication_transition parallel_right_io)
+  obtains Q
+    where
+      "\<currency>\<^sup>* A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> Q"
+    and
+      "Q \<sim>\<^sub>s (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>* A \<guillemotleft> suffix n"
+  unfolding duploss_def and adapted_after_parallel
+  using parallel_left_commutativity
+  by (fast intro: duplication_transition parallel_right_io)
 
 lemma transition_from_duploss:
   assumes "\<currency>\<^sup>* A \<rightarrow>\<^sub>s\<lparr>\<alpha>\<rparr> Q"
@@ -1245,50 +1252,61 @@ proof (coinduction rule: synchronous.mixed.up_to_rule [where \<F> = "[\<sim>\<^s
       unfolding adapted_after_parallel
       using thorn_simps
       by equivalence
-    moreover have "
-      \<currency>\<^sup>* A
-      \<Rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
-      (\<zero> \<parallel> \<currency>\<^sup>? A \<guillemotleft> suffix n) \<parallel> (\<zero> \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
+    moreover obtain T where "\<currency>\<^sup>* A \<Rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> T" and "A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<currency>\<^sup>* A \<guillemotleft> suffix n \<sim>\<^sub>s T"
     proof -
-      have "
-        \<currency>\<^sup>* A
-        \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
-        \<currency>\<^sup>? A \<guillemotleft> suffix n \<parallel> (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
+      obtain S
+        where
+          "\<currency>\<^sup>* A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> S"
+        and
+          "S \<sim>\<^sub>s (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>* A \<guillemotleft> suffix n"
         by (fact duploss_duplicating_transition)
       moreover have "
-        \<currency>\<^sup>? A \<guillemotleft> suffix n \<parallel> (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n
+        (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>* A \<guillemotleft> suffix n
         \<rightarrow>\<^sub>s\<lparr>\<tau>\<rparr>
-        (\<zero> \<parallel> \<currency>\<^sup>? A \<guillemotleft> suffix n) \<parallel> (\<zero> \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
+        (\<zero> \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (\<zero> \<parallel> \<currency>\<^sup>? A \<guillemotleft> suffix n) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
       proof -
         have "\<currency>\<^sup>? (A \<guillemotleft> suffix n) \<rightarrow>\<^sub>s\<lparr>A \<guillemotleft> suffix n \<triangleright> \<star>\<^bsup>0\<^esup> X\<rparr> \<zero> \<parallel> \<currency>\<^sup>? (A \<guillemotleft> suffix n) \<guillemotleft> suffix 0"
           by (fact loss_transition)
+        then have "
+          \<currency>\<^sup>* A \<guillemotleft> suffix n
+          \<rightarrow>\<^sub>s\<lparr>A \<guillemotleft> suffix n \<triangleright> \<star>\<^bsup>0\<^esup> X\<rparr>
+          (\<zero> \<parallel> \<currency>\<^sup>? A \<guillemotleft> suffix n \<guillemotleft> suffix 0) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n \<guillemotleft> suffix 0"
+          unfolding adapted_after_loss and adapted_after_parallel and duploss_def
+          by (intro parallel_left_io)
         moreover have "A \<guillemotleft> suffix n \<triangleleft> X \<rightarrow>\<^sub>s\<lparr>A \<guillemotleft> suffix n \<triangleleft> \<star>\<^bsup>0\<^esup> X\<rparr> \<zero>"
           by (fact sending)
         then have "
-          (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n
+          A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>
           \<rightarrow>\<^sub>s\<lparr>A \<guillemotleft> suffix n \<triangleleft> \<star>\<^bsup>0\<^esup> X\<rparr>
-          (\<zero> \<parallel> (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<guillemotleft> suffix 0) \<parallel> (\<currency>\<^sup>+ A \<guillemotleft> suffix n) \<guillemotleft> suffix 0"
-          by (blast intro: parallel_left_io)
+          \<zero> \<parallel> (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<guillemotleft> suffix 0"
+          by (intro parallel_left_io)
         ultimately have "
-          \<currency>\<^sup>? (A \<guillemotleft> suffix n) \<parallel> (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n
+          (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>* A \<guillemotleft> suffix n
           \<rightarrow>\<^sub>s\<lparr>\<tau>\<rparr>
-          (\<zero> \<parallel> \<currency>\<^sup>? (A \<guillemotleft> suffix n) \<guillemotleft> suffix 0) \<parallel>
-          ((\<zero> \<parallel> (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<guillemotleft> suffix 0) \<parallel> (\<currency>\<^sup>+ A \<guillemotleft> suffix n) \<guillemotleft> suffix 0)"
+          (\<zero> \<parallel> (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<guillemotleft> suffix 0) \<parallel>
+          (\<zero> \<parallel> \<currency>\<^sup>? A \<guillemotleft> suffix n \<guillemotleft> suffix 0) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n \<guillemotleft> suffix 0"
           using communication
           by fastforce
         then show ?thesis
-          by (unfold adapted_after_loss, transfer, simp)
+          by transfer simp
       qed
+      with \<open>S \<sim>\<^sub>s (A \<guillemotleft> suffix n \<triangleleft> X \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>* A \<guillemotleft> suffix n\<close>
+      obtain T
+        where
+          "S \<rightarrow>\<^sub>s\<lparr>\<tau>\<rparr> T"
+        and
+          "T \<sim>\<^sub>s (\<zero> \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (\<zero> \<parallel> \<currency>\<^sup>? A \<guillemotleft> suffix n) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
+        by (blast elim: synchronous.bisimilarity.cases)
+      moreover have "A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<currency>\<^sup>* A \<guillemotleft> suffix n \<sim>\<^sub>s T"
+        unfolding adapted_after_parallel and duploss_def
+        using
+          thorn_simps
+        and
+          \<open>T \<sim>\<^sub>s (\<zero> \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (\<zero> \<parallel> \<currency>\<^sup>? A \<guillemotleft> suffix n) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n\<close>
+        by equivalence
       ultimately show ?thesis
-        by (simp, blast intro: rtranclp_trans)
+        using that by (simp, blast intro: rtranclp_trans)
     qed
-    moreover have "
-      A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<currency>\<^sup>* A \<guillemotleft> suffix n
-      \<sim>\<^sub>s
-      (\<zero> \<parallel> \<currency>\<^sup>? A \<guillemotleft> suffix n) \<parallel> (\<zero> \<parallel> A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> \<currency>\<^sup>+ A \<guillemotleft> suffix n"
-      unfolding duploss_def and adapted_after_parallel
-      using thorn_simps
-      by equivalence
     ultimately show ?thesis
       unfolding
         \<open>\<alpha> = IO \<eta> A' n X\<close> and \<open>S = \<currency>\<^sup>* A \<guillemotleft> suffix n \<parallel> Q\<close>
