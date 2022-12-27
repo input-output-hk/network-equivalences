@@ -1359,14 +1359,29 @@ lemma adapted_after_bidirectional_bridge:
   by (simp only: bidirectional_bridge_def adapted_after_parallel adapted_after_unidirectional_bridge)
 
 lemma bidirectional_bridge_forward_transition:
-  shows "A \<leftrightarrow> B \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> ((B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n) \<parallel> (B \<rightarrow> A) \<guillemotleft> suffix n"
-  unfolding bidirectional_bridge_def
-  by (intro unidirectional_bridge_transition parallel_left_io)
+  obtains Q
+    where
+      "A \<leftrightarrow> B \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> Q"
+    and
+      "Q \<sim>\<^sub>s B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero> \<parallel> (A \<leftrightarrow> B) \<guillemotleft> suffix n"
+  unfolding bidirectional_bridge_def and adapted_after_parallel
+  using parallel_associativity and synchronous.bisimilarity_transitivity_rule
+  by (blast intro: unidirectional_bridge_transition parallel_left_io)
 
 lemma bidirectional_bridge_backward_transition:
-  shows "A \<leftrightarrow> B \<rightarrow>\<^sub>s\<lparr>B \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> (A \<rightarrow> B) \<guillemotleft> suffix n \<parallel> ((A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (B \<rightarrow> A) \<guillemotleft> suffix n)"
-  unfolding bidirectional_bridge_def
-  by (intro unidirectional_bridge_transition parallel_right_io)
+  obtains Q
+    where
+      "A \<leftrightarrow> B \<rightarrow>\<^sub>s\<lparr>B \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> Q"
+    and
+      "Q \<sim>\<^sub>s A \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero> \<parallel> (A \<leftrightarrow> B) \<guillemotleft> suffix n"
+  unfolding bidirectional_bridge_def and adapted_after_parallel
+  using
+    parallel_associativity
+  and
+    parallel_left_commutativity
+  and
+    synchronous.bisimilarity_transitivity_rule
+  by (fast intro: unidirectional_bridge_transition parallel_right_io)
 
 lemma transition_from_bidirectional_bridge:
   assumes "A \<leftrightarrow> B \<rightarrow>\<^sub>s\<lparr>\<alpha>\<rparr> Q"
@@ -1586,31 +1601,28 @@ proof
     then have "A \<leftrightarrow> B \<parallel> A \<triangleright> x. \<P> x \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> (A \<leftrightarrow> B) \<guillemotleft> suffix n \<parallel> post_receive n X \<P>"
       by (intro synchronous_transition.parallel_right_io)
     moreover
-    have "
-      B \<leftrightarrow> A \<parallel> B \<triangleright> x. \<P> x
-      \<Rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr>
-      ((B \<rightarrow> A) \<guillemotleft> suffix n \<parallel> ((\<zero> \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n)) \<parallel> post_receive n X \<P>"
+    obtain T
+      where
+        "B \<leftrightarrow> A \<parallel> B \<triangleright> x. \<P> x \<Rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> T"
+      and
+        "(A \<leftrightarrow> B) \<guillemotleft> suffix n \<parallel> post_receive n X \<P> \<sim>\<^sub>s T"
     proof -
-      let ?T = "(B \<rightarrow> A) \<guillemotleft> suffix n \<parallel> ((B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n)"
-      have "B \<leftrightarrow> A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> ?T"
-        by (fact bidirectional_bridge_backward_transition)
-      then have "B \<leftrightarrow> A \<parallel> B \<triangleright> x. \<P> x \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> ?T \<parallel> (B \<triangleright> x. \<P> x) \<guillemotleft> suffix n"
-        by (intro parallel_left_io)
+      let ?S' = "B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero> \<parallel> (B \<leftrightarrow> A) \<guillemotleft> suffix n"
+      obtain S where "B \<leftrightarrow> A \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> S" and "S \<sim>\<^sub>s ?S'"
+        by (erule bidirectional_bridge_backward_transition)
+      then have
+        "B \<leftrightarrow> A \<parallel> B \<triangleright> x. \<P> x \<rightarrow>\<^sub>s\<lparr>A \<triangleright> \<star>\<^bsup>n\<^esup> X\<rparr> S \<parallel> (B \<triangleright> x. \<P> x) \<guillemotleft> suffix n"
+        and
+        "S \<parallel> (B \<triangleright> x. \<P> x) \<guillemotleft> suffix n \<sim>\<^sub>s ?S' \<parallel> (B \<triangleright> x. \<P> x) \<guillemotleft> suffix n"
+        unfolding atomize_conj
+        by (fast intro: parallel_left_io synchronous.parallel_is_left_compatible_with_bisimilarity)
       moreover
-      have "
-        ?T \<parallel> (B \<triangleright> x. \<P> x) \<guillemotleft> suffix n
-        \<rightarrow>\<^sub>s\<lparr>\<tau>\<rparr>
-        ((B \<rightarrow> A) \<guillemotleft> suffix n \<parallel> ((\<zero> \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n)) \<parallel> post_receive n X \<P>"
+      have "?S' \<parallel> (B \<triangleright> x. \<P> x) \<guillemotleft> suffix n \<rightarrow>\<^sub>s\<lparr>\<tau>\<rparr> (\<zero> \<parallel> \<zero> \<parallel> (B \<leftrightarrow> A) \<guillemotleft> suffix n) \<parallel> post_receive n X \<P>"
       proof -
         have "B \<guillemotleft> suffix n \<triangleleft> X \<rightarrow>\<^sub>s\<lparr>B \<guillemotleft> suffix n \<triangleleft> \<star>\<^bsup>0\<^esup> X\<rparr> \<zero>"
           by (fact sending)
-        then have "B \<guillemotleft> suffix n \<triangleleft> X \<parallel> \<zero> \<rightarrow>\<^sub>s\<lparr>B \<guillemotleft> suffix n \<triangleleft> \<star>\<^bsup>0\<^esup> X\<rparr> \<zero> \<parallel> \<zero> \<guillemotleft> suffix 0"
+        then have "?S' \<rightarrow>\<^sub>s\<lparr>B \<guillemotleft> suffix n \<triangleleft> \<star>\<^bsup>0\<^esup> X\<rparr> \<zero> \<parallel> (\<zero> \<parallel> (B \<leftrightarrow> A) \<guillemotleft> suffix n) \<guillemotleft> suffix 0"
           by (intro parallel_left_io)
-        then have "
-          ?T
-          \<rightarrow>\<^sub>s\<lparr>B \<guillemotleft> suffix n \<triangleleft> \<star>\<^bsup>0\<^esup> X\<rparr>
-          (B \<rightarrow> A) \<guillemotleft> suffix n \<guillemotleft> suffix 0 \<parallel> ((\<zero> \<parallel> \<zero> \<guillemotleft> suffix 0) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n \<guillemotleft> suffix 0)"
-          by (blast intro: parallel_left_io synchronous_transition.parallel_right_io)
         moreover
         have "
           (B \<triangleright> x. \<P> x) \<guillemotleft> suffix n
@@ -1619,26 +1631,29 @@ proof
           unfolding adapted_after_receive
           using receiving .
         ultimately have "
-          ?T \<parallel> (B \<triangleright> x. \<P> x) \<guillemotleft> suffix n
+          ?S' \<parallel> (B \<triangleright> x. \<P> x) \<guillemotleft> suffix n
           \<rightarrow>\<^sub>s\<lparr>\<tau>\<rparr>
-          ((B \<rightarrow> A) \<guillemotleft> suffix n \<guillemotleft> suffix 0 \<parallel> ((\<zero> \<parallel> \<zero> \<guillemotleft> suffix 0) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n \<guillemotleft> suffix 0)) \<parallel>
-          post_receive 0 X (\<lambda>x. \<P> x \<guillemotleft> suffix n)"
+          (\<zero> \<parallel> (\<zero> \<parallel> (B \<leftrightarrow> A) \<guillemotleft> suffix n) \<guillemotleft> suffix 0) \<parallel> post_receive 0 X (\<lambda>x. \<P> x \<guillemotleft> suffix n)"
           using communication
           by fastforce
         then show ?thesis
           unfolding post_receive_def
           by transfer simp
       qed
+      with \<open>S \<parallel> (B \<triangleright> x. \<P> x) \<guillemotleft> suffix n \<sim>\<^sub>s ?S' \<parallel> (B \<triangleright> x. \<P> x) \<guillemotleft> suffix n\<close>
+      obtain U
+        where
+          "S \<parallel> (B \<triangleright> x. \<P> x) \<guillemotleft> suffix n \<rightarrow>\<^sub>s\<lparr>\<tau>\<rparr> U"
+        and
+          U_bisim: "U \<sim>\<^sub>s (\<zero> \<parallel> \<zero> \<parallel> (B \<leftrightarrow> A) \<guillemotleft> suffix n) \<parallel> post_receive n X \<P>"
+        by (blast elim: synchronous.bisimilarity.cases)
+      moreover have "(A \<leftrightarrow> B) \<guillemotleft> suffix n \<parallel> post_receive n X \<P> \<sim>\<^sub>s U"
+        unfolding adapted_after_bidirectional_bridge
+        using U_bisim [unfolded adapted_after_bidirectional_bridge] and thorn_simps
+        by equivalence
       ultimately show ?thesis
-        by (simp, blast intro: rtranclp_trans)
+        using that by (simp, blast intro: rtranclp_trans)
     qed
-    moreover have "
-      (A \<leftrightarrow> B) \<guillemotleft> suffix n \<parallel> post_receive n X \<P>
-      \<sim>\<^sub>s
-      ((B \<rightarrow> A) \<guillemotleft> suffix n \<parallel> ((\<zero> \<parallel> \<zero>) \<parallel> (A \<rightarrow> B) \<guillemotleft> suffix n)) \<parallel> post_receive n X \<P>"
-      unfolding adapted_after_parallel and bidirectional_bridge_def
-      using thorn_simps
-      by equivalence
     ultimately show ?thesis
       unfolding
         \<open>\<alpha> = IO \<eta> A' n X\<close> and \<open>S = (A \<leftrightarrow> B) \<guillemotleft> suffix n \<parallel> R\<close>
