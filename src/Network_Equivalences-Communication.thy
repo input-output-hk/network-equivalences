@@ -1664,6 +1664,11 @@ proof
   qed
 qed (respectful, iprover)
 
+lemma receive_channel_switch:
+  shows "A \<leftrightarrow> B \<parallel> A \<triangleright> x. \<P> x \<approx>\<^sub>s A \<leftrightarrow> B \<parallel> B \<triangleright> x. \<P> x"
+  using symmetric_receive_channel_switch [where A = A] and thorn_simps
+  by equivalence
+
 end
 
 lemma general_parallel_channel_switch:
