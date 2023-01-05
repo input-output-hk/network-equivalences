@@ -289,6 +289,14 @@ lemma adapted_after_bidirectional_bridge:
   shows "(A \<leftrightarrow> B) \<guillemotleft> \<E> = A \<guillemotleft> \<E> \<leftrightarrow> B \<guillemotleft> \<E>"
   by (simp only: bidirectional_bridge_def adapted_after_parallel adapted_after_unidirectional_bridge)
 
+lemma family_uncurry_after_bidirectional_bridge [induct_simp]:
+  shows "\<nabla> (\<lambda>b. \<A> b \<leftrightarrow> \<B> b) = \<nabla> \<A> \<leftrightarrow> \<nabla> \<B>"
+  unfolding
+    bidirectional_bridge_def
+  and
+    family_uncurry_after_parallel and family_uncurry_after_unidirectional_bridge
+  ..
+
 lemma bidirectional_bridge_idempotency [thorn_simps]:
   shows "A \<leftrightarrow> B \<parallel> A \<leftrightarrow> B \<sim>\<^sub>s A \<leftrightarrow> B"
   unfolding bidirectional_bridge_def
