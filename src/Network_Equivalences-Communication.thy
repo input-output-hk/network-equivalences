@@ -91,6 +91,11 @@ lemma adapted_after_duplication:
   shows "\<currency>\<^sup>+ A \<guillemotleft> \<E> = \<currency>\<^sup>+ (A \<guillemotleft> \<E>)"
   by (simp del: distributor_def add: adapted_after_distributor)
 
+lemma family_uncurry_after_duplication [induct_simp]:
+  shows "\<nabla> (\<lambda>b. \<currency>\<^sup>+ (\<A> b)) = \<currency>\<^sup>+ (\<nabla> \<A>)"
+  using family_uncurry_after_distributor [where \<B>s = "[\<A>, \<A>]"]
+  by simp
+
 lemma duplication_idempotency [thorn_simps]:
   shows "\<currency>\<^sup>+ A \<parallel> \<currency>\<^sup>+ A \<sim>\<^sub>s \<currency>\<^sup>+ A"
   unfolding duplication_def
