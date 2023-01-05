@@ -125,6 +125,14 @@ lemma adapted_after_duploss:
   shows "\<currency>\<^sup>* A \<guillemotleft> \<E> = \<currency>\<^sup>* (A \<guillemotleft> \<E>)"
   by (simp only: duploss_def adapted_after_parallel adapted_after_loss adapted_after_duplication)
 
+lemma family_uncurry_after_duploss [induct_simp]:
+  shows "\<nabla> (\<lambda>b. \<currency>\<^sup>* (\<A> b)) = \<currency>\<^sup>* (\<nabla> \<A>)"
+  unfolding
+    duploss_def
+  and
+    family_uncurry_after_parallel and family_uncurry_after_loss and family_uncurry_after_duplication
+  ..
+
 lemma duploss_idempotency [thorn_simps]:
   shows "\<currency>\<^sup>* A \<parallel> \<currency>\<^sup>* A \<sim>\<^sub>s \<currency>\<^sup>* A"
   unfolding duploss_def
