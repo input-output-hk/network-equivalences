@@ -231,6 +231,11 @@ lemma adapted_after_unidirectional_bridge:
   shows "(A \<rightarrow> B) \<guillemotleft> \<E> = A \<guillemotleft> \<E> \<rightarrow> B \<guillemotleft> \<E>"
   by (simp del: distributor_def add: adapted_after_distributor)
 
+lemma family_uncurry_after_unidirectional_bridge [induct_simp]:
+  shows "\<nabla> (\<lambda>b. \<A> b \<rightarrow> \<B> b) = \<nabla> \<A> \<rightarrow> \<nabla> \<B>"
+  using family_uncurry_after_distributor [where \<B>s = "[\<B>]"]
+  by simp
+
 lemma unidirectional_bridge_idempotency [thorn_simps]:
   shows "A \<rightarrow> B \<parallel> A \<rightarrow> B \<sim>\<^sub>s A \<rightarrow> B"
   unfolding unidirectional_bridge_def
