@@ -1,5 +1,6 @@
 theory "Network_Equivalences-Diamond-Foundations"
-  imports "Network_Equivalences-Communication"
+  imports
+    "Network_Equivalences-Communication"
 begin
 
 abbreviation diamond_sending where
