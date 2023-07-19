@@ -7,7 +7,7 @@ begin
 subsection \<open>Distributors\<close>
 
 definition distributor :: "chan family \<Rightarrow> chan family list \<Rightarrow> process family" (infix \<open>\<Rightarrow>\<close> 52) where
-  [simp]: "A \<Rightarrow> Bs = A \<triangleright>\<^sup>\<infinity> x. \<Prod>B \<leftarrow> Bs. B \<triangleleft> \<box> x"
+  [simp]: "A \<Rightarrow> Bs = A \<triangleright>\<^sup>\<infinity> x. \<Parallel>B \<leftarrow> Bs. B \<triangleleft> \<box> x"
 
 lemma adapted_after_distributor:
   shows "(A \<Rightarrow> Bs) \<guillemotleft> \<E> = A \<guillemotleft> \<E> \<Rightarrow> map (\<lambda>B. B \<guillemotleft> \<E>) Bs"
@@ -223,11 +223,11 @@ lemma loop_redundancy_under_duploss:
   sorry
 
 lemma sidetrack_redundancy:
-  shows "\<Prod>B \<leftarrow> Bs. \<currency>\<^sup>? B \<parallel> A \<Rightarrow> (B\<^sub>0 # Bs) \<parallel> A \<rightarrow> B\<^sub>0 \<approx>\<^sub>s \<Prod>B \<leftarrow> Bs. \<currency>\<^sup>? B \<parallel> A \<Rightarrow> (B\<^sub>0 # Bs)"
+  shows "\<Parallel>B \<leftarrow> Bs. \<currency>\<^sup>? B \<parallel> A \<Rightarrow> (B\<^sub>0 # Bs) \<parallel> A \<rightarrow> B\<^sub>0 \<approx>\<^sub>s \<Parallel>B \<leftarrow> Bs. \<currency>\<^sup>? B \<parallel> A \<Rightarrow> (B\<^sub>0 # Bs)"
   sorry
 
 lemma distributor_split:
-  shows "\<currency>\<^sup>+ A \<parallel> \<Prod>B \<leftarrow> Bs. \<currency>\<^sup>? B \<parallel> A \<Rightarrow> Bs \<approx>\<^sub>s \<currency>\<^sup>+ A \<parallel> \<Prod>B \<leftarrow> Bs. \<currency>\<^sup>? B \<parallel> \<Prod>B \<leftarrow> Bs. A \<rightarrow> B"
+  shows "\<currency>\<^sup>+ A \<parallel> \<Parallel>B \<leftarrow> Bs. \<currency>\<^sup>? B \<parallel> A \<Rightarrow> Bs \<approx>\<^sub>s \<currency>\<^sup>+ A \<parallel> \<Parallel>B \<leftarrow> Bs. \<currency>\<^sup>? B \<parallel> \<Parallel>B \<leftarrow> Bs. A \<rightarrow> B"
   sorry
 
 subsection \<open>Bidirectional Bridges\<close>
@@ -336,7 +336,7 @@ lemma receive_channel_switch:
 
 lemma general_parallel_channel_switch:
   assumes "\<And>x. fst x \<leftrightarrow> snd x \<parallel> \<P> (fst x) \<approx>\<^sub>s fst x \<leftrightarrow> snd x \<parallel> \<P> (snd x)"
-  shows "\<Prod>v \<leftarrow> vs. fst v \<leftrightarrow> snd v \<parallel> \<Prod>v \<leftarrow> vs. \<P> (fst v) \<approx>\<^sub>s \<Prod>v \<leftarrow> vs. fst v \<leftrightarrow> snd v \<parallel> \<Prod>v \<leftarrow> vs. \<P> (snd v)"
+  shows "\<Parallel>v \<leftarrow> vs. fst v \<leftrightarrow> snd v \<parallel> \<Parallel>v \<leftarrow> vs. \<P> (fst v) \<approx>\<^sub>s \<Parallel>v \<leftarrow> vs. fst v \<leftrightarrow> snd v \<parallel> \<Parallel>v \<leftarrow> vs. \<P> (snd v)"
 proof (induction vs)
   case Nil
   show ?case
@@ -345,15 +345,15 @@ proof (induction vs)
 next
   case (Cons v vs)
   have "
-    (fst v \<leftrightarrow> snd v \<parallel> \<Prod>v \<leftarrow> vs. fst v \<leftrightarrow> snd v) \<parallel> \<P> (fst v) \<parallel> \<Prod>x \<leftarrow> vs. \<P> (fst x)
+    (fst v \<leftrightarrow> snd v \<parallel> \<Parallel>v \<leftarrow> vs. fst v \<leftrightarrow> snd v) \<parallel> \<P> (fst v) \<parallel> \<Parallel>x \<leftarrow> vs. \<P> (fst x)
     \<approx>\<^sub>s
-    (fst v \<leftrightarrow> snd v \<parallel> \<P> (fst v)) \<parallel> (\<Prod>x \<leftarrow> vs. fst x \<leftrightarrow> snd x \<parallel> \<Prod>x \<leftarrow> vs. \<P> (fst x))"
+    (fst v \<leftrightarrow> snd v \<parallel> \<P> (fst v)) \<parallel> (\<Parallel>x \<leftarrow> vs. fst x \<leftrightarrow> snd x \<parallel> \<Parallel>x \<leftarrow> vs. \<P> (fst x))"
     using thorn_simps
     by equivalence
-  also have "\<dots> \<approx>\<^sub>s (fst v \<leftrightarrow> snd v \<parallel> \<P> (snd v)) \<parallel> (\<Prod>v \<leftarrow> vs. fst v \<leftrightarrow> snd v \<parallel> \<Prod>v \<leftarrow> vs. \<P> (snd v))"
+  also have "\<dots> \<approx>\<^sub>s (fst v \<leftrightarrow> snd v \<parallel> \<P> (snd v)) \<parallel> (\<Parallel>v \<leftarrow> vs. fst v \<leftrightarrow> snd v \<parallel> \<Parallel>v \<leftarrow> vs. \<P> (snd v))"
     using assms and Cons.IH
     by (rule synchronous.weak.parallel_is_compatible_with_bisimilarity)
-  also have "\<dots> \<approx>\<^sub>s (fst v \<leftrightarrow> snd v \<parallel> \<Prod>v \<leftarrow> vs. fst v \<leftrightarrow> snd v) \<parallel> (\<P> (snd v) \<parallel> \<Prod>v \<leftarrow> vs. \<P> (snd v))"
+  also have "\<dots> \<approx>\<^sub>s (fst v \<leftrightarrow> snd v \<parallel> \<Parallel>v \<leftarrow> vs. fst v \<leftrightarrow> snd v) \<parallel> (\<P> (snd v) \<parallel> \<Parallel>v \<leftarrow> vs. \<P> (snd v))"
     using thorn_simps
     by equivalence
   finally show ?case
@@ -390,7 +390,7 @@ lemma distributor_source_switch:
 *)
 lemma distributor_target_switch:
   shows
-    "\<Prod>v \<leftarrow> vs. fst v \<leftrightarrow> snd v \<parallel> A \<Rightarrow> map fst vs \<approx>\<^sub>s \<Prod>v \<leftarrow> vs. fst v \<leftrightarrow> snd v \<parallel> A \<Rightarrow> map snd vs"
+    "\<Parallel>v \<leftarrow> vs. fst v \<leftrightarrow> snd v \<parallel> A \<Rightarrow> map fst vs \<approx>\<^sub>s \<Parallel>v \<leftarrow> vs. fst v \<leftrightarrow> snd v \<parallel> A \<Rightarrow> map snd vs"
     (is "?\<P> vs \<parallel> _ \<approx>\<^sub>s ?\<P> vs \<parallel> _")
 proof -
   \<comment> \<open>Specializations of lemmas:\<close>
@@ -399,20 +399,20 @@ proof -
     using inner_bidirectional_bridge_redundancy
     by (rule inner_general_parallel_redundancy)
   have targets_switch:
-    "?\<P> ws \<parallel> \<Prod>w \<leftarrow> ws. fst w \<triangleleft> Y \<approx>\<^sub>s ?\<P> ws \<parallel> \<Prod>w \<leftarrow> ws. snd w \<triangleleft> Y" for ws and Y
+    "?\<P> ws \<parallel> \<Parallel>w \<leftarrow> ws. fst w \<triangleleft> Y \<approx>\<^sub>s ?\<P> ws \<parallel> \<Parallel>w \<leftarrow> ws. snd w \<triangleleft> Y" for ws and Y
     using send_channel_switch
     by (rule general_parallel_channel_switch)
   have post_receive_targets_switch: "
-    post_receive n X (\<lambda>x. ?\<P> vs \<parallel> \<Prod>v \<leftarrow> vs. fst v \<triangleleft> \<box> x)
+    post_receive n X (\<lambda>x. ?\<P> vs \<parallel> \<Parallel>v \<leftarrow> vs. fst v \<triangleleft> \<box> x)
     \<approx>\<^sub>s
-    post_receive n X (\<lambda>x. ?\<P> vs \<parallel> \<Prod>v \<leftarrow> vs. snd v \<triangleleft> \<box> x)"
+    post_receive n X (\<lambda>x. ?\<P> vs \<parallel> \<Parallel>v \<leftarrow> vs. snd v \<triangleleft> \<box> x)"
     for n and X
   proof -
     let ?ws = "map (\<lambda>v. (fst v \<guillemotleft> suffix n, snd v \<guillemotleft> suffix n)) vs"
     have "
-      (\<lambda>e. ((?\<P> vs \<parallel> \<Prod>v \<leftarrow> vs. fst v \<triangleleft> \<box> (X e)) \<guillemotleft> suffix n) e)
+      (\<lambda>e. ((?\<P> vs \<parallel> \<Parallel>v \<leftarrow> vs. fst v \<triangleleft> \<box> (X e)) \<guillemotleft> suffix n) e)
       =
-      (\<lambda>e. (\<Prod>v \<leftarrow> vs. fst v \<guillemotleft> suffix n \<leftrightarrow> snd v \<guillemotleft> suffix n \<parallel> \<Prod>v \<leftarrow> vs. fst v \<guillemotleft> suffix n \<triangleleft> \<box> (X e) \<guillemotleft> suffix n) e)"
+      (\<lambda>e. (\<Parallel>v \<leftarrow> vs. fst v \<guillemotleft> suffix n \<leftrightarrow> snd v \<guillemotleft> suffix n \<parallel> \<Parallel>v \<leftarrow> vs. fst v \<guillemotleft> suffix n \<triangleleft> \<box> (X e) \<guillemotleft> suffix n) e)"
       by
         (simp only:
           adapted_after_parallel
@@ -420,7 +420,7 @@ proof -
           adapted_after_bidirectional_bridge
           adapted_after_send
         )
-    also have "\<dots> = \<Prod>v \<leftarrow> vs. fst v \<guillemotleft> suffix n \<leftrightarrow> snd v \<guillemotleft> suffix n \<parallel> \<Prod>v \<leftarrow> vs. fst v \<guillemotleft> suffix n \<triangleleft> X"
+    also have "\<dots> = \<Parallel>v \<leftarrow> vs. fst v \<guillemotleft> suffix n \<leftrightarrow> snd v \<guillemotleft> suffix n \<parallel> \<Parallel>v \<leftarrow> vs. fst v \<guillemotleft> suffix n \<triangleleft> X"
       by
         (
           subst environment_dependent_parallel,
@@ -429,13 +429,13 @@ proof -
           transfer,
           simp only: comp_def constant_family_def
         )
-    also have "\<dots> = \<Prod>w \<leftarrow> ?ws. fst w \<leftrightarrow> snd w \<parallel> \<Prod>w \<leftarrow> ?ws. fst w \<triangleleft> X"
+    also have "\<dots> = \<Parallel>w \<leftarrow> ?ws. fst w \<leftrightarrow> snd w \<parallel> \<Parallel>w \<leftarrow> ?ws. fst w \<triangleleft> X"
       by (simp only: general_parallel_conversion_deferral fst_conv snd_conv)
-    also have "\<dots> \<approx>\<^sub>s \<Prod>w \<leftarrow> ?ws. fst w \<leftrightarrow> snd w \<parallel> \<Prod>w \<leftarrow> ?ws. snd w \<triangleleft> X"
+    also have "\<dots> \<approx>\<^sub>s \<Parallel>w \<leftarrow> ?ws. fst w \<leftrightarrow> snd w \<parallel> \<Parallel>w \<leftarrow> ?ws. snd w \<triangleleft> X"
       using general_parallel_channel_switch [OF send_channel_switch] .
-    also have "\<dots> = \<Prod>v \<leftarrow> vs. fst v \<guillemotleft> suffix n \<leftrightarrow> snd v \<guillemotleft> suffix n \<parallel> \<Prod>v \<leftarrow> vs. snd v \<guillemotleft> suffix n \<triangleleft> X"
+    also have "\<dots> = \<Parallel>v \<leftarrow> vs. fst v \<guillemotleft> suffix n \<leftrightarrow> snd v \<guillemotleft> suffix n \<parallel> \<Parallel>v \<leftarrow> vs. snd v \<guillemotleft> suffix n \<triangleleft> X"
       by (simp only: general_parallel_conversion_deferral fst_conv snd_conv)
-    also have "\<dots> = (\<lambda>e. (\<Prod>v \<leftarrow> vs. fst v \<guillemotleft> suffix n \<leftrightarrow> snd v \<guillemotleft> suffix n \<parallel> \<Prod>v \<leftarrow> vs. snd v \<guillemotleft> suffix n \<triangleleft> \<box> (X e) \<guillemotleft> suffix n) e)"
+    also have "\<dots> = (\<lambda>e. (\<Parallel>v \<leftarrow> vs. fst v \<guillemotleft> suffix n \<leftrightarrow> snd v \<guillemotleft> suffix n \<parallel> \<Parallel>v \<leftarrow> vs. snd v \<guillemotleft> suffix n \<triangleleft> \<box> (X e) \<guillemotleft> suffix n) e)"
       by
         (
           subst (2) environment_dependent_parallel,
@@ -444,7 +444,7 @@ proof -
           transfer,
           simp only: comp_def constant_family_def
         )
-    also have "\<dots> = (\<lambda>e. ((?\<P> vs \<parallel> \<Prod>v \<leftarrow> vs. snd v \<triangleleft> \<box> (X e)) \<guillemotleft> suffix n) e)"
+    also have "\<dots> = (\<lambda>e. ((?\<P> vs \<parallel> \<Parallel>v \<leftarrow> vs. snd v \<triangleleft> \<box> (X e)) \<guillemotleft> suffix n) e)"
       by
         (simp only:
           adapted_after_parallel
@@ -456,14 +456,14 @@ proof -
       unfolding post_receive_def .
   qed
   \<comment> \<open>The actual proof:\<close>
-  have "?\<P> vs \<parallel> A \<triangleright>\<^sup>\<infinity> y. \<Prod>v \<leftarrow> vs. fst v \<triangleleft> \<box> y \<approx>\<^sub>s ?\<P> vs \<parallel> A \<triangleright>\<^sup>\<infinity> y. (?\<P> vs \<parallel> \<Prod>v \<leftarrow> vs. fst v \<triangleleft> \<box> y)"
+  have "?\<P> vs \<parallel> A \<triangleright>\<^sup>\<infinity> y. \<Parallel>v \<leftarrow> vs. fst v \<triangleleft> \<box> y \<approx>\<^sub>s ?\<P> vs \<parallel> A \<triangleright>\<^sup>\<infinity> y. (?\<P> vs \<parallel> \<Parallel>v \<leftarrow> vs. fst v \<triangleleft> \<box> y)"
     by
       (
         rule synchronous.bisimilarity_in_weak_bisimilarity [THEN predicate2D],
         rule synchronous.bisimilarity_symmetry_rule
       )
       (fact inner_target_bridges_redundancy)
-  also have "\<dots> \<approx>\<^sub>s ?\<P> vs \<parallel> A \<triangleright>\<^sup>\<infinity> y. (?\<P> vs \<parallel> \<Prod>v \<leftarrow> vs. snd v \<triangleleft> \<box> y)"
+  also have "\<dots> \<approx>\<^sub>s ?\<P> vs \<parallel> A \<triangleright>\<^sup>\<infinity> y. (?\<P> vs \<parallel> \<Parallel>v \<leftarrow> vs. snd v \<triangleleft> \<box> y)"
     using post_receive_targets_switch
     by
       (intro
@@ -471,7 +471,7 @@ proof -
         synchronous.weak.repeated_receive_is_quasi_compatible_with_bisimilarity
       )
       simp
-  also have "\<dots> \<approx>\<^sub>s ?\<P> vs \<parallel> A \<triangleright>\<^sup>\<infinity> y. \<Prod>v \<leftarrow> vs. snd v \<triangleleft> \<box> y"
+  also have "\<dots> \<approx>\<^sub>s ?\<P> vs \<parallel> A \<triangleright>\<^sup>\<infinity> y. \<Parallel>v \<leftarrow> vs. snd v \<triangleleft> \<box> y"
     by
       (rule synchronous.bisimilarity_in_weak_bisimilarity [THEN predicate2D])
       (fact inner_target_bridges_redundancy)
@@ -491,9 +491,9 @@ proof -
   also have "\<dots> \<approx>\<^sub>s (A \<leftrightarrow> B \<parallel> A \<leftrightarrow> B \<parallel> \<zero>) \<parallel> B \<Rightarrow> [A, A]"
     using thorn_simps
     by equivalence
-  also have "\<dots> \<approx>\<^sub>s \<Prod>v \<leftarrow> [(A, B), (A, B)]. fst v \<leftrightarrow> snd v \<parallel> B \<Rightarrow> map fst [(A, B), (A, B)]"
+  also have "\<dots> \<approx>\<^sub>s \<Parallel>v \<leftarrow> [(A, B), (A, B)]. fst v \<leftrightarrow> snd v \<parallel> B \<Rightarrow> map fst [(A, B), (A, B)]"
     by simp
-  also have "\<dots> \<approx>\<^sub>s \<Prod>v \<leftarrow> [(A, B), (A, B)]. fst v \<leftrightarrow> snd v \<parallel> B \<Rightarrow> map snd [(A, B), (A, B)]"
+  also have "\<dots> \<approx>\<^sub>s \<Parallel>v \<leftarrow> [(A, B), (A, B)]. fst v \<leftrightarrow> snd v \<parallel> B \<Rightarrow> map snd [(A, B), (A, B)]"
     using distributor_target_switch .
   also have "\<dots> \<approx>\<^sub>s (A \<leftrightarrow> B \<parallel> A \<leftrightarrow> B \<parallel> \<zero>) \<parallel> B \<Rightarrow> [B, B]"
     by simp
@@ -537,9 +537,9 @@ proof -
   have "A \<leftrightarrow> B \<parallel> C \<Rightarrow> [A] \<approx>\<^sub>s (A \<leftrightarrow> B \<parallel> \<zero>) \<parallel> C \<Rightarrow> [A]"
     using thorn_simps
     by equivalence
-  also have "\<dots> \<approx>\<^sub>s \<Prod>v \<leftarrow> [(A, B)]. fst v \<leftrightarrow> snd v \<parallel> C \<Rightarrow> map fst [(A, B)]"
+  also have "\<dots> \<approx>\<^sub>s \<Parallel>v \<leftarrow> [(A, B)]. fst v \<leftrightarrow> snd v \<parallel> C \<Rightarrow> map fst [(A, B)]"
     by simp
-  also have "\<dots> \<approx>\<^sub>s \<Prod>v \<leftarrow>[(A, B)]. fst v \<leftrightarrow> snd v \<parallel> C \<Rightarrow> map snd [(A, B)]"
+  also have "\<dots> \<approx>\<^sub>s \<Parallel>v \<leftarrow>[(A, B)]. fst v \<leftrightarrow> snd v \<parallel> C \<Rightarrow> map snd [(A, B)]"
     using distributor_target_switch .
   also have "\<dots> \<approx>\<^sub>s (A \<leftrightarrow> B \<parallel> \<zero>) \<parallel> C \<Rightarrow> [B]"
     by simp
