@@ -54,20 +54,20 @@ lemma buffer_sidetrack_addition:
     (is "?p \<approx>\<^sub>s ?q")
 proof -
   have "?p \<approx>\<^sub>s
-    \<comment> \<open>Node 0:\<close> (\<Prod>a\<leftarrow>[r\<^sub>0]. \<currency>\<^sup>?a \<parallel> rb\<^sub>0 \<Rightarrow> [sb\<^sub>0, r\<^sub>0]) \<parallel>
-    \<comment> \<open>Node 1:\<close> (\<Prod>a\<leftarrow>[r\<^sub>1]. \<currency>\<^sup>?a \<parallel> rb\<^sub>1 \<Rightarrow> [sb\<^sub>1, r\<^sub>1]) \<parallel>
-    \<comment> \<open>Node 2:\<close> (\<Prod>a\<leftarrow>[r\<^sub>2]. \<currency>\<^sup>?a \<parallel> rb\<^sub>2 \<Rightarrow> [sb\<^sub>2, r\<^sub>2]) \<parallel>
-    \<comment> \<open>Node 3:\<close> (\<Prod>a\<leftarrow>[r\<^sub>3]. \<currency>\<^sup>?a \<parallel> rb\<^sub>3 \<Rightarrow> [sb\<^sub>3, r\<^sub>3])"
+    \<comment> \<open>Node 0:\<close> (\<Parallel>a\<leftarrow>[r\<^sub>0]. \<currency>\<^sup>?a \<parallel> rb\<^sub>0 \<Rightarrow> [sb\<^sub>0, r\<^sub>0]) \<parallel>
+    \<comment> \<open>Node 1:\<close> (\<Parallel>a\<leftarrow>[r\<^sub>1]. \<currency>\<^sup>?a \<parallel> rb\<^sub>1 \<Rightarrow> [sb\<^sub>1, r\<^sub>1]) \<parallel>
+    \<comment> \<open>Node 2:\<close> (\<Parallel>a\<leftarrow>[r\<^sub>2]. \<currency>\<^sup>?a \<parallel> rb\<^sub>2 \<Rightarrow> [sb\<^sub>2, r\<^sub>2]) \<parallel>
+    \<comment> \<open>Node 3:\<close> (\<Parallel>a\<leftarrow>[r\<^sub>3]. \<currency>\<^sup>?a \<parallel> rb\<^sub>3 \<Rightarrow> [sb\<^sub>3, r\<^sub>3])"
     unfolding general_parallel.simps and distributor_def using thorn_simps sorry
     (* FIXME:
       This should by solvable by \<^theory_text>\<open>equivalence\<close> again once it is configured to reason under
       \<^theory_text>\<open>repeated_receive\<close>.
     *)
   also have "\<dots> \<approx>\<^sub>s
-    \<comment> \<open>Node 0:\<close> (\<Prod>a\<leftarrow>[r\<^sub>0]. \<currency>\<^sup>?a \<parallel> rb\<^sub>0 \<Rightarrow> [sb\<^sub>0, r\<^sub>0] \<parallel> rb\<^sub>0 \<rightarrow> sb\<^sub>0) \<parallel>
-    \<comment> \<open>Node 1:\<close> (\<Prod>a\<leftarrow>[r\<^sub>1]. \<currency>\<^sup>?a \<parallel> rb\<^sub>1 \<Rightarrow> [sb\<^sub>1, r\<^sub>1] \<parallel> rb\<^sub>1 \<rightarrow> sb\<^sub>1) \<parallel>
-    \<comment> \<open>Node 2:\<close> (\<Prod>a\<leftarrow>[r\<^sub>2]. \<currency>\<^sup>?a \<parallel> rb\<^sub>2 \<Rightarrow> [sb\<^sub>2, r\<^sub>2] \<parallel> rb\<^sub>2 \<rightarrow> sb\<^sub>2) \<parallel>
-    \<comment> \<open>Node 3:\<close> (\<Prod>a\<leftarrow>[r\<^sub>3]. \<currency>\<^sup>?a \<parallel> rb\<^sub>3 \<Rightarrow> [sb\<^sub>3, r\<^sub>3] \<parallel> rb\<^sub>3 \<rightarrow> sb\<^sub>3)"
+    \<comment> \<open>Node 0:\<close> (\<Parallel>a\<leftarrow>[r\<^sub>0]. \<currency>\<^sup>?a \<parallel> rb\<^sub>0 \<Rightarrow> [sb\<^sub>0, r\<^sub>0] \<parallel> rb\<^sub>0 \<rightarrow> sb\<^sub>0) \<parallel>
+    \<comment> \<open>Node 1:\<close> (\<Parallel>a\<leftarrow>[r\<^sub>1]. \<currency>\<^sup>?a \<parallel> rb\<^sub>1 \<Rightarrow> [sb\<^sub>1, r\<^sub>1] \<parallel> rb\<^sub>1 \<rightarrow> sb\<^sub>1) \<parallel>
+    \<comment> \<open>Node 2:\<close> (\<Parallel>a\<leftarrow>[r\<^sub>2]. \<currency>\<^sup>?a \<parallel> rb\<^sub>2 \<Rightarrow> [sb\<^sub>2, r\<^sub>2] \<parallel> rb\<^sub>2 \<rightarrow> sb\<^sub>2) \<parallel>
+    \<comment> \<open>Node 3:\<close> (\<Parallel>a\<leftarrow>[r\<^sub>3]. \<currency>\<^sup>?a \<parallel> rb\<^sub>3 \<Rightarrow> [sb\<^sub>3, r\<^sub>3] \<parallel> rb\<^sub>3 \<rightarrow> sb\<^sub>3)"
     using sidetrack_redundancy by equivalence
   also have "\<dots> \<approx>\<^sub>s ?q"
     unfolding general_parallel.simps and distributor_def using thorn_simps sorry
@@ -154,21 +154,21 @@ proof -
     diamond_sending sb\<^sub>0 sb\<^sub>1 sb\<^sub>2 sb\<^sub>3 l\<^sub>0\<^sub>1 l\<^sub>0\<^sub>2 l\<^sub>1\<^sub>3 l\<^sub>2\<^sub>3 l\<^sub>3\<^sub>0 \<parallel>
     diamond_receiving rb\<^sub>0 rb\<^sub>1 rb\<^sub>2 rb\<^sub>3 l\<^sub>0\<^sub>1 l\<^sub>0\<^sub>2 l\<^sub>1\<^sub>3 l\<^sub>2\<^sub>3 l\<^sub>3\<^sub>0 \<parallel>
     buffer_sidetracks sb\<^sub>0 sb\<^sub>1 sb\<^sub>2 sb\<^sub>3 rb\<^sub>0 rb\<^sub>1 rb\<^sub>2 rb\<^sub>3 \<parallel>
-    \<comment> \<open>Link 0--1:\<close> (\<currency>\<^sup>+l\<^sub>0\<^sub>1 \<parallel> \<Prod>a\<leftarrow>[l\<^sub>1\<^sub>3]. \<currency>\<^sup>?a \<parallel> l\<^sub>0\<^sub>1 \<Rightarrow> [l\<^sub>1\<^sub>3]) \<parallel>
-    \<comment> \<open>Link 0--2:\<close> (\<currency>\<^sup>+l\<^sub>0\<^sub>2 \<parallel> \<Prod>a\<leftarrow>[l\<^sub>2\<^sub>3]. \<currency>\<^sup>?a \<parallel> l\<^sub>0\<^sub>2 \<Rightarrow> [l\<^sub>2\<^sub>3]) \<parallel>
-    \<comment> \<open>Link 1--3:\<close> (\<currency>\<^sup>+l\<^sub>1\<^sub>3 \<parallel> \<Prod>a\<leftarrow>[l\<^sub>3\<^sub>0]. \<currency>\<^sup>?a \<parallel> l\<^sub>1\<^sub>3 \<Rightarrow> [l\<^sub>3\<^sub>0]) \<parallel>
-    \<comment> \<open>Link 2--3:\<close> (\<currency>\<^sup>+l\<^sub>2\<^sub>3 \<parallel> \<Prod>a\<leftarrow>[l\<^sub>3\<^sub>0]. \<currency>\<^sup>?a \<parallel> l\<^sub>2\<^sub>3 \<Rightarrow> [l\<^sub>3\<^sub>0]) \<parallel>
-    \<comment> \<open>Link 3--0:\<close> (\<currency>\<^sup>+l\<^sub>3\<^sub>0 \<parallel> \<Prod>a\<leftarrow>[l\<^sub>0\<^sub>1, l\<^sub>0\<^sub>2]. \<currency>\<^sup>?a \<parallel> l\<^sub>3\<^sub>0 \<Rightarrow> [l\<^sub>0\<^sub>1, l\<^sub>0\<^sub>2])"
+    \<comment> \<open>Link 0--1:\<close> (\<currency>\<^sup>+l\<^sub>0\<^sub>1 \<parallel> \<Parallel>a\<leftarrow>[l\<^sub>1\<^sub>3]. \<currency>\<^sup>?a \<parallel> l\<^sub>0\<^sub>1 \<Rightarrow> [l\<^sub>1\<^sub>3]) \<parallel>
+    \<comment> \<open>Link 0--2:\<close> (\<currency>\<^sup>+l\<^sub>0\<^sub>2 \<parallel> \<Parallel>a\<leftarrow>[l\<^sub>2\<^sub>3]. \<currency>\<^sup>?a \<parallel> l\<^sub>0\<^sub>2 \<Rightarrow> [l\<^sub>2\<^sub>3]) \<parallel>
+    \<comment> \<open>Link 1--3:\<close> (\<currency>\<^sup>+l\<^sub>1\<^sub>3 \<parallel> \<Parallel>a\<leftarrow>[l\<^sub>3\<^sub>0]. \<currency>\<^sup>?a \<parallel> l\<^sub>1\<^sub>3 \<Rightarrow> [l\<^sub>3\<^sub>0]) \<parallel>
+    \<comment> \<open>Link 2--3:\<close> (\<currency>\<^sup>+l\<^sub>2\<^sub>3 \<parallel> \<Parallel>a\<leftarrow>[l\<^sub>3\<^sub>0]. \<currency>\<^sup>?a \<parallel> l\<^sub>2\<^sub>3 \<Rightarrow> [l\<^sub>3\<^sub>0]) \<parallel>
+    \<comment> \<open>Link 3--0:\<close> (\<currency>\<^sup>+l\<^sub>3\<^sub>0 \<parallel> \<Parallel>a\<leftarrow>[l\<^sub>0\<^sub>1, l\<^sub>0\<^sub>2]. \<currency>\<^sup>?a \<parallel> l\<^sub>3\<^sub>0 \<Rightarrow> [l\<^sub>0\<^sub>1, l\<^sub>0\<^sub>2])"
     unfolding duploss_def and general_parallel.simps using thorn_simps by equivalence
   also have "\<dots> \<approx>\<^sub>s
     diamond_sending sb\<^sub>0 sb\<^sub>1 sb\<^sub>2 sb\<^sub>3 l\<^sub>0\<^sub>1 l\<^sub>0\<^sub>2 l\<^sub>1\<^sub>3 l\<^sub>2\<^sub>3 l\<^sub>3\<^sub>0 \<parallel>
     diamond_receiving rb\<^sub>0 rb\<^sub>1 rb\<^sub>2 rb\<^sub>3 l\<^sub>0\<^sub>1 l\<^sub>0\<^sub>2 l\<^sub>1\<^sub>3 l\<^sub>2\<^sub>3 l\<^sub>3\<^sub>0 \<parallel>
     buffer_sidetracks sb\<^sub>0 sb\<^sub>1 sb\<^sub>2 sb\<^sub>3 rb\<^sub>0 rb\<^sub>1 rb\<^sub>2 rb\<^sub>3 \<parallel>
-    \<comment> \<open>Link 0--1:\<close> (\<currency>\<^sup>+l\<^sub>0\<^sub>1 \<parallel> \<Prod>a\<leftarrow>[l\<^sub>1\<^sub>3]. \<currency>\<^sup>?a \<parallel> \<Prod>a\<leftarrow>[l\<^sub>1\<^sub>3]. l\<^sub>0\<^sub>1 \<rightarrow> a) \<parallel>
-    \<comment> \<open>Link 0--2:\<close> (\<currency>\<^sup>+l\<^sub>0\<^sub>2 \<parallel> \<Prod>a\<leftarrow>[l\<^sub>2\<^sub>3]. \<currency>\<^sup>?a \<parallel> \<Prod>a\<leftarrow>[l\<^sub>2\<^sub>3]. l\<^sub>0\<^sub>2 \<rightarrow> a) \<parallel>
-    \<comment> \<open>Link 1--3:\<close> (\<currency>\<^sup>+l\<^sub>1\<^sub>3 \<parallel> \<Prod>a\<leftarrow>[l\<^sub>3\<^sub>0]. \<currency>\<^sup>?a \<parallel> \<Prod>a\<leftarrow>[l\<^sub>3\<^sub>0]. l\<^sub>1\<^sub>3 \<rightarrow> a) \<parallel>
-    \<comment> \<open>Link 2--3:\<close> (\<currency>\<^sup>+l\<^sub>2\<^sub>3 \<parallel> \<Prod>a\<leftarrow>[l\<^sub>3\<^sub>0]. \<currency>\<^sup>?a \<parallel> \<Prod>a\<leftarrow>[l\<^sub>3\<^sub>0]. l\<^sub>2\<^sub>3 \<rightarrow> a) \<parallel>
-    \<comment> \<open>Link 3--0:\<close> (\<currency>\<^sup>+l\<^sub>3\<^sub>0 \<parallel> \<Prod>a\<leftarrow>[l\<^sub>0\<^sub>1, l\<^sub>0\<^sub>2]. \<currency>\<^sup>?a \<parallel> \<Prod>a\<leftarrow>[l\<^sub>0\<^sub>1, l\<^sub>0\<^sub>2]. l\<^sub>3\<^sub>0 \<rightarrow> a)"
+    \<comment> \<open>Link 0--1:\<close> (\<currency>\<^sup>+l\<^sub>0\<^sub>1 \<parallel> \<Parallel>a\<leftarrow>[l\<^sub>1\<^sub>3]. \<currency>\<^sup>?a \<parallel> \<Parallel>a\<leftarrow>[l\<^sub>1\<^sub>3]. l\<^sub>0\<^sub>1 \<rightarrow> a) \<parallel>
+    \<comment> \<open>Link 0--2:\<close> (\<currency>\<^sup>+l\<^sub>0\<^sub>2 \<parallel> \<Parallel>a\<leftarrow>[l\<^sub>2\<^sub>3]. \<currency>\<^sup>?a \<parallel> \<Parallel>a\<leftarrow>[l\<^sub>2\<^sub>3]. l\<^sub>0\<^sub>2 \<rightarrow> a) \<parallel>
+    \<comment> \<open>Link 1--3:\<close> (\<currency>\<^sup>+l\<^sub>1\<^sub>3 \<parallel> \<Parallel>a\<leftarrow>[l\<^sub>3\<^sub>0]. \<currency>\<^sup>?a \<parallel> \<Parallel>a\<leftarrow>[l\<^sub>3\<^sub>0]. l\<^sub>1\<^sub>3 \<rightarrow> a) \<parallel>
+    \<comment> \<open>Link 2--3:\<close> (\<currency>\<^sup>+l\<^sub>2\<^sub>3 \<parallel> \<Parallel>a\<leftarrow>[l\<^sub>3\<^sub>0]. \<currency>\<^sup>?a \<parallel> \<Parallel>a\<leftarrow>[l\<^sub>3\<^sub>0]. l\<^sub>2\<^sub>3 \<rightarrow> a) \<parallel>
+    \<comment> \<open>Link 3--0:\<close> (\<currency>\<^sup>+l\<^sub>3\<^sub>0 \<parallel> \<Parallel>a\<leftarrow>[l\<^sub>0\<^sub>1, l\<^sub>0\<^sub>2]. \<currency>\<^sup>?a \<parallel> \<Parallel>a\<leftarrow>[l\<^sub>0\<^sub>1, l\<^sub>0\<^sub>2]. l\<^sub>3\<^sub>0 \<rightarrow> a)"
     using distributor_split by equivalence
   also have "\<dots> \<approx>\<^sub>s ?q"
     unfolding duploss_def and general_parallel.simps using thorn_simps by equivalence
@@ -204,10 +204,10 @@ proof -
     unfolding tagged_new_channel_def
     sorry
   also have "\<dots> \<approx>\<^sub>s
-    \<langle>0\<rangle> \<nu> sb. \<langle>1\<rangle> \<nu> rb. (s \<rightarrow> \<box> sb \<parallel> m \<leftrightarrow> \<box> sb \<parallel> m \<leftrightarrow> \<box> rb \<parallel> (\<currency>\<^sup>+ (\<box> rb) \<parallel> \<Prod>a\<leftarrow>[r, \<box> sb]. \<currency>\<^sup>?a \<parallel> \<box> rb \<Rightarrow> [r, \<box> sb]))"
+    \<langle>0\<rangle> \<nu> sb. \<langle>1\<rangle> \<nu> rb. (s \<rightarrow> \<box> sb \<parallel> m \<leftrightarrow> \<box> sb \<parallel> m \<leftrightarrow> \<box> rb \<parallel> (\<currency>\<^sup>+ (\<box> rb) \<parallel> \<Parallel>a\<leftarrow>[r, \<box> sb]. \<currency>\<^sup>?a \<parallel> \<box> rb \<Rightarrow> [r, \<box> sb]))"
     unfolding general_parallel.simps using thorn_simps sorry
   also have "\<dots> \<approx>\<^sub>s
-    \<langle>0\<rangle> \<nu> sb. \<langle>1\<rangle> \<nu> rb. (s \<rightarrow> \<box> sb \<parallel> m \<leftrightarrow> \<box> sb \<parallel> m \<leftrightarrow> \<box> rb \<parallel> (\<currency>\<^sup>+ (\<box> rb) \<parallel> \<Prod>a\<leftarrow>[r, \<box> sb]. \<currency>\<^sup>?a \<parallel> \<Prod>a\<leftarrow>[r, \<box> sb]. \<box> rb \<rightarrow> a))"
+    \<langle>0\<rangle> \<nu> sb. \<langle>1\<rangle> \<nu> rb. (s \<rightarrow> \<box> sb \<parallel> m \<leftrightarrow> \<box> sb \<parallel> m \<leftrightarrow> \<box> rb \<parallel> (\<currency>\<^sup>+ (\<box> rb) \<parallel> \<Parallel>a\<leftarrow>[r, \<box> sb]. \<currency>\<^sup>?a \<parallel> \<Parallel>a\<leftarrow>[r, \<box> sb]. \<box> rb \<rightarrow> a))"
     using distributor_split sorry
   also have "\<dots> \<approx>\<^sub>s
     \<currency>\<^sup>?r \<parallel> \<langle>0\<rangle> \<nu> sb. \<langle>1\<rangle> \<nu> rb. (s \<rightarrow> \<box> sb \<parallel> \<box> rb \<rightarrow> r \<parallel> \<box> rb \<rightarrow> \<box> sb \<parallel> (\<box> sb \<leftrightarrow> m \<parallel> \<currency>\<^sup>? (\<box> sb)) \<parallel> (\<box> rb \<leftrightarrow> m \<parallel> \<currency>\<^sup>+ (\<box> rb)))"
