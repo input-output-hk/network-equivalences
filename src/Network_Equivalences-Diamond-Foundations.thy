@@ -2,6 +2,8 @@ theory "Network_Equivalences-Diamond-Foundations"
   imports "Network_Equivalences-Communication"
 begin
 
+no_notation funcset (infixr \<open>\<rightarrow>\<close> 60)
+
 abbreviation diamond_sending where
   "diamond_sending s\<^sub>0 s\<^sub>1 s\<^sub>2 s\<^sub>3 l\<^sub>0\<^sub>1 l\<^sub>0\<^sub>2 l\<^sub>1\<^sub>3 l\<^sub>2\<^sub>3 l\<^sub>3\<^sub>0 \<equiv>
     \<comment> \<open>Node 0:\<close> s\<^sub>0 \<Rightarrow> [l\<^sub>0\<^sub>1, l\<^sub>0\<^sub>2] \<parallel>
@@ -129,7 +131,7 @@ proof -
     by (equivalence simplification: fst_conv snd_conv list.map)
   also have "\<dots> \<approx>\<^sub>s
     transformed_core l\<^sub>0\<^sub>1 l\<^sub>0\<^sub>2 l\<^sub>1\<^sub>3 l\<^sub>2\<^sub>3 l\<^sub>3\<^sub>0 \<parallel>
-    \<comment> \<open>Node 0:\<close> (\<currency>\<^sup>*l\<^sub>3\<^sub>0 \<parallel> s\<^sub>0 \<triangleright>\<^sup>\<infinity> x. (l\<^sub>3\<^sub>0 \<triangleleft> \<box> x \<parallel> l\<^sub>3\<^sub>0 \<triangleleft> \<box> x)) \<parallel>
+    \<comment> \<open>Node 0:\<close> (\<currency>\<^sup>*l\<^sub>3\<^sub>0 \<parallel> s\<^sub>0 \<triangleright>\<^sup>\<infinity> x :: val. (l\<^sub>3\<^sub>0 \<triangleleft> \<box> x \<parallel> l\<^sub>3\<^sub>0 \<triangleleft> \<box> x)) \<parallel>
     \<comment> \<open>Node 1:\<close> s\<^sub>1 \<Rightarrow> [l\<^sub>3\<^sub>0] \<parallel>
     \<comment> \<open>Node 2:\<close> s\<^sub>2 \<Rightarrow> [l\<^sub>3\<^sub>0] \<parallel>
     \<comment> \<open>Node 3:\<close> s\<^sub>3 \<Rightarrow> [l\<^sub>3\<^sub>0]"
@@ -140,14 +142,14 @@ proof -
     *)
   also have "\<dots> \<approx>\<^sub>s
     transformed_core l\<^sub>0\<^sub>1 l\<^sub>0\<^sub>2 l\<^sub>1\<^sub>3 l\<^sub>2\<^sub>3 l\<^sub>3\<^sub>0 \<parallel>
-    \<comment> \<open>Node 0:\<close> (\<currency>\<^sup>*l\<^sub>3\<^sub>0 \<parallel> s\<^sub>0 \<triangleright>\<^sup>\<infinity> x. (\<currency>\<^sup>*l\<^sub>3\<^sub>0 \<parallel> l\<^sub>3\<^sub>0 \<triangleleft> \<box> x \<parallel> l\<^sub>3\<^sub>0 \<triangleleft> \<box> x)) \<parallel>
+    \<comment> \<open>Node 0:\<close> (\<currency>\<^sup>*l\<^sub>3\<^sub>0 \<parallel> s\<^sub>0 \<triangleright>\<^sup>\<infinity> x :: val. (\<currency>\<^sup>*l\<^sub>3\<^sub>0 \<parallel> l\<^sub>3\<^sub>0 \<triangleleft> \<box> x \<parallel> l\<^sub>3\<^sub>0 \<triangleleft> \<box> x)) \<parallel>
     \<comment> \<open>Node 1:\<close> s\<^sub>1 \<Rightarrow> [l\<^sub>3\<^sub>0] \<parallel>
     \<comment> \<open>Node 2:\<close> s\<^sub>2 \<Rightarrow> [l\<^sub>3\<^sub>0] \<parallel>
     \<comment> \<open>Node 3:\<close> s\<^sub>3 \<Rightarrow> [l\<^sub>3\<^sub>0]"
     using inner_duploss_redundancy by equivalence
   also have "\<dots> \<approx>\<^sub>s
     transformed_core l\<^sub>0\<^sub>1 l\<^sub>0\<^sub>2 l\<^sub>1\<^sub>3 l\<^sub>2\<^sub>3 l\<^sub>3\<^sub>0 \<parallel>
-    \<comment> \<open>Node 0:\<close> (\<currency>\<^sup>*l\<^sub>3\<^sub>0 \<parallel> s\<^sub>0 \<triangleright>\<^sup>\<infinity> x. (\<currency>\<^sup>*l\<^sub>3\<^sub>0 \<parallel> l\<^sub>3\<^sub>0 \<triangleleft> \<box> x)) \<parallel>
+    \<comment> \<open>Node 0:\<close> (\<currency>\<^sup>*l\<^sub>3\<^sub>0 \<parallel> s\<^sub>0 \<triangleright>\<^sup>\<infinity> x :: val. (\<currency>\<^sup>*l\<^sub>3\<^sub>0 \<parallel> l\<^sub>3\<^sub>0 \<triangleleft> \<box> x)) \<parallel>
     \<comment> \<open>Node 1:\<close> s\<^sub>1 \<Rightarrow> [l\<^sub>3\<^sub>0] \<parallel>
     \<comment> \<open>Node 2:\<close> s\<^sub>2 \<Rightarrow> [l\<^sub>3\<^sub>0] \<parallel>
     \<comment> \<open>Node 3:\<close> s\<^sub>3 \<Rightarrow> [l\<^sub>3\<^sub>0]"
@@ -158,7 +160,7 @@ proof -
     *)
   also have "\<dots> \<approx>\<^sub>s
     transformed_core l\<^sub>0\<^sub>1 l\<^sub>0\<^sub>2 l\<^sub>1\<^sub>3 l\<^sub>2\<^sub>3 l\<^sub>3\<^sub>0 \<parallel>
-    \<comment> \<open>Node 0:\<close> (\<currency>\<^sup>*l\<^sub>3\<^sub>0 \<parallel> s\<^sub>0 \<triangleright>\<^sup>\<infinity> x. l\<^sub>3\<^sub>0 \<triangleleft> \<box> x) \<parallel>
+    \<comment> \<open>Node 0:\<close> (\<currency>\<^sup>*l\<^sub>3\<^sub>0 \<parallel> s\<^sub>0 \<triangleright>\<^sup>\<infinity> x :: val. l\<^sub>3\<^sub>0 \<triangleleft> \<box> x) \<parallel>
     \<comment> \<open>Node 1:\<close> s\<^sub>1 \<Rightarrow> [l\<^sub>3\<^sub>0] \<parallel>
     \<comment> \<open>Node 2:\<close> s\<^sub>2 \<Rightarrow> [l\<^sub>3\<^sub>0] \<parallel>
     \<comment> \<open>Node 3:\<close> s\<^sub>3 \<Rightarrow> [l\<^sub>3\<^sub>0]"

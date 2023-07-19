@@ -7,7 +7,7 @@ begin
 subsection \<open>Distributors\<close>
 
 definition distributor :: "chan family \<Rightarrow> chan family list \<Rightarrow> process family" (infix \<open>\<Rightarrow>\<close> 52) where
-  [simp]: "A \<Rightarrow> Bs = A \<triangleright>\<^sup>\<infinity> x. \<Prod>B \<leftarrow> Bs. B \<triangleleft> \<box> x"
+  [simp]: "A \<Rightarrow> Bs = A \<triangleright>\<^sup>\<infinity> x :: val. \<Prod>B \<leftarrow> Bs. B \<triangleleft> \<box> x"
 
 lemma adapted_after_distributor:
   shows "(A \<Rightarrow> Bs) \<guillemotleft> \<E> = A \<guillemotleft> \<E> \<Rightarrow> map (\<lambda>B. B \<guillemotleft> \<E>) Bs"
@@ -25,6 +25,7 @@ lemma distributor_nested_idempotency [thorn_simps]:
 
 (*FIXME: Check whether we should add this lemma to \<^theory_text>\<open>thorn_simps\<close>. *)
 lemma inner_distributor_redundancy:
+  fixes C :: "chan family" and \<P> :: "val \<Rightarrow> process family"
   shows "A \<Rightarrow> Bs \<parallel> C \<triangleright>\<^sup>\<infinity> x. (A \<Rightarrow> Bs \<parallel> \<P> x) \<sim>\<^sub>s A \<Rightarrow> Bs \<parallel> C \<triangleright>\<^sup>\<infinity> x. \<P> x"
   unfolding distributor_def
   using inner_repeated_receive_redundancy .
@@ -49,6 +50,7 @@ lemma loss_nested_idempotency [thorn_simps]:
   using distributor_nested_idempotency .
 
 lemma inner_loss_redundancy:
+  fixes B :: "chan family" and \<P> :: "val \<Rightarrow> process family"
   shows "\<currency>\<^sup>? A \<parallel> B \<triangleright>\<^sup>\<infinity> x. (\<currency>\<^sup>? A \<parallel> \<P> x) \<sim>\<^sub>s \<currency>\<^sup>? A \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x"
   unfolding loss_def
   using inner_distributor_redundancy .
@@ -73,6 +75,7 @@ lemma duplication_nested_idempotency [thorn_simps]:
   using distributor_nested_idempotency .
 
 lemma inner_duplication_redundancy:
+  fixes B :: "chan family" and \<P> :: "val \<Rightarrow> process family"
   shows "\<currency>\<^sup>+ A \<parallel> B \<triangleright>\<^sup>\<infinity> x. (\<currency>\<^sup>+ A \<parallel> \<P> x) \<sim>\<^sub>s \<currency>\<^sup>+ A \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x"
   unfolding duplication_def
   using inner_distributor_redundancy .
@@ -119,6 +122,7 @@ lemma duploss_nested_idempotency [thorn_simps]:
     \<^item> Get rid of applications of compatibility rules whenever \<^theory_text>\<open>bisimilarity\<close> can be used instead.
 *)
 lemma inner_duploss_redundancy:
+  fixes B :: "chan family" and \<P> :: "val \<Rightarrow> process family"
   shows "\<currency>\<^sup>* A \<parallel> B \<triangleright>\<^sup>\<infinity> x. (\<currency>\<^sup>* A \<parallel> \<P> x) \<sim>\<^sub>s \<currency>\<^sup>* A \<parallel> B \<triangleright>\<^sup>\<infinity> x. \<P> x"
 proof -
   have "
@@ -200,6 +204,7 @@ lemma unidirectional_bridge_nested_idempotency [thorn_simps]:
   using distributor_nested_idempotency .
 
 lemma inner_unidirectional_bridge_redundancy:
+  fixes C :: "chan family" and \<P> :: "val \<Rightarrow> process family"
   shows "A \<rightarrow> B \<parallel> C \<triangleright>\<^sup>\<infinity> x. (A \<rightarrow> B \<parallel> \<P> x) \<sim>\<^sub>s A \<rightarrow> B \<parallel> C \<triangleright>\<^sup>\<infinity> x. \<P> x"
   unfolding unidirectional_bridge_def
   using inner_distributor_redundancy .
@@ -255,6 +260,7 @@ lemma bidirectional_bridge_nested_idempotency [thorn_simps]:
   by equivalence
 
 lemma inner_bidirectional_bridge_redundancy:
+  fixes C :: "chan family" and \<P> :: "val \<Rightarrow> process family"
   shows "A \<leftrightarrow> B \<parallel> C \<triangleright>\<^sup>\<infinity> x. (A \<leftrightarrow> B \<parallel> \<P> x) \<sim>\<^sub>s A \<leftrightarrow> B \<parallel> C \<triangleright>\<^sup>\<infinity> x. \<P> x"
 proof -
   have "
@@ -395,7 +401,7 @@ lemma distributor_target_switch:
 proof -
   \<comment> \<open>Specializations of lemmas:\<close>
   have inner_target_bridges_redundancy:
-    "?\<P> vs \<parallel> A \<triangleright>\<^sup>\<infinity> y. (?\<P> vs \<parallel> \<Q> y) \<sim>\<^sub>s ?\<P> vs \<parallel> A \<triangleright>\<^sup>\<infinity> y. \<Q> y" for \<Q>
+    "?\<P> vs \<parallel> A \<triangleright>\<^sup>\<infinity> y. (?\<P> vs \<parallel> \<Q> y) \<sim>\<^sub>s ?\<P> vs \<parallel> A \<triangleright>\<^sup>\<infinity> y. \<Q> y" for \<Q> :: "val \<Rightarrow> process family"
     using inner_bidirectional_bridge_redundancy
     by (rule inner_general_parallel_redundancy)
   have targets_switch:
@@ -456,14 +462,14 @@ proof -
       unfolding post_receive_def .
   qed
   \<comment> \<open>The actual proof:\<close>
-  have "?\<P> vs \<parallel> A \<triangleright>\<^sup>\<infinity> y. \<Prod>v \<leftarrow> vs. fst v \<triangleleft> \<box> y \<approx>\<^sub>s ?\<P> vs \<parallel> A \<triangleright>\<^sup>\<infinity> y. (?\<P> vs \<parallel> \<Prod>v \<leftarrow> vs. fst v \<triangleleft> \<box> y)"
+  have "?\<P> vs \<parallel> A \<triangleright>\<^sup>\<infinity> y :: val. \<Prod>v \<leftarrow> vs. fst v \<triangleleft> \<box> y \<approx>\<^sub>s ?\<P> vs \<parallel> A \<triangleright>\<^sup>\<infinity> y :: val. (?\<P> vs \<parallel> \<Prod>v \<leftarrow> vs. fst v \<triangleleft> \<box> y)"
     by
       (
         rule synchronous.bisimilarity_in_weak_bisimilarity [THEN predicate2D],
         rule synchronous.bisimilarity_symmetry_rule
       )
       (fact inner_target_bridges_redundancy)
-  also have "\<dots> \<approx>\<^sub>s ?\<P> vs \<parallel> A \<triangleright>\<^sup>\<infinity> y. (?\<P> vs \<parallel> \<Prod>v \<leftarrow> vs. snd v \<triangleleft> \<box> y)"
+  also have "\<dots> \<approx>\<^sub>s ?\<P> vs \<parallel> A \<triangleright>\<^sup>\<infinity> y :: val. (?\<P> vs \<parallel> \<Prod>v \<leftarrow> vs. snd v \<triangleleft> \<box> y)"
     using post_receive_targets_switch
     by
       (intro
@@ -471,7 +477,7 @@ proof -
         synchronous.weak.repeated_receive_is_quasi_compatible_with_bisimilarity
       )
       simp
-  also have "\<dots> \<approx>\<^sub>s ?\<P> vs \<parallel> A \<triangleright>\<^sup>\<infinity> y. \<Prod>v \<leftarrow> vs. snd v \<triangleleft> \<box> y"
+  also have "\<dots> \<approx>\<^sub>s ?\<P> vs \<parallel> A \<triangleright>\<^sup>\<infinity> y :: val. \<Prod>v \<leftarrow> vs. snd v \<triangleleft> \<box> y"
     by
       (rule synchronous.bisimilarity_in_weak_bisimilarity [THEN predicate2D])
       (fact inner_target_bridges_redundancy)
