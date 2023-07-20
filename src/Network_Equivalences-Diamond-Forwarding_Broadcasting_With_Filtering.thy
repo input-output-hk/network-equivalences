@@ -144,16 +144,16 @@ lemma receive_send_sidetracking:
     (is "?p \<approx>\<^sub>\<flat> ?q")
 proof -
   have "?p \<approx>\<^sub>\<flat>
-    \<comment> \<open>Node 0:\<close> (\<Prod>b\<leftarrow>[r\<^sub>0]. \<currency>\<^sup>?b \<parallel> ib\<^sub>0 {\<phi>}\<Rightarrow> [ob\<^sub>0, r\<^sub>0]) \<parallel>
-    \<comment> \<open>Node 1:\<close> (\<Prod>b\<leftarrow>[r\<^sub>1]. \<currency>\<^sup>?b \<parallel> ib\<^sub>1 {\<phi>}\<Rightarrow> [ob\<^sub>1, r\<^sub>1]) \<parallel>
-    \<comment> \<open>Node 2:\<close> (\<Prod>b\<leftarrow>[r\<^sub>2]. \<currency>\<^sup>?b \<parallel> ib\<^sub>2 {\<phi>}\<Rightarrow> [ob\<^sub>2, r\<^sub>2]) \<parallel>
-    \<comment> \<open>Node 3:\<close> (\<Prod>b\<leftarrow>[r\<^sub>3]. \<currency>\<^sup>?b \<parallel> ib\<^sub>3 {\<phi>}\<Rightarrow> [ob\<^sub>3, r\<^sub>3])"
+    \<comment> \<open>Node 0:\<close> (\<Parallel>b\<leftarrow>[r\<^sub>0]. \<currency>\<^sup>?b \<parallel> ib\<^sub>0 {\<phi>}\<Rightarrow> [ob\<^sub>0, r\<^sub>0]) \<parallel>
+    \<comment> \<open>Node 1:\<close> (\<Parallel>b\<leftarrow>[r\<^sub>1]. \<currency>\<^sup>?b \<parallel> ib\<^sub>1 {\<phi>}\<Rightarrow> [ob\<^sub>1, r\<^sub>1]) \<parallel>
+    \<comment> \<open>Node 2:\<close> (\<Parallel>b\<leftarrow>[r\<^sub>2]. \<currency>\<^sup>?b \<parallel> ib\<^sub>2 {\<phi>}\<Rightarrow> [ob\<^sub>2, r\<^sub>2]) \<parallel>
+    \<comment> \<open>Node 3:\<close> (\<Parallel>b\<leftarrow>[r\<^sub>3]. \<currency>\<^sup>?b \<parallel> ib\<^sub>3 {\<phi>}\<Rightarrow> [ob\<^sub>3, r\<^sub>3])"
     unfolding distributor_def and general_parallel.simps using natural_simps by equivalence
   also have "\<dots> \<approx>\<^sub>\<flat>
-    \<comment> \<open>Node 0:\<close> (\<Prod>b\<leftarrow>[r\<^sub>0]. \<currency>\<^sup>?b \<parallel> ib\<^sub>0 {\<phi>}\<Rightarrow> [ob\<^sub>0, r\<^sub>0] \<parallel> ib\<^sub>0 {\<phi>}\<rightarrow> ob\<^sub>0) \<parallel>
-    \<comment> \<open>Node 1:\<close> (\<Prod>b\<leftarrow>[r\<^sub>1]. \<currency>\<^sup>?b \<parallel> ib\<^sub>1 {\<phi>}\<Rightarrow> [ob\<^sub>1, r\<^sub>1] \<parallel> ib\<^sub>1 {\<phi>}\<rightarrow> ob\<^sub>1) \<parallel>
-    \<comment> \<open>Node 2:\<close> (\<Prod>b\<leftarrow>[r\<^sub>2]. \<currency>\<^sup>?b \<parallel> ib\<^sub>2 {\<phi>}\<Rightarrow> [ob\<^sub>2, r\<^sub>2] \<parallel> ib\<^sub>2 {\<phi>}\<rightarrow> ob\<^sub>2) \<parallel>
-    \<comment> \<open>Node 3:\<close> (\<Prod>b\<leftarrow>[r\<^sub>3]. \<currency>\<^sup>?b \<parallel> ib\<^sub>3 {\<phi>}\<Rightarrow> [ob\<^sub>3, r\<^sub>3] \<parallel> ib\<^sub>3 {\<phi>}\<rightarrow> ob\<^sub>3)"
+    \<comment> \<open>Node 0:\<close> (\<Parallel>b\<leftarrow>[r\<^sub>0]. \<currency>\<^sup>?b \<parallel> ib\<^sub>0 {\<phi>}\<Rightarrow> [ob\<^sub>0, r\<^sub>0] \<parallel> ib\<^sub>0 {\<phi>}\<rightarrow> ob\<^sub>0) \<parallel>
+    \<comment> \<open>Node 1:\<close> (\<Parallel>b\<leftarrow>[r\<^sub>1]. \<currency>\<^sup>?b \<parallel> ib\<^sub>1 {\<phi>}\<Rightarrow> [ob\<^sub>1, r\<^sub>1] \<parallel> ib\<^sub>1 {\<phi>}\<rightarrow> ob\<^sub>1) \<parallel>
+    \<comment> \<open>Node 2:\<close> (\<Parallel>b\<leftarrow>[r\<^sub>2]. \<currency>\<^sup>?b \<parallel> ib\<^sub>2 {\<phi>}\<Rightarrow> [ob\<^sub>2, r\<^sub>2] \<parallel> ib\<^sub>2 {\<phi>}\<rightarrow> ob\<^sub>2) \<parallel>
+    \<comment> \<open>Node 3:\<close> (\<Parallel>b\<leftarrow>[r\<^sub>3]. \<currency>\<^sup>?b \<parallel> ib\<^sub>3 {\<phi>}\<Rightarrow> [ob\<^sub>3, r\<^sub>3] \<parallel> ib\<^sub>3 {\<phi>}\<rightarrow> ob\<^sub>3)"
     using sidetrack_redundancy by equivalence
   also have "\<dots> \<approx>\<^sub>\<flat> ?q"
     unfolding distributor_def and general_parallel.simps using natural_simps by equivalence
@@ -251,7 +251,7 @@ proof -
     by equivalence
   also have "\<dots> \<approx>\<^sub>\<flat>
     \<currency>\<^sup>*l\<^sub>0\<^sub>1 \<parallel> \<currency>\<^sup>*l\<^sub>0\<^sub>2 \<parallel> \<currency>\<^sup>*l\<^sub>3\<^sub>0 \<parallel>
-    (\<currency>\<^sup>+l\<^sub>3\<^sub>0 \<parallel> \<Prod>b \<leftarrow> [l\<^sub>0\<^sub>1, l\<^sub>0\<^sub>2]. \<currency>\<^sup>?b \<parallel> l\<^sub>3\<^sub>0 {\<phi>}\<Rightarrow> [l\<^sub>0\<^sub>1, l\<^sub>0\<^sub>2]) \<parallel>
+    (\<currency>\<^sup>+l\<^sub>3\<^sub>0 \<parallel> \<Parallel>b \<leftarrow> [l\<^sub>0\<^sub>1, l\<^sub>0\<^sub>2]. \<currency>\<^sup>?b \<parallel> l\<^sub>3\<^sub>0 {\<phi>}\<Rightarrow> [l\<^sub>0\<^sub>1, l\<^sub>0\<^sub>2]) \<parallel>
     (l\<^sub>3\<^sub>0 {\<top>}\<rightarrow> ib\<^sub>0 \<parallel> ib\<^sub>0 {\<phi>}\<rightarrow> ob\<^sub>0 \<parallel> l\<^sub>3\<^sub>0 {\<phi>}\<rightarrow> ob\<^sub>0) \<parallel>
     diamond_send_buffering ob\<^sub>0 ob\<^sub>1 ob\<^sub>2 ob\<^sub>3 l\<^sub>0\<^sub>1 l\<^sub>0\<^sub>2 l\<^sub>1\<^sub>3 l\<^sub>2\<^sub>3 l\<^sub>3\<^sub>0 \<parallel>
     diamond_receive_buffering ib\<^sub>0 ib\<^sub>1 ib\<^sub>2 ib\<^sub>3 l\<^sub>0\<^sub>1 l\<^sub>0\<^sub>2 l\<^sub>1\<^sub>3 l\<^sub>2\<^sub>3 l\<^sub>3\<^sub>0 \<parallel>
@@ -262,7 +262,7 @@ proof -
     using natural_simps by equivalence
   also have "\<dots> \<approx>\<^sub>\<flat>
     \<currency>\<^sup>*l\<^sub>0\<^sub>1 \<parallel> \<currency>\<^sup>*l\<^sub>0\<^sub>2 \<parallel> \<currency>\<^sup>*l\<^sub>3\<^sub>0 \<parallel>
-    (\<currency>\<^sup>+l\<^sub>3\<^sub>0 \<parallel> \<Prod>b \<leftarrow> [l\<^sub>0\<^sub>1, l\<^sub>0\<^sub>2]. \<currency>\<^sup>?b \<parallel> \<Prod>b \<leftarrow> [l\<^sub>0\<^sub>1, l\<^sub>0\<^sub>2]. l\<^sub>3\<^sub>0 {\<phi>}\<rightarrow> b) \<parallel>
+    (\<currency>\<^sup>+l\<^sub>3\<^sub>0 \<parallel> \<Parallel>b \<leftarrow> [l\<^sub>0\<^sub>1, l\<^sub>0\<^sub>2]. \<currency>\<^sup>?b \<parallel> \<Parallel>b \<leftarrow> [l\<^sub>0\<^sub>1, l\<^sub>0\<^sub>2]. l\<^sub>3\<^sub>0 {\<phi>}\<rightarrow> b) \<parallel>
     (l\<^sub>3\<^sub>0 {\<top>}\<rightarrow> ib\<^sub>0 \<parallel> ib\<^sub>0 {\<phi>}\<rightarrow> ob\<^sub>0) \<parallel>
     diamond_send_buffering ob\<^sub>0 ob\<^sub>1 ob\<^sub>2 ob\<^sub>3 l\<^sub>0\<^sub>1 l\<^sub>0\<^sub>2 l\<^sub>1\<^sub>3 l\<^sub>2\<^sub>3 l\<^sub>3\<^sub>0 \<parallel>
     diamond_receive_buffering ib\<^sub>0 ib\<^sub>1 ib\<^sub>2 ib\<^sub>3 l\<^sub>0\<^sub>1 l\<^sub>0\<^sub>2 l\<^sub>1\<^sub>3 l\<^sub>2\<^sub>3 l\<^sub>3\<^sub>0 \<parallel>
@@ -357,18 +357,18 @@ lemma send_buffering_collapse:
 proof -
   have "?p \<approx>\<^sub>\<flat>
     \<currency>\<^sup>*l\<^sub>3\<^sub>0 \<parallel>
-    \<comment> \<open>Node 0:\<close> (\<Prod>x\<leftarrow>[(l\<^sub>3\<^sub>0, l\<^sub>0\<^sub>1), (l\<^sub>3\<^sub>0, l\<^sub>0\<^sub>2)]. fst x {\<phi>}\<leftrightarrow>{\<phi>} snd x \<parallel>
+    \<comment> \<open>Node 0:\<close> (\<Parallel>x\<leftarrow>[(l\<^sub>3\<^sub>0, l\<^sub>0\<^sub>1), (l\<^sub>3\<^sub>0, l\<^sub>0\<^sub>2)]. fst x {\<phi>}\<leftrightarrow>{\<phi>} snd x \<parallel>
                   ob\<^sub>0 \<Rightarrow> map snd [(l\<^sub>3\<^sub>0, l\<^sub>0\<^sub>1), (l\<^sub>3\<^sub>0, l\<^sub>0\<^sub>2)]) \<parallel>
-    \<comment> \<open>Node 1:\<close> (\<Prod>x\<leftarrow>[(l\<^sub>3\<^sub>0, l\<^sub>1\<^sub>3)]. fst x {\<phi>}\<leftrightarrow>{\<phi>} snd x \<parallel> ob\<^sub>1 \<Rightarrow> map snd [(l\<^sub>3\<^sub>0, l\<^sub>1\<^sub>3)]) \<parallel>
-    \<comment> \<open>Node 2:\<close> (\<Prod>x\<leftarrow>[(l\<^sub>3\<^sub>0, l\<^sub>2\<^sub>3)]. fst x {\<phi>}\<leftrightarrow>{\<phi>} snd x \<parallel> ob\<^sub>2 \<Rightarrow> map snd [(l\<^sub>3\<^sub>0, l\<^sub>2\<^sub>3)]) \<parallel>
+    \<comment> \<open>Node 1:\<close> (\<Parallel>x\<leftarrow>[(l\<^sub>3\<^sub>0, l\<^sub>1\<^sub>3)]. fst x {\<phi>}\<leftrightarrow>{\<phi>} snd x \<parallel> ob\<^sub>1 \<Rightarrow> map snd [(l\<^sub>3\<^sub>0, l\<^sub>1\<^sub>3)]) \<parallel>
+    \<comment> \<open>Node 2:\<close> (\<Parallel>x\<leftarrow>[(l\<^sub>3\<^sub>0, l\<^sub>2\<^sub>3)]. fst x {\<phi>}\<leftrightarrow>{\<phi>} snd x \<parallel> ob\<^sub>2 \<Rightarrow> map snd [(l\<^sub>3\<^sub>0, l\<^sub>2\<^sub>3)]) \<parallel>
     \<comment> \<open>Node 3:\<close> ob\<^sub>3 \<Rightarrow> [l\<^sub>3\<^sub>0]"
     unfolding general_parallel.simps using natural_simps by equivalence
   also have "\<dots> \<approx>\<^sub>\<flat>
     \<currency>\<^sup>*l\<^sub>3\<^sub>0 \<parallel>
-    \<comment> \<open>Node 0:\<close> (\<Prod>x\<leftarrow>[(l\<^sub>3\<^sub>0, l\<^sub>0\<^sub>1), (l\<^sub>3\<^sub>0, l\<^sub>0\<^sub>2)]. fst x {\<phi>}\<leftrightarrow>{\<phi>} snd x \<parallel>
+    \<comment> \<open>Node 0:\<close> (\<Parallel>x\<leftarrow>[(l\<^sub>3\<^sub>0, l\<^sub>0\<^sub>1), (l\<^sub>3\<^sub>0, l\<^sub>0\<^sub>2)]. fst x {\<phi>}\<leftrightarrow>{\<phi>} snd x \<parallel>
                   ob\<^sub>0 \<Rightarrow> map fst [(l\<^sub>3\<^sub>0, l\<^sub>0\<^sub>1), (l\<^sub>3\<^sub>0, l\<^sub>0\<^sub>2)]) \<parallel>
-    \<comment> \<open>Node 1:\<close> (\<Prod>x\<leftarrow>[(l\<^sub>3\<^sub>0, l\<^sub>1\<^sub>3)]. fst x {\<phi>}\<leftrightarrow>{\<phi>} snd x \<parallel> ob\<^sub>1 \<Rightarrow> map fst [(l\<^sub>3\<^sub>0, l\<^sub>1\<^sub>3)]) \<parallel>
-    \<comment> \<open>Node 2:\<close> (\<Prod>x\<leftarrow>[(l\<^sub>3\<^sub>0, l\<^sub>2\<^sub>3)]. fst x {\<phi>}\<leftrightarrow>{\<phi>} snd x \<parallel> ob\<^sub>2 \<Rightarrow> map fst [(l\<^sub>3\<^sub>0, l\<^sub>2\<^sub>3)]) \<parallel>
+    \<comment> \<open>Node 1:\<close> (\<Parallel>x\<leftarrow>[(l\<^sub>3\<^sub>0, l\<^sub>1\<^sub>3)]. fst x {\<phi>}\<leftrightarrow>{\<phi>} snd x \<parallel> ob\<^sub>1 \<Rightarrow> map fst [(l\<^sub>3\<^sub>0, l\<^sub>1\<^sub>3)]) \<parallel>
+    \<comment> \<open>Node 2:\<close> (\<Parallel>x\<leftarrow>[(l\<^sub>3\<^sub>0, l\<^sub>2\<^sub>3)]. fst x {\<phi>}\<leftrightarrow>{\<phi>} snd x \<parallel> ob\<^sub>2 \<Rightarrow> map fst [(l\<^sub>3\<^sub>0, l\<^sub>2\<^sub>3)]) \<parallel>
     \<comment> \<open>Node 3:\<close> ob\<^sub>3 \<Rightarrow> [l\<^sub>3\<^sub>0]"
     by (intro
       basic_weak_parallel_preservation
@@ -536,12 +536,12 @@ proof -
   also have "\<dots> \<approx>\<^sub>\<sharp>
     \<langle>0\<rangle> \<nu> ib. \<langle>1\<rangle> \<nu> ob. (
       \<currency>\<^sup>*m \<parallel> s \<rightarrow> ob \<parallel> ib {\<phi>}\<leftrightarrow> ob \<parallel> m \<leftrightarrow>{\<phi>} ib \<parallel> m {\<phi>}\<leftrightarrow> ob \<parallel>
-      \<currency>\<^sup>+ib \<parallel> \<Prod>b \<leftarrow> [r, ob]. \<currency>\<^sup>?b \<parallel> ib {\<phi>}\<Rightarrow> [r, ob])"
+      \<currency>\<^sup>+ib \<parallel> \<Parallel>b \<leftarrow> [r, ob]. \<currency>\<^sup>?b \<parallel> ib {\<phi>}\<Rightarrow> [r, ob])"
     unfolding general_parallel.simps using natural_simps by equivalence
   also have "\<dots> \<approx>\<^sub>\<sharp>
     \<langle>0\<rangle> \<nu> ib. \<langle>1\<rangle> \<nu> ob. (
       \<currency>\<^sup>*m \<parallel> s \<rightarrow> ob \<parallel> ib {\<phi>}\<leftrightarrow> ob \<parallel> m \<leftrightarrow>{\<phi>} ib \<parallel> m {\<phi>}\<leftrightarrow> ob \<parallel>
-      \<currency>\<^sup>+ib \<parallel> \<Prod>b \<leftarrow> [r, ob]. \<currency>\<^sup>?b \<parallel> \<Prod>b \<leftarrow> [r, ob]. ib {\<phi>}\<rightarrow> b)"
+      \<currency>\<^sup>+ib \<parallel> \<Parallel>b \<leftarrow> [r, ob]. \<currency>\<^sup>?b \<parallel> \<Parallel>b \<leftarrow> [r, ob]. ib {\<phi>}\<rightarrow> b)"
     using distributor_split by equivalence
   also have "\<dots> \<approx>\<^sub>\<sharp>
     \<langle>0\<rangle> \<nu> ib. \<langle>1\<rangle> \<nu> ob. (
