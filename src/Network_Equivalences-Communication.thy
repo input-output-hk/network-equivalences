@@ -14,6 +14,30 @@ lemma adapted_after_distributor:
   shows "(A \<Rightarrow> Bs) \<guillemotleft> \<E> = A \<guillemotleft> \<E> \<Rightarrow> map (\<lambda>B. B \<guillemotleft> \<E>) Bs"
   sorry
 
+lemma family_uncurry_after_distributor [induct_simp]:
+  shows "\<nabla> (\<lambda>b. \<A> b \<Rightarrow> map (\<lambda>\<B>. \<B> b) \<B>s) = \<nabla> \<A> \<Rightarrow> map \<nabla> \<B>s"
+proof -
+  have "\<nabla> (\<lambda>b. \<A> b \<Rightarrow> map (\<lambda>\<B>. \<B> b) \<B>s) = \<nabla> (\<lambda>b. \<A> b \<triangleright>\<^sup>\<infinity> x. \<Prod>B \<leftarrow> map (\<lambda>\<B>. \<B> b) \<B>s. B \<triangleleft> \<box> x)"
+    unfolding distributor_def ..
+  also have "\<dots> = \<nabla> (\<lambda>b. \<A> b \<triangleright>\<^sup>\<infinity> x. \<Prod>\<B> \<leftarrow> \<B>s. \<B> b \<triangleleft> \<box> x)"
+    unfolding general_parallel_conversion_deferral ..
+  also have "\<dots> = \<nabla> \<A> \<triangleright>\<^sup>\<infinity> x. \<nabla> (\<lambda>b. \<Prod>\<B> \<leftarrow> \<B>s. \<B> b \<triangleleft> \<box> x)"
+    unfolding family_uncurry_after_repeated_receive ..
+  also have "\<dots> = \<nabla> \<A> \<triangleright>\<^sup>\<infinity> x. \<Prod>\<B> \<leftarrow> \<B>s. \<nabla> (\<lambda>b. \<B> b \<triangleleft> \<box> x)"
+    unfolding family_uncurry_after_general_parallel ..
+  also have "\<dots> = \<nabla> \<A> \<triangleright>\<^sup>\<infinity> x. \<Prod>\<B> \<leftarrow> \<B>s. \<nabla> \<B> \<triangleleft> \<nabla> (\<lambda>b.\<box> x)"
+    unfolding family_uncurry_after_send ..
+  also have "\<dots> = \<nabla> \<A> \<triangleright>\<^sup>\<infinity> x. \<Prod>\<B> \<leftarrow> \<B>s. \<nabla> \<B> \<triangleleft> \<box> x \<guillemotleft> tail"
+    unfolding constant_function_family_uncurry ..
+  also have "\<dots> = \<nabla> \<A> \<triangleright>\<^sup>\<infinity> x. \<Prod>\<B> \<leftarrow> \<B>s. \<nabla> \<B> \<triangleleft> \<box> x"
+    unfolding tail_def by transfer simp
+  also have "\<dots> = \<nabla> \<A> \<triangleright>\<^sup>\<infinity> x. \<Prod>B \<leftarrow> map \<nabla> \<B>s. B \<triangleleft> \<box> x"
+    unfolding general_parallel_conversion_deferral ..
+  also have "\<dots> = \<nabla> \<A> \<Rightarrow> map \<nabla> \<B>s"
+    unfolding distributor_def ..
+  finally show ?thesis .
+qed
+
 lemma distributor_idempotency [thorn_simps]:
   shows "A \<Rightarrow> Bs \<parallel> A \<Rightarrow> Bs \<sim>\<^sub>s A \<Rightarrow> Bs"
   unfolding distributor_def
@@ -40,6 +64,11 @@ lemma adapted_after_loss:
   shows "\<currency>\<^sup>? A \<guillemotleft> \<E> = \<currency>\<^sup>? (A \<guillemotleft> \<E>)"
   by (simp del: distributor_def add: adapted_after_distributor)
 
+lemma family_uncurry_after_loss [induct_simp]:
+  shows "\<nabla> (\<lambda>b. \<currency>\<^sup>? (\<A> b)) = \<currency>\<^sup>? (\<nabla> \<A>)"
+  using family_uncurry_after_distributor [where \<B>s = "[]"]
+  by simp
+
 lemma loss_idempotency [thorn_simps]:
   shows "\<currency>\<^sup>? A \<parallel> \<currency>\<^sup>? A \<sim>\<^sub>s \<currency>\<^sup>? A"
   unfolding loss_def
@@ -64,6 +93,11 @@ definition duplication :: "chan family \<Rightarrow> process family" (\<open>\<c
 lemma adapted_after_duplication:
   shows "\<currency>\<^sup>+ A \<guillemotleft> \<E> = \<currency>\<^sup>+ (A \<guillemotleft> \<E>)"
   by (simp del: distributor_def add: adapted_after_distributor)
+
+lemma family_uncurry_after_duplication [induct_simp]:
+  shows "\<nabla> (\<lambda>b. \<currency>\<^sup>+ (\<A> b)) = \<currency>\<^sup>+ (\<nabla> \<A>)"
+  using family_uncurry_after_distributor [where \<B>s = "[\<A>, \<A>]"]
+  by simp
 
 lemma duplication_idempotency [thorn_simps]:
   shows "\<currency>\<^sup>+ A \<parallel> \<currency>\<^sup>+ A \<sim>\<^sub>s \<currency>\<^sup>+ A"
@@ -94,6 +128,14 @@ definition duploss :: "chan family \<Rightarrow> process family" (\<open>\<curre
 lemma adapted_after_duploss:
   shows "\<currency>\<^sup>* A \<guillemotleft> \<E> = \<currency>\<^sup>* (A \<guillemotleft> \<E>)"
   by (simp only: duploss_def adapted_after_parallel adapted_after_loss adapted_after_duplication)
+
+lemma family_uncurry_after_duploss [induct_simp]:
+  shows "\<nabla> (\<lambda>b. \<currency>\<^sup>* (\<A> b)) = \<currency>\<^sup>* (\<nabla> \<A>)"
+  unfolding
+    duploss_def
+  and
+    family_uncurry_after_parallel and family_uncurry_after_loss and family_uncurry_after_duplication
+  ..
 
 lemma duploss_idempotency [thorn_simps]:
   shows "\<currency>\<^sup>* A \<parallel> \<currency>\<^sup>* A \<sim>\<^sub>s \<currency>\<^sup>* A"
@@ -194,6 +236,11 @@ lemma adapted_after_unidirectional_bridge:
   shows "(A \<rightarrow> B) \<guillemotleft> \<E> = A \<guillemotleft> \<E> \<rightarrow> B \<guillemotleft> \<E>"
   by (simp del: distributor_def add: adapted_after_distributor)
 
+lemma family_uncurry_after_unidirectional_bridge [induct_simp]:
+  shows "\<nabla> (\<lambda>b. \<A> b \<rightarrow> \<B> b) = \<nabla> \<A> \<rightarrow> \<nabla> \<B>"
+  using family_uncurry_after_distributor [where \<B>s = "[\<B>]"]
+  by simp
+
 lemma unidirectional_bridge_idempotency [thorn_simps]:
   shows "A \<rightarrow> B \<parallel> A \<rightarrow> B \<sim>\<^sub>s A \<rightarrow> B"
   unfolding unidirectional_bridge_def
@@ -247,6 +294,14 @@ where
 lemma adapted_after_bidirectional_bridge:
   shows "(A \<leftrightarrow> B) \<guillemotleft> \<E> = A \<guillemotleft> \<E> \<leftrightarrow> B \<guillemotleft> \<E>"
   by (simp only: bidirectional_bridge_def adapted_after_parallel adapted_after_unidirectional_bridge)
+
+lemma family_uncurry_after_bidirectional_bridge [induct_simp]:
+  shows "\<nabla> (\<lambda>b. \<A> b \<leftrightarrow> \<B> b) = \<nabla> \<A> \<leftrightarrow> \<nabla> \<B>"
+  unfolding
+    bidirectional_bridge_def
+  and
+    family_uncurry_after_parallel and family_uncurry_after_unidirectional_bridge
+  ..
 
 lemma bidirectional_bridge_idempotency [thorn_simps]:
   shows "A \<leftrightarrow> B \<parallel> A \<leftrightarrow> B \<sim>\<^sub>s A \<leftrightarrow> B"
