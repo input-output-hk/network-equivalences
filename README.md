@@ -14,6 +14,10 @@ Isabelle2022 from the [Isabelle website][isabelle].
     https://isabelle.in.tum.de/
     "Isabelle"
 
+In addition, you need the following Isabelle sessions:
+
+  * [`Thorn_Calculus`](https://github.com/input-output-hk/thorn-calculus)
+
 
 Setup
 =====
