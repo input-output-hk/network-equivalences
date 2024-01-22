@@ -1,7 +1,20 @@
 Overview
 ========
 
-[…]
+The `network-equivalences` library contains proofs of behavioral
+equivalences of various communication networks. For reasoning on an
+appropriately high level, it introduces and uses a communication
+language that is embedded in [the Þ-calculus][thorn-calculus].
+
+Part of this library are discussed in the following conference articles:
+  * [Correctness of Broadcast via Multicast: Graphically and
+    Formally](https://arxiv.org/abs/2209.09472)
+  * [Proofs about Network Communication: For Humans and
+    Machines](https://arxiv.org/abs/2308.10652)
+
+[thorn-calculus]:
+    https://github.com/input-output-hk/thorn-calculus
+    "Þ-calculus"
 
 
 Requirements
